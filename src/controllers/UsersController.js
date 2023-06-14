@@ -1,8 +1,14 @@
 import { Users } from "../models/Users.js";
-
+import { Role } from "../models/Role.js";
 export const getUsers = async (req, res) => {
     try {
-        const users = await Users.findAll();
+        const users = await Users.findAll({
+            include:[{ model: Role, attributes: ['name'] }],
+            where:{
+                state:true
+            }
+        });
+        
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -10,13 +16,14 @@ export const getUsers = async (req, res) => {
 };
 
 export const createUsers= async(req,res)=>{
-    const {name}=req.body;
+    const {username,role_id}=req.body;
     try {
         let newUser = await Users.create({
-            name,
-            state:true,
+            username,
+            role_id,
+            state:true
         },{
-            fields: ['name','state']
+            fields: ['username','role_id']
         });
         if (newUser) {
             return res.json({
@@ -53,10 +60,10 @@ export const getUsersById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
     const {id} = req.params;
-    const {name} = req.body;
+    const {username,role_id} = req.body;
     try{
         const users = await Users.findAll({
-            attributes: ['id', 'name'],
+            attributes: ['id', 'username','role_id'],
             where: {
                 id
             }
@@ -64,7 +71,8 @@ export const updateUser = async (req, res) => {
         if(users.length > 0){
             users.forEach(async user => {
                 await user.update({
-                    name
+                    username,
+                    role_id
                 });
             });
         } 
