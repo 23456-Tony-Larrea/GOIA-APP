@@ -4,30 +4,39 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from '../../axios/axios';
 import { IUser } from '../Interface/IUser';
 import { IRole } from '../Interface/IRole';
+import DropDownPicker, { ItemType } from 'react-native-dropdown-picker';
+import { ALERT_TYPE, AlertNotificationRoot ,Toast} from 'react-native-alert-notification';
+
 
 const UsersView = () => {
   const [users, setUsers] = useState<IUser[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [username, setUsername] = useState('');
-  const [role, setRole] = useState<IRole[]>([]); // Movido dentro del componente
-  const [selectedValue, setSelectedValue] = useState(''); // Movido dentro del componente
-
+  const [role, setRole] = useState<IRole[]>([]);
+  
 
   const getUsers = async () => {
     try {
       const response = await axios.get('/users');
       setUsers(response.data);
-      console.log(response.data);
+      console.log("re",response.data)
     } catch (error) {
       console.error('Error al obtener los usuarios:', error);
     }
   };
 
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const items: ItemType<number>[] = role.map((role: IRole) => ({
+    label: role.name,
+    value: role.id
+  }));
+
   const getRoles = async ()=>{
     try{
     const response = await axios.get('/roles')
         setRole(response.data)
-        console.log(response.data)
+        
     } catch (error) {
         console.error('Error al obtener los usuarios:', error);    
   }
@@ -40,28 +49,55 @@ const UsersView = () => {
   }, []);
 
   const addUser = async () => {
-    try {
-      await axios.post('/users', { username });
-      setModalVisible(false);
-      setUsername('');
-      getUsers();
+     try {
+        const response = await axios.post('/users',{
+            username: username,
+            role_id:value
+        });
+        setUsers([...users, response.data]);
+        setModalVisible(false);
+        getUsers()
     } catch (error) {
-      console.error('Error al insertar el usuario:', error);
-    }
+        console.error('Error al obtener los usuarios:', error);
+    } 
+    
   };
+
+const changeState = async (id:number) => {
+    try {
+        const response = await axios.put(`/users/activate/${id}`
+        );
+        setUsers(users.map((user: IUser) => (user.id === id? response.data : user)));
+        //Using toast 
+        Toast.show({
+            title: 'Usuario desactivado',
+            textBody:'Se desactivo el usuario',
+            type: ALERT_TYPE.DANGER
+        });
+}
+    catch (error) {
+        console.error('Error al obtener los usuarios:', error);
+    }
+}
 
   const renderList = () => {
     return (
-      <FlatList
-        data={users}
-        keyExtractor={(user) => user.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.listItem}>
-            <Text style={styles.listItemText}>Nombre: {item.username}</Text>
-            <Text style={styles.listItemText}>Rol: {item.role_id || 'Ningún rol asignado'}</Text>
-          </View>
-        )}
-      />
+        <AlertNotificationRoot>
+     <View style={styles.rolesContainer}>
+     {users.map((user, index) => (
+        <View key={index} style={styles.roleItem}>
+          <Text>Nombre del usuario:{user.username}</Text>
+          <Text>Nombre del Rol: {user.role_id ?user.role_id.name  : "Sin ningún rol"}</Text>
+          <TouchableOpacity>
+            <Icon name="edit" size={20} color="blue" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => changeState(user.id)}>
+            <Icon name="trash" size={20} color="red" />
+          </TouchableOpacity>
+        </View>
+      ))}
+</View>
+      </AlertNotificationRoot>
     );
   };
 
@@ -79,14 +115,23 @@ const UsersView = () => {
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Agregar Usuario</Text>
+            <Text style={styles.modalTitle}>Usuario</Text>
             <TextInput
               style={styles.modalInput}
               placeholder="Nombre de usuario"
               value={username}
               onChangeText={setUsername}
             />
-        
+        <DropDownPicker
+      open={open}
+      value={value}
+      items={items}
+      setOpen={setOpen}
+      setValue={setValue}
+      setItems={setRole}
+      
+    />
+
             <TouchableOpacity style={styles.modalButton} onPress={addUser}>
               <Text style={styles.buttonText}>Agregar</Text>
             </TouchableOpacity>
@@ -186,6 +231,22 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     marginLeft: 8,
+  },
+  rolesContainer: {
+    flex: 1,
+  },
+  roleItem: {
+    marginBottom: 10,
+    backgroundColor: '#EEE',
+    padding: 10,
+    borderRadius: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  roleName: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
