@@ -16,14 +16,15 @@ export const getUsers = async (req, res) => {
 };
 
 export const createUsers= async(req,res)=>{
-    const {username,role_id}=req.body;
+    const {username,role_id,password}=req.body;
     try {
         let newUser = await Users.create({
             username,
             role_id,
-            state:true
+            state:true,
+            password
         },{
-            fields: ['username','role_id']
+            fields: ['username','role_id',"state",'password']
         });
         if (newUser) {
             return res.json({
@@ -72,7 +73,8 @@ export const updateUser = async (req, res) => {
             users.forEach(async user => {
                 await user.update({
                     username,
-                    role_id
+                    role_id,
+                    state:true
                 });
             });
         } 
