@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet , Text } from 'react-native';
 import { Input, Button } from 'react-native-elements';
 import axios from '../../axios/axios';
 import Toast from 'react-native-toast-message';
@@ -49,6 +49,8 @@ const LoginView = ({ navigation }: { navigation: NavigationProp<any> }) => {
 
   return (
     <View>
+          <Text style={styles.title}>RTV SYSTEM GOIA-APP</Text>
+
       <Input
         placeholder="Nombre de usuario"
         value={username}
@@ -63,15 +65,22 @@ const LoginView = ({ navigation }: { navigation: NavigationProp<any> }) => {
         leftIcon={<Icon name="lock" size={24} color="black" />} // Agregar el icono al componente Input
       />
       <Button title="Iniciar sesión" onPress={handleLogin} icon={<Icon name="sign-in" size={20} color="white" />} /> 
-      <Button
-        title="Registrarse"
-        type="clear"
-        onPress={() => navigation.navigate('Registro')}
-        icon={<Icon name="user-plus" size={20} color="black" />} // Agregar el icono al componente Button
-      />
       <Toast />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+});
 
 export default LoginView;

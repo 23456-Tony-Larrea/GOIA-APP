@@ -3,32 +3,80 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from '../../axios/axios';
 import { Camera } from 'expo-camera';
+import {ICars} from '../Interface/ICars'
+import jwtDecode from 'jwt-decode';
+import { IDecodedToken } from '../Interface/IDecodedToken';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface ICars {
-  id: number;
-  identityCar: string;
-  marca: string;
-  model: string;
-  identity: string;
-  client: string;
-}
+const getToken = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    return token;
+  } catch (error) {
+    console.error('Error al obtener el token:', error);
+    return null;
+  }
+};
 
+const decodeToken = async () => {
+  try {
+    const token = await getToken();
+    if (token) {
+      const decodedToken = jwtDecode<IDecodedToken>(token);
+      console.log('Decoded token:', decodedToken);
+      return decodedToken;
+    } else {
+      console.log('No se encontró un token');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error al decodificar el token:', error);
+    return null;
+  }
+};
 const IdentificationCard = () => {
+  const [idRole,setIdRole]= useState(Number);
   const [plateNumber, setPlateNumber] = useState('');
   const [vehicleInfo, setVehicleInfo] = useState<ICars[]>([]);
   const [searched, setSearched] = useState(false);
   const [cameraRef, setCameraRef] = useState<Camera | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null); // Asegura que el estado sea del tipo correcto
+  const [seeSearch,setSeeSearch]= useState(false);
 
+  const fetchRoleId = async () => {
+    const decodedToken = await decodeToken();
+    if (decodedToken && decodedToken.role_id) {
+      setIdRole(decodedToken.role_id);
+    }
+  };
 
+    
+  const getPermissions = async () => {
+    try {
+      const response = await axios.get(`/role_permissions/${idRole}`);
+      const permissions = response.data.data;
+      const viewSearch = permissions.find((permission: any) => permission.name ==='insertar usuarios');
+      if (viewSearch && viewSearch.state === false) {
+        setSeeSearch(false);
+      } else {
+        setSeeSearch(true);
+      }
+    } catch (error) {
+      console.error('Error al obtener los permisos:', error);
+    }
+  };
 
-    useEffect(() => {
+  useEffect(() => {
         (async () => {
           const { status } = await Camera.requestCameraPermissionsAsync();
           setHasCameraPermission(status === 'granted');
         })();
-      }, []);
+       fetchRoleId();
+       getPermissions()
+      },
+      []);
 
+    
 
   const searchVehicle = async () => {
     try {
@@ -55,18 +103,20 @@ const IdentificationCard = () => {
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Identificación del vehículo</Text>
-        <View style={styles.inputContainer}>
-          <Icon name="car" size={24} color="#999" style={styles.inputIcon} />
-          <TextInput
-            placeholder="Ingrese la placa del vehículo a buscar"
-            style={styles.input}
-            value={plateNumber}
-            onChangeText={text => setPlateNumber(text)}
-          />
-          <TouchableOpacity onPress={searchVehicle}>
-            <Icon name="search" size={24} color="#007AFF" style={styles.searchIcon} />
-          </TouchableOpacity>
-        </View>
+        {seeSearch && (
+      <>
+      <Icon name="car" size={24} color="#999" style={styles.inputIcon} />
+      <TextInput
+        placeholder="Ingrese la placa del vehículo a buscar"
+        style={styles.input}
+        value={plateNumber}
+        onChangeText={text => setPlateNumber(text)}
+      />
+      <TouchableOpacity onPress={searchVehicle}>
+        <Icon name="search" size={24} color="#007AFF" style={styles.searchIcon} />
+      </TouchableOpacity>
+    </>
+    )}
       </View>
 
       {searched && (

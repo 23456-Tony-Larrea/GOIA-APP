@@ -8,7 +8,7 @@ import { IPermission } from '../Interface/IPermission';
 import Toast from 'react-native-toast-message';
 
 
-const RoleView = () => {
+const RoleView = ({}) => {
   const [roles, setRoles] = useState<IRole[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editedPermissions, setEditedPermissions] = useState(null);
@@ -102,15 +102,15 @@ const createRole = async () => {
     }
   }
   const getPermissionRoleById=async(id:number)=>{
-      try{
-        const response = await axios.get(`/role_permissions/${id}`);
-        const permissions = response.data.data;
-        setPermissions(permissions)
-      }
-      catch(e){
-        console.log(e)
-      }
-  }
+    try{
+      const response = await axios.get(`/role_permissions/${id}`);
+      const permissions = response.data.data;
+      setPermissions(permissions)
+    }
+    catch(e){
+      console.log(e)
+    }
+}
   const updatePermissionState = async (permissionId:number, newState:boolean) => {
     try {
       const response = await axios.put(`/role_permissions/${permissionId}/state`, { newState });
@@ -130,7 +130,6 @@ const createRole = async () => {
       console.log(error);
     }
   };
-  
   return (
     <AlertNotificationRoot>
     <View style={styles.container}>
@@ -196,6 +195,7 @@ const createRole = async () => {
                     value={permission.state}
                     onValueChange={(value) => updatePermissionState(permission.id, value)}
                   />
+
                 </View>
               ))}
             </View>

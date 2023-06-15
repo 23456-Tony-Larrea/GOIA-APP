@@ -9,11 +9,11 @@ const Stack = createStackNavigator();
 
 const Navigation = () => {
   return (
-    <Stack.Navigator initialRouteName="Ingreso">
+    <Stack.Navigator initialRouteName="Roles y Permisos">
       <Stack.Screen name="Ingreso" component={LoginView} />
       <Stack.Screen name="Inicio" component={HomeScreen} />
       <Stack.Screen name="Registro" component={RegisterView} />
-      <Stack.Screen name="Roles y Permisos " component={RolePermissionView} />
+      <Stack.Screen name="Roles y Permisos" component={RolePermissionView} />
       <Stack.Screen name="Usuarios" component={UsersView} />
     </Stack.Navigator>
   );
