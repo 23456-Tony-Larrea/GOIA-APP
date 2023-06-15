@@ -34,7 +34,6 @@ const IdentificationCard = () => {
     try {
       const response = await axios.get(`/cars/${plateNumber}`);
       setVehicleInfo(response.data);
-      console.log(response.data);
       setSearched(true);
     } catch (error) {
       console.error(error);
@@ -48,7 +47,6 @@ const IdentificationCard = () => {
     if (cameraRef) {
       const photo = await cameraRef.takePictureAsync();
       console.log(`Foto tomada del vehículo con ID: ${id}`);
-      console.log('URI de la foto:', photo.uri);
     }
   };
 

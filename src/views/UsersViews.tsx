@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from '../../axios/axios';
 import { IUser } from '../Interface/IUser';
 import { IRole } from '../Interface/IRole';
-import DropDownPicker, { ItemType } from 'react-native-dropdown-picker';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { ALERT_TYPE, AlertNotificationRoot, Toast } from 'react-native-alert-notification';
 
 const UsersView = () => {
@@ -44,8 +44,8 @@ const UsersView = () => {
       if (idUser) {
         await axios.put(`/users/${idUser}`, {
           username: username,
-          role_id: value,
-        });
+          role_id: value,  
+          });
 
         Toast.show({
           title: 'Usuario Actualizado',
@@ -53,9 +53,10 @@ const UsersView = () => {
           type: ALERT_TYPE.SUCCESS,
         });
       } else {
-        await axios.post('/users', {
+        await axios.post('/register', {
           username: username,
           role_id: value,
+          password:"123456"
         });
 
         Toast.show({
@@ -94,8 +95,8 @@ const UsersView = () => {
         <View style={styles.rolesContainer}>
           {users.map((user, index) => (
             <View key={index} style={styles.roleItem}>
-              <Text style={styles.roleName}>Nombre del usuario: {user.username}</Text>
-              <Text style={styles.roleName}>Nombre del Rol: {user.role_id ? user.role.name : 'Sin ningún rol'}</Text>
+              <Text style={styles.roleName}>Usuario: {user.username}</Text>
+              <Text style={styles.roleName}>Rol: {user.role_id ? user.role.name : 'Sin ningún rol'}</Text>
               <TouchableOpacity
                 style={styles.editButton}
                 onPress={() => {

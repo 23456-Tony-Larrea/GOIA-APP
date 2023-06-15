@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.18.2",
     "@react-navigation/bottom-tabs": "^6.5.7",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/stack": "^6.3.16",
@@ -19,6 +20,7 @@
     "expo-camera": "~13.2.1",
     "expo-image-picker": "~14.1.1",
     "expo-status-bar": "~1.4.4",
+    "jwt-decode": "^3.1.2",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
     "react-native": "0.71.8",

@@ -106,7 +106,6 @@ const createRole = async () => {
         const response = await axios.get(`/role_permissions/${id}`);
         const permissions = response.data.data;
         setPermissions(permissions)
-        console.log(permissions)
       }
       catch(e){
         console.log(e)
@@ -115,7 +114,6 @@ const createRole = async () => {
   const updatePermissionState = async (permissionId:number, newState:boolean) => {
     try {
       const response = await axios.put(`/role_permissions/${permissionId}/state`, { newState });
-      console.log(response)
       const updatedPermissions = permissions.map((permission) => {
         if (permission.id === permissionId) {
           return { ...permission, state: newState };
@@ -136,88 +134,80 @@ const createRole = async () => {
   return (
     <AlertNotificationRoot>
     <View style={styles.container}>
-    <View style={styles.rolesContainer}>
-  {roles.map((role,index) => (
-    <TouchableOpacity key={index} style={styles.roleItem} 
-    onPress={()=> {
-      setPermissionsModalTitle(`Permisos de ${role.name}`)
-      setPermissionsModalVisible(true)
-      getPermissionRoleById(role.id)
-    }}>
-      <Text style={styles.roleName}>{role.name}</Text>
-      <TouchableOpacity style={styles.editButton} onPress={() => {
-     setIdRole(role.id)
-     setModalVisible(true);
-     setSelectedName(role.name)
-    }}
-   ><Icon name="pencil" size={16} color="#FFF" />
-    </TouchableOpacity>
-            <TouchableOpacity style={styles.deleteButton} onPress={() => deleteRole(role.id)}>
-              <Icon name="trash" size={16} color="#FFF" />
-            </TouchableOpacity>
-    </TouchableOpacity>
-
-  ))}
-</View>
-      <TouchableOpacity style={styles.createButton} onPress={() =>{ setModalVisible(true)
-      clearData()
-    }
-      }>
+      <View style={styles.rolesContainer}>
+        {roles.map((role, index) => {
+          if (role.name !== 'superAdministrador') { // Reemplaza 'superAdministrador' con el nombre exacto del rol que deseas ocultar
+            return (
+              <TouchableOpacity key={index} style={styles.roleItem} onPress={() => {
+                setPermissionsModalTitle(`Permisos de ${role.name}`);
+                setPermissionsModalVisible(true);
+                getPermissionRoleById(role.id);
+              }}>
+                <Text style={styles.roleName}>{role.name}</Text>
+                <TouchableOpacity style={styles.editButton} onPress={() => {
+                  setIdRole(role.id);
+                  setModalVisible(true);
+                  setSelectedName(role.name);
+                }}>
+                  <Icon name="pencil" size={16} color="#FFF" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.deleteButton} onPress={() => deleteRole(role.id)}>
+                  <Icon name="trash" size={16} color="#FFF" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            );
+          } else {
+            return null; // Omite el renderizado del rol de superAdministrador
+          }
+        })}
+      </View>
+      <TouchableOpacity style={styles.createButton} onPress={() => { setModalVisible(true); clearData(); }}>
         <Icon name="user" size={20} style={styles.roleIcon} />
         <Text style={styles.createButtonText}>Crear Rol</Text>
       </TouchableOpacity>
       {modalVisible && (
-  <Modal visible={modalVisible} transparent animationType="fade">
-    <View style={styles.modalContainer}>
-      <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>Rol</Text>
-        <TextInput
-          style={styles.roleNameInput}
-          placeholder="Nombre del Rol"
-          value={selectedName}
-          onChangeText={setSelectedName}
-        />
-        <Button title="Guardar" onPress={createRole} />
-        <TouchableOpacity style={styles.closeButton} onPress={() =>{ 
-        setModalVisible(false)
-        }
-        }>
-          <Text style={styles.closeButtonText}>Cerrar</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </Modal>
-  
-)}
-{permissionsModalVisible && (
-  <Modal visible={permissionsModalVisible} transparent animationType="fade">
-      <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>{permissionsModalTitle}</Text>
-          <View style={styles.permissionList}>  
-            {permissions.map((permission,index) => (
-              <View key={index} style={styles.permissionItem}>
-                <Text style={styles.permissionText}>{permission.name}</Text>
-                <Switch
-                     value={permission.state}
+        <Modal visible={modalVisible} transparent animationType="fade">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Rol</Text>
+              <TextInput
+                style={styles.roleNameInput}
+                placeholder="Nombre del Rol"
+                value={selectedName}
+                onChangeText={setSelectedName}
+              />
+              <Button title="Guardar" onPress={createRole} />
+              <TouchableOpacity style={styles.closeButton} onPress={() => { setModalVisible(false); }}>
+                <Text style={styles.closeButtonText}>Cerrar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
+      {permissionsModalVisible && (
+        <Modal visible={permissionsModalVisible} transparent animationType="fade">
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{permissionsModalTitle}</Text>
+            <View style={styles.permissionList}>
+              {permissions.map((permission, index) => (
+                <View key={index} style={styles.permissionItem}>
+                  <Text style={styles.permissionText}>{permission.name}</Text>
+                  <Switch
+                    value={permission.state}
                     onValueChange={(value) => updatePermissionState(permission.id, value)}
-
-                />
-               </View>
-
-
-            ))}
-
-        <TouchableOpacity style={styles.closeButton} onPress={() => setPermissionsModalVisible(false)}>
-          <Text style={styles.closeButtonText}>Cerrar</Text>
-        </TouchableOpacity>
-      </View>
+                  />
+                </View>
+              ))}
+            </View>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setPermissionsModalVisible(false)}>
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      )}
     </View>
-    <Toast />
-  </Modal>
-)}
-</View>
-
-</AlertNotificationRoot>
+  </AlertNotificationRoot>
+  
 );
 };
 
