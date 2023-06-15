@@ -8,7 +8,6 @@ export const Role = sequelize.define('role', {
     },
     name: {
         type: DataTypes.STRING,
-        defaultValue:'superAdministrador'
             }
 }, {
     timestamps: false

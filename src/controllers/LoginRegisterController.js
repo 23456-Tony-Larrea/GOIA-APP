@@ -32,7 +32,7 @@ export const login = async (req, res) => {
 
           // Generar token con el nombre del rol incluido
           const token = jwt.sign(
-            { id: user.id, name: user.name, nameRole: role.name }, // Incluye el nombre del rol en el token
+            { id: user.id, name: user.username, nameRole: role.name ,role_id:role.id }, // Incluye el nombre del rol en el token
             'secretkey',
             {
               expiresIn: 60 * 60 * 24,
