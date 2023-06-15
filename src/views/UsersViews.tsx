@@ -1,47 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from '../../axios/axios';
 import { IUser } from '../Interface/IUser';
 import { IRole } from '../Interface/IRole';
 import DropDownPicker, { ItemType } from 'react-native-dropdown-picker';
-import { ALERT_TYPE, AlertNotificationRoot ,Toast} from 'react-native-alert-notification';
-
+import { ALERT_TYPE, AlertNotificationRoot, Toast } from 'react-native-alert-notification';
 
 const UsersView = () => {
   const [users, setUsers] = useState<IUser[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [username, setUsername] = useState('');
   const [role, setRole] = useState<IRole[]>([]);
-  
+  const [idUser, setIdUser] = useState<number | null>(null);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState<number | null>(null);
 
   const getUsers = async () => {
     try {
       const response = await axios.get('/users');
       setUsers(response.data);
-      console.log("re",response.data)
     } catch (error) {
       console.error('Error al obtener los usuarios:', error);
     }
   };
 
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const items: ItemType<number>[] = role.map((role: IRole) => ({
-    label: role.name,
-    value: role.id
-  }));
-
-  const getRoles = async ()=>{
-    try{
-    const response = await axios.get('/roles')
-        setRole(response.data)
-        
+  const getRoles = async () => {
+    try {
+      const response = await axios.get('/roles');
+      setRole(response.data);
     } catch (error) {
-        console.error('Error al obtener los usuarios:', error);    
-  }
-
-  }
+      console.error('Error al obtener los roles:', error);
+    }
+  };
 
   useEffect(() => {
     getUsers();
@@ -49,54 +40,79 @@ const UsersView = () => {
   }, []);
 
   const addUser = async () => {
-     try {
-        const response = await axios.post('/users',{
-            username: username,
-            role_id:value
+    try {
+      if (idUser) {
+        await axios.put(`/users/${idUser}`, {
+          username: username,
+          role_id: value,
         });
-        setUsers([...users, response.data]);
-        setModalVisible(false);
-        getUsers()
+
+        Toast.show({
+          title: 'Usuario Actualizado',
+          textBody: 'El usuario ha sido actualizado exitosamente.',
+          type: ALERT_TYPE.SUCCESS,
+        });
+      } else {
+        await axios.post('/users', {
+          username: username,
+          role_id: value,
+        });
+
+        Toast.show({
+          title: 'Usuario Agregado',
+          textBody: 'El usuario ha sido agregado exitosamente.',
+          type: ALERT_TYPE.SUCCESS,
+        });
+      }
+
+      setModalVisible(false);
+      getUsers();
     } catch (error) {
-        console.error('Error al obtener los usuarios:', error);
-    } 
-    
+      console.error('Error al agregar o actualizar el usuario:', error);
+    }
   };
 
-const changeState = async (id:number) => {
+  const changeState = async (id: number) => {
     try {
-        const response = await axios.put(`/users/activate/${id}`
-        );
-        setUsers(users.map((user: IUser) => (user.id === id? response.data : user)));
-        //Using toast 
-        Toast.show({
-            title: 'Usuario desactivado',
-            textBody:'Se desactivo el usuario',
-            type: ALERT_TYPE.DANGER
-        });
-}
-    catch (error) {
-        console.error('Error al obtener los usuarios:', error);
+      await axios.put(`/users/activate/${id}`);
+
+      Toast.show({
+        title: 'Usuario Desactivado',
+        textBody: 'El usuario ha sido desactivado.',
+        type: ALERT_TYPE.DANGER,
+      });
+
+      getUsers();
+    } catch (error) {
+      console.error('Error al cambiar el estado del usuario:', error);
     }
-}
+  };
 
   const renderList = () => {
     return (
-        <AlertNotificationRoot>
-     <View style={styles.rolesContainer}>
-     {users.map((user, index) => (
-        <View key={index} style={styles.roleItem}>
-          <Text>Nombre del usuario:{user.username}</Text>
-          <Text>Nombre del Rol: {user.role_id ?user.role_id.name  : "Sin ningún rol"}</Text>
-          <TouchableOpacity>
-            <Icon name="edit" size={20} color="blue" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => changeState(user.id)}>
-            <Icon name="trash" size={20} color="red" />
-          </TouchableOpacity>
+      <AlertNotificationRoot>
+        <View style={styles.rolesContainer}>
+          {users.map((user, index) => (
+            <View key={index} style={styles.roleItem}>
+              <Text style={styles.roleName}>Nombre del usuario: {user.username}</Text>
+              <Text style={styles.roleName}>Nombre del Rol: {user.role_id ? user.role.name : 'Sin ningún rol'}</Text>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => {
+                  setIdUser(user.id);
+                  setUsername(user.username);
+                  setValue(user.role_id);
+                  setModalVisible(true);
+                }}
+              >
+                <Icon name="edit" size={20} color="blue" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.deleteButton} onPress={() => changeState(user.id)}>
+                <Icon name="trash" size={20} color="red" />
+              </TouchableOpacity>
+            </View>
+          ))}
         </View>
-      ))}
-</View>
       </AlertNotificationRoot>
     );
   };
@@ -122,15 +138,14 @@ const changeState = async (id:number) => {
               value={username}
               onChangeText={setUsername}
             />
-        <DropDownPicker
-      open={open}
-      value={value}
-      items={items}
-      setOpen={setOpen}
-      setValue={setValue}
-      setItems={setRole}
-      
-    />
+            <DropDownPicker
+              open={open}
+              value={value}
+              items={role.map((role: IRole) => ({ label: role.name, value: role.id }))}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setRole}
+            />
 
             <TouchableOpacity style={styles.modalButton} onPress={addUser}>
               <Text style={styles.buttonText}>Agregar</Text>
@@ -150,43 +165,19 @@ const changeState = async (id:number) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 16,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  tableContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2196F3',
     borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#ddd',
     padding: 8,
     marginBottom: 16,
   },
-  head: {
-    height: 40,
-    backgroundColor: '#f1f8ff',
-  },
-  headText: {
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  rowText: {
-    textAlign: 'center',
-  },
-  listItem: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 4,
-    padding: 8,
-    marginBottom: 8,
-  },
-  listItemText: {
-    fontSize: 16,
+  buttonText: {
+    color: 'white',
+    marginLeft: 8,
   },
   modalContainer: {
     flex: 1,
@@ -220,18 +211,6 @@ const styles = StyleSheet.create({
     padding: 8,
     marginBottom: 8,
   },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2196F3',
-    borderRadius: 4,
-    padding: 8,
-    marginBottom: 16,
-  },
-  buttonText: {
-    color: 'white',
-    marginLeft: 8,
-  },
   rolesContainer: {
     flex: 1,
   },
@@ -247,7 +226,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 4,
   },
+  editButton: {
+    marginRight: 8,
+  },
+  deleteButton: {},
 });
 
 export default UsersView;
