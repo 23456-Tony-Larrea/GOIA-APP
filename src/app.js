@@ -9,6 +9,7 @@ import CarsRoute from './routes/CarsRoute.js'
 import RoleRoute from './routes/RoleRoute.js'
 import RolePermission from './routes/RolePermission.js'
 import PermissionRoute from './routes/PermissionRoute.js'
+import EvidenceRoute from './routes/EvidenceRoute.js'
 
 
 const app = express();
@@ -25,5 +26,6 @@ app.use(CarsRoute)
 app.use(RoleRoute)
 app.use(RolePermission)
 app.use(PermissionRoute)
+app.use(EvidenceRoute)
 app.use('/uploads', express.static(path.join(__dirname,'src','public','uploads')));
 export default app

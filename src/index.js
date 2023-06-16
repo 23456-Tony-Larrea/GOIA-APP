@@ -6,6 +6,7 @@ import './models/Users_Department.js'
 import './models/Role.js'
 import './models/Car.js'
 import './models/RolePermission.js'
+import './models/Evidence.js'
 
 async function main() {
     try {
