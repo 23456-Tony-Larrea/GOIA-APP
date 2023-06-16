@@ -25,6 +25,11 @@ const UsersView = () => {
     }
   };
 
+const clearData=()=>{
+setValue(0)
+setUsername('')
+} 
+
   const getRoles = async () => {
     try {
       const response = await axios.get('/roles');
@@ -52,6 +57,8 @@ const UsersView = () => {
           textBody: 'El usuario ha sido actualizado exitosamente.',
           type: ALERT_TYPE.SUCCESS,
         });
+        getRoles()
+
       } else {
         await axios.post('/register', {
           username: username,
@@ -64,6 +71,9 @@ const UsersView = () => {
           textBody: 'El usuario ha sido agregado exitosamente.',
           type: ALERT_TYPE.SUCCESS,
         });
+        clearData()
+        getRoles()
+
       }
 
       setModalVisible(false);
@@ -82,7 +92,6 @@ const UsersView = () => {
         textBody: 'El usuario ha sido desactivado.',
         type: ALERT_TYPE.DANGER,
       });
-
       getUsers();
     } catch (error) {
       console.error('Error al cambiar el estado del usuario:', error);
@@ -127,7 +136,9 @@ const UsersView = () => {
 
   return (
     <View style={styles.container}>
-      <AddButton onPress={() => setModalVisible(true)} />
+      <AddButton onPress={() =>{ setModalVisible(true)
+      clearData()
+      }} />
 
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
@@ -148,7 +159,7 @@ const UsersView = () => {
               setItems={setRole}
             />
 
-            <TouchableOpacity style={styles.modalButton} onPress={addUser}>
+            <TouchableOpacity style={styles.modalButton} onPress={()=>addUser}>
               <Text style={styles.buttonText}>Agregar</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>

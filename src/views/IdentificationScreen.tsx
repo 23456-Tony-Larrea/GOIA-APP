@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from '../../axios/axios';
 import { Camera } from 'expo-camera';
@@ -7,6 +7,7 @@ import {ICars} from '../Interface/ICars'
 import jwtDecode from 'jwt-decode';
 import { IDecodedToken } from '../Interface/IDecodedToken';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CameraScreem from '../views/CameraScreen'
 
 const getToken = async () => {
   try {
@@ -42,6 +43,8 @@ const IdentificationCard = () => {
   const [cameraRef, setCameraRef] = useState<Camera | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null); // Asegura que el estado sea del tipo correcto
   const [seeSearch,setSeeSearch]= useState(false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
 
   const fetchRoleId = async () => {
     const decodedToken = await decodeToken();
@@ -94,31 +97,59 @@ const IdentificationCard = () => {
      
     if (cameraRef) {
       const photo = await cameraRef.takePictureAsync();
-      console.log(`Foto tomada del vehículo con ID: ${id}`);
+      setPhotoUri(photo.uri);
+    }
+    if(`Foto tomada del vehículo con ID: ${id}`){
+        return (
+          <CameraScreem/>
+        )
+    }
+
+  };
+  /* 
+   const takePhoto = async () => {
+    if (cameraRef) {
+      const photo = await cameraRef.takePictureAsync();
+      setPhotoUri(photo.uri);
     }
   };
+  */
+  
+
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+ 
+  {hasPermission && (
+    <Camera style={styles.camera} ref={(ref) => setCameraRef(ref)} />
+  )}
 
   return (
-    
     <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Identificación del vehículo</Text>
-        {seeSearch && (
-      <>
-      <Icon name="car" size={24} color="#999" style={styles.inputIcon} />
-      <TextInput
-        placeholder="Ingrese la placa del vehículo a buscar"
-        style={styles.input}
-        value={plateNumber}
-        onChangeText={text => setPlateNumber(text)}
-      />
-      <TouchableOpacity onPress={searchVehicle}>
-        <Icon name="search" size={24} color="#007AFF" style={styles.searchIcon} />
-      </TouchableOpacity>
-    </>
-    )}
+      
+ <View style={styles.card}>
+    <View >
+      <Text style={styles.cardTitle}>Identificación</Text>
+    </View>
+    <View >
+      <View style={styles.search}>
+        <Icon name="search" size={20} color="#000000" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Ingrese el número de placa"
+          placeholderTextColor="#000000"
+          value={plateNumber}
+          onChangeText={setPlateNumber}
+        />
       </View>
-
+      <TouchableOpacity
+        style={styles.searchButton}
+        onPress={searchVehicle}
+      >
+        <Text style={styles.searchButtonText}>Buscar</Text>
+      </TouchableOpacity>
+    </View>
+   </View>
       {searched && (
         <>
           {vehicleInfo.length === 0 ? (
@@ -241,6 +272,28 @@ const styles = StyleSheet.create({
   },
   emptyDiv: {
     height: 200,
+    width: '100%',
+  },
+  search: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    marginRight: 10,
+  },
+  searchButton: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 3,
+    padding: 7,
+    alignItems: 'center',
+  },
+  searchButtonText: {
+    color: '#FFF',
+  },
+  camera: {
+    flex: 1,
     width: '100%',
   },
 });

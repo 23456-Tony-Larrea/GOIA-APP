@@ -6,6 +6,7 @@ import VisualInspectionScreen from './VisualInspectionScreen';
 import ClearancesScreen from './ClearancesScreen';
 import WheelsScreen from './WheelsScreen'
 import RolePermissionScreen from './RolePermissionScreen';
+import CameraScreen from '../views/CameraScreen'
 import UsersView from './UsersViews';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwtDecode from 'jwt-decode';
@@ -111,7 +112,15 @@ const App = () => {
           ),
         }}
       />
-       
+      <Tab.Screen
+        name="Camara"
+        component={CameraScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="camera" color={color} size={size} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };

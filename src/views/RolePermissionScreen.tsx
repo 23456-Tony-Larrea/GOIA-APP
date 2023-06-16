@@ -105,6 +105,7 @@ const createRole = async () => {
     try{
       const response = await axios.get(`/role_permissions/${id}`);
       const permissions = response.data.data;
+      console.log('Permissions:', permissions);
       setPermissions(permissions)
     }
     catch(e){
@@ -120,11 +121,12 @@ const createRole = async () => {
         }
         return permission;
       });
+      console.log('Updated Permissions:', updatedPermissions); // Agrega este console.log para verificar los permisos actualizados
       setPermissions(updatedPermissions);
       Toast.show({
         type:'success',
         text1: 'Permiso',
-        text2: `${response.data.message}`,
+        text2: "El permiso se ha actualizado",
       });
     } catch (error) {
       console.log(error);
@@ -192,9 +194,13 @@ const createRole = async () => {
                 <View key={index} style={styles.permissionItem}>
                   <Text style={styles.permissionText}>{permission.name}</Text>
                   <Switch
-                    value={permission.state}
-                    onValueChange={(value) => updatePermissionState(permission.id, value)}
-                  />
+      value={permission.state}
+  onValueChange={async (value) => {
+    console.log('Switch Value:', value);
+    await updatePermissionState(permission.id, value);
+    await getPermissionRoleById(permission.id);
+  }}
+/>
 
                 </View>
               ))}
