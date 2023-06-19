@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import axios from '../../axios/axios';
+import axios from '../../axios/axios2';
 import { ICars } from '../Interface/ICars';
 import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Camera } from 'expo-camera';
 import { IDecodedToken } from '../Interface/IDecodedToken';
 import {IPhoto} from '../Interface/IPhoto'
+import * as FileSystem from 'expo-file-system';
+
+
 
 const IdentificationCard = () => {
   const [idRole, setIdRole] = useState(Number);
@@ -20,8 +23,11 @@ const IdentificationCard = () => {
   const [capturedPhoto, setCapturedPhoto] = useState<IPhoto | string>('');
   const [idPicture, setIdPicture]= useState(Number);
   const cameraRef = useRef<any>(null); // Asegúrate de que el tipo sea correcto
+  const [capturedImageURL, setCapturedImageURL] = useState('');
+  const [captureCodeVehi, setCaptureCodeVehi] = useState('');
 
-  const getToken = async () => {
+
+ /*  const getToken = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
       return token;
@@ -68,28 +74,47 @@ const IdentificationCard = () => {
     } catch (error) {
       console.error('Error al obtener los permisos:', error);
     }
-  };
+  }; */
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(status === 'granted');
     })();
-    fetchRoleId();
-    getPermissions();
+   /*  fetchRoleId();
+    getPermissions(); */
   }, []);
 
+  const clearData=()=>{
+    setVehicleInfo([])
+    setPlateNumber('')
+    setSearched(false)
+  }
   const searchVehicle = async () => {
     try {
-      const response = await axios.get(`/cars/${plateNumber}`);
-      setVehicleInfo(response.data);
+      const response = await axios.post('/GetCodVehiculo',{
+            "placa":`${plateNumber}`
+      });
       setSearched(true);
+      setCaptureCodeVehi(response.data[0].vehi_codigo)
+      getInformationCar(response.data[0].vehi_codigo) 
     } catch (error) {
       console.error(error);
     }
   };
 
-  const takePhoto = async (id: number) => {
+  const getInformationCar = async (captureCodeVehi:number) => {
+    try {
+      setSearched(true);
+      const response = await axios.post('/GetDatoVehiculo',{
+            "vehi_codigo":`${captureCodeVehi}`
+      });
+      setVehicleInfo(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+      const takePhoto = async (id: number) => {
     setModalVisiblePicture(true);
     setIdPicture(id)
   };
@@ -99,42 +124,47 @@ const IdentificationCard = () => {
   }
   
   const takePicture = async (id: number) => {
-    if (cameraRef.current) {
-      const photo: IPhoto = await cameraRef.current.takePictureAsync();
-      setCapturedPhoto(photo.uri);
-      console.log('URI de la foto:', photo.uri);
+    setModalVisiblePicture(false)
+   /*  if (cameraRef.current) {
+      const photo = await cameraRef.current.takePictureAsync();
+      const { uri } = photo; 
+      console.log("URI de la foto:", uri); 
   
-      try {
-        const response = await fetch(photo.uri);
-        const blob = await response.blob();
-        console.log('Blob de la foto:', blob);
+      const fileUri = FileSystem.cacheDirectory + 'photo.jpg';
+      console.log("Ruta absoluta guardada:", fileUri);
   
-        const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
-        console.log("eror o no",file)
+      // Mueve la foto a la nueva ubicación
+      await FileSystem.moveAsync({
+        from: uri,
+        to: fileUri,
+      });
   
-      /*   const formData = new FormData();
-        formData.append('document', file);
-        console.log('FormData:', formData);
+      const formData = new FormData();
+      formData.append('evidence', {
+        uri: fileUri,
+        name: 'photo.jpg',
+        type: 'image/jpeg',
+      }as any);
+      console.log("Datos del formulario",formData );
+
   
-        const axiosConfig = {
+       try {
+        const response = await axios.post(`/takePhoto/${id}/evidence`, formData,{
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-        };
-  
-        const axiosResponse = await axios.post(
-          `/takePhoto/${id}/evidence`,
-          formData,
-          axiosConfig
-        );
-  
-        console.log('La foto se ha enviado correctamente');
-        // Realizar cualquier acción adicional con la respuesta del servidor si es necesario
-       */} catch (error) {
-        console.log('Error al enviar la foto:', error);
+        });
+        console.log(response.data);
       }
-    }
+      catch (error) {
+        console.error(error);
+      } 
+    } */
   };
+  
+  
+  
+  
 
   
   return (
@@ -170,31 +200,32 @@ const IdentificationCard = () => {
                 <Text style={styles.cardTitle}>Información del vehículo</Text>
                 <View style={styles.infoContainer}>
                   <View style={styles.labelRow}>
+                    <Text style={styles.label}>Codigo del vehículo:</Text>
+                    <Text style={styles.value}>{vehicle.codigo}</Text>
+                  </View>
+                  <View style={styles.labelRow}>
                     <Text style={styles.label}>Marca:</Text>
                     <Text style={styles.value}>{vehicle.marca}</Text>
                   </View>
                   <View style={styles.labelRow}>
                     <Text style={styles.label}>Cliente:</Text>
-                    <Text style={styles.value}>{vehicle.client}</Text>
+                    <Text style={styles.value}>{vehicle.cliente}</Text>
                   </View>
                   <View style={styles.labelRow}>
                     <Text style={styles.label}>Modelo:</Text>
-                    <Text style={styles.value}>{vehicle.model}</Text>
+                    <Text style={styles.value}>{vehicle.modelo}</Text>
                   </View>
                   <View style={styles.labelRow}>
                     <Text style={styles.label}>No. Cédula:</Text>
-                    <Text style={styles.value}>{vehicle.identity}</Text>
+                    <Text style={styles.value}>{vehicle.cedula}</Text>
                   </View>
-                </View>
+                  </View>
 
-                <TouchableOpacity style={styles.cameraButton} onPress={() => takePhoto(vehicle.id)}>
-                  <Icon name="camera" size={24} color="#FFF" />
-                  <Text style={styles.cameraText}>Tomar foto</Text>
-                </TouchableOpacity>
-              </View>
+           </View>
             ))
           )}
         </>
+
       )}
 
       <Modal visible={modalVisiblePicture} transparent>
@@ -204,6 +235,9 @@ const IdentificationCard = () => {
         }}>
           <Text style={styles.captureButtonText}>Tomar foto</Text>
         </TouchableOpacity>
+        {capturedImageURL !== '' && (
+    <Image source={{ uri: capturedImageURL }} style={styles.capturedImage} />
+  )}
       </Modal>
 
       <View style={styles.emptyDiv}></View>
@@ -292,6 +326,12 @@ const styles = StyleSheet.create({
   },
   emptyDiv: {
     marginBottom: 100,
+  },
+  capturedImage: {
+    width: 200,
+    height: 200,
+    alignSelf: 'center',
+    marginTop: 10,
   },
 });
 

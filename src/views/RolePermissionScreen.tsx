@@ -17,19 +17,20 @@ const RoleView = ({}) => {
   const [permissionsModalTitle, setPermissionsModalTitle] = useState('');
   const [permissionsModalVisible, setPermissionsModalVisible] = useState(false);
   const [permissions, setPermissions] = useState<IPermission[]>([]);
-
+  const [rolePermissionId,setRolePermissionId]=useState(Number)
+  let [roleIdANDPermission,setRoleANDIdPermission]=useState(Number)
 
 
    
   useEffect(() => {
     getRoles()
-    
+    getPermissionRoleById(rolePermissionId)
   }, []);
   const getRoles=async()=>{
     try {
         const response = await axios.get('/roles'); 
          setRoles(response.data);
-      } catch (error) {
+        } catch (error) {
         console.error('Error al obtener los roles:', error);
       }
 }
@@ -104,17 +105,20 @@ const createRole = async () => {
   const getPermissionRoleById=async(id:number)=>{
     try{
       const response = await axios.get(`/role_permissions/${id}`);
-      const permissions = response.data.data;
-      console.log('Permissions:', permissions);
-      setPermissions(permissions)
-    }
+      const permission = response.data.data;
+      console.log('Permissions:', permission);
+       setPermissions(permission);
+   }
     catch(e){
       console.log(e)
     }
 }
-  const updatePermissionState = async (permissionId:number, newState:boolean) => {
-    try {
-      const response = await axios.put(`/role_permissions/${permissionId}/state`, { newState });
+  const updatePermissionState = async (permissionId:number, newState:boolean,roleId:number) => {
+    console.log('Permission ID:', permissionId);
+    console.log('New State:', newState);
+    console.log('Role ID:', roleId);
+     try {
+      const response = await axios.put(`/roles/${roleId}/permissions/${permissionId}/state`, { newState });
       const updatedPermissions = permissions.map((permission) => {
         if (permission.id === permissionId) {
           return { ...permission, state: newState };
@@ -130,19 +134,20 @@ const createRole = async () => {
       });
     } catch (error) {
       console.log(error);
-    }
+    } 
   };
   return (
     <AlertNotificationRoot>
     <View style={styles.container}>
       <View style={styles.rolesContainer}>
         {roles.map((role, index) => {
-          if (role.name !== 'superAdministrador') { // Reemplaza 'superAdministrador' con el nombre exacto del rol que deseas ocultar
+          if (role.name !== 'superAdministrador') { 
             return (
               <TouchableOpacity key={index} style={styles.roleItem} onPress={() => {
                 setPermissionsModalTitle(`Permisos de ${role.name}`);
                 setPermissionsModalVisible(true);
                 getPermissionRoleById(role.id);
+                setRoleANDIdPermission(role.id)
               }}>
                 <Text style={styles.roleName}>{role.name}</Text>
                 <TouchableOpacity style={styles.editButton} onPress={() => {
@@ -157,9 +162,9 @@ const createRole = async () => {
                 </TouchableOpacity>
               </TouchableOpacity>
             );
-          } else {
+           } else {
             return null; // Omite el renderizado del rol de superAdministrador
-          }
+          } 
         })}
       </View>
       <TouchableOpacity style={styles.createButton} onPress={() => { setModalVisible(true); clearData(); }}>
@@ -197,16 +202,18 @@ const createRole = async () => {
       value={permission.state}
   onValueChange={async (value) => {
     console.log('Switch Value:', value);
-    await updatePermissionState(permission.id, value);
-    await getPermissionRoleById(permission.id);
+    await updatePermissionState(permission.id, value, roleIdANDPermission);
   }}
 />
 
                 </View>
               ))}
             </View>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setPermissionsModalVisible(false)}>
-              <Text style={styles.closeButtonText}>Cerrar</Text>
+            <TouchableOpacity style={styles.closeButton} onPress={() => {setPermissionsModalVisible(false)
+              getPermissionRoleById(rolePermissionId)
+            }}>
+              <Text style={styles.closeButtonText}
+           >Cerrar</Text>
             </TouchableOpacity>
           </View>
         </Modal>
