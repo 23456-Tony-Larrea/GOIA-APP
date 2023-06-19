@@ -71,9 +71,8 @@ setUsername('')
           textBody: 'El usuario ha sido agregado exitosamente.',
           type: ALERT_TYPE.SUCCESS,
         });
-        clearData()
         getRoles()
-
+        clearData()
       }
 
       setModalVisible(false);
@@ -159,7 +158,7 @@ setUsername('')
               setItems={setRole}
             />
 
-            <TouchableOpacity style={styles.modalButton} onPress={()=>addUser}>
+            <TouchableOpacity style={styles.modalButton} onPress={()=>addUser()}>
               <Text style={styles.buttonText}>Agregar</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>

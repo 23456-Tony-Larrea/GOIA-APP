@@ -114,9 +114,7 @@ const createRole = async () => {
     }
 }
   const updatePermissionState = async (permissionId:number, newState:boolean,roleId:number) => {
-    console.log('Permission ID:', permissionId);
-    console.log('New State:', newState);
-    console.log('Role ID:', roleId);
+   
      try {
       const response = await axios.put(`/roles/${roleId}/permissions/${permissionId}/state`, { newState });
       const updatedPermissions = permissions.map((permission) => {

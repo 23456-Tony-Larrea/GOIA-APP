@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import axios from '../../axios/axios2';
+import axios from '../../axios/axios';
 import { ICars } from '../Interface/ICars';
 import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -27,7 +27,7 @@ const IdentificationCard = () => {
   const [captureCodeVehi, setCaptureCodeVehi] = useState('');
 
 
- /*  const getToken = async () => {
+   const getToken = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
       return token;
@@ -42,7 +42,6 @@ const IdentificationCard = () => {
       const token = await getToken();
       if (token) {
         const decodedToken = jwtDecode<IDecodedToken>(token);
-        console.log('Decoded token:', decodedToken);
         return decodedToken;
       } else {
         console.log('No se encontró un token');
@@ -57,33 +56,37 @@ const IdentificationCard = () => {
   const fetchRoleId = async () => {
     const decodedToken = await decodeToken();
     if (decodedToken && decodedToken.role_id) {
-      setIdRole(decodedToken.role_id);
+        setIdRole(decodedToken.role_id);
     }
   };
 
   const getPermissions = async () => {
-    try {
+    console.log('ID del rol:', idRole);
+     try {
       const response = await axios.get(`/role_permissions/${idRole}`);
       const permissions = response.data.data;
-      const viewSearch = permissions.find((permission: any) => permission.name === 'insertar usuarios');
+      const viewSearch = permissions.find((permission: any) => permission.name === 'eliminar');
       if (viewSearch && viewSearch.state === false) {
-        setSeeSearch(false);
+         console.log("estado",viewSearch.state )
       } else {
         setSeeSearch(true);
       }
+      
+ 
+      console.log("que paso",viewSearch)
     } catch (error) {
       console.error('Error al obtener los permisos:', error);
-    }
-  }; */
-
+    } 
+  }; 
+ 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(status === 'granted');
     })();
-   /*  fetchRoleId();
-    getPermissions(); */
-  }, []);
+   fetchRoleId();
+     getPermissions(); 
+    }, []);
 
   const clearData=()=>{
     setVehicleInfo([])
@@ -171,6 +174,10 @@ const IdentificationCard = () => {
     <View style={styles.container}>
       <View style={styles.card}>
         <View>
+          {seeSearch && (
+                <Text style={styles.cardTitle}>Tomar foto</Text>
+          )       
+          }
           <Text style={styles.cardTitle}>Identificación</Text>
         </View>
         <View>
