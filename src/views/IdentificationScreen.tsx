@@ -9,6 +9,7 @@ import { Camera } from 'expo-camera';
 import { IDecodedToken } from '../Interface/IDecodedToken';
 import {IPhoto} from '../Interface/IPhoto'
 import * as FileSystem from 'expo-file-system';
+import axiosInstance from '../../axios/axios2';
 
 
 
@@ -94,8 +95,9 @@ const IdentificationCard = () => {
     setSearched(false)
   }
   const searchVehicle = async () => {
+
     try {
-      const response = await axios.post('/GetCodVehiculo',{
+      const response = await axiosInstance.post('/GetCodVehiculo',{
             "placa":`${plateNumber}`
       });
       setSearched(true);
