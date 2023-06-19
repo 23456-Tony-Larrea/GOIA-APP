@@ -148,11 +148,17 @@ export const deleteRole_permissionById = async (req, res) => {
  */
 export const updateRole_permissionState = async (req, res) => {
   try {
-    const { id } = req.params; // ID del RolePermission que deseas actualizar
-    const { newState } = req.body; // Nuevo estado que deseas asignar (en este caso, `false`)
+    const { roleId } = req.params; // ID del rol
+    const {permissionId}=req.params
+    const {  newState } = req.body; // ID del permiso y nuevo estado
 
-    // Buscar el RolePermission por ID
-    const role_permission = await RolePermission.findByPk(id);
+    // Buscar el RolePermission por el ID del rol y el ID del permiso
+    const role_permission = await RolePermission.findOne({
+      where: {
+        role_id: roleId,
+        permission_id: permissionId
+      }
+    });
 
     if (!role_permission) {
       return res.status(404).json({ error: 'RolePermission no encontrado' });

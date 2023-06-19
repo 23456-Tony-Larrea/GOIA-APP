@@ -8,7 +8,7 @@ export const Evidence= sequelize.define('Evidence',{
         autoIncrement: true
     },
     image:{
-        type: DataTypes.STRING
+        type: DataTypes.TEXT
     }
 },
 {
