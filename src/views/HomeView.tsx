@@ -6,7 +6,7 @@ import VisualInspectionScreen from './VisualInspectionScreen';
 import ClearancesScreen from './ClearancesScreen';
 import WheelsScreen from './WheelsScreen'
 import RolePermissionScreen from './RolePermissionScreen';
-import CameraScreen from '../views/CameraScreen'
+import ExitScreen from './ExitScreen'
 import UsersView from './UsersViews';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwtDecode from 'jwt-decode';
@@ -113,11 +113,11 @@ const App = () => {
         }}
       />
       <Tab.Screen
-        name="Camara"
-        component={CameraScreen}
+        name="Salir"
+        component={ExitScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="camera" color={color} size={size} />
+            <Icon name="sign-out" color={color} size={size} />
           ),
         }}
       />

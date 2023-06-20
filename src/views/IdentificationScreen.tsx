@@ -8,13 +8,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Camera } from 'expo-camera';
 import { IDecodedToken } from '../Interface/IDecodedToken';
 import {IPhoto} from '../Interface/IPhoto'
-import * as FileSystem from 'expo-file-system';
 import axiosInstance from '../../axios/axios2';
 
 
 
 const IdentificationCard = () => {
-  const [idRole, setIdRole] = useState(Number);
+  let [idRole, setIdRole] = useState(Number);
   const [plateNumber, setPlateNumber] = useState('');
   const [vehicleInfo, setVehicleInfo] = useState<ICars[]>([]);
   const [searched, setSearched] = useState(false);
