@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import axios from '../../axios/axios';
 import { ICars } from '../Interface/ICars';
-import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Camera } from 'expo-camera';
-import { IDecodedToken } from '../Interface/IDecodedToken';
 import {IPhoto} from '../Interface/IPhoto'
 import axiosInstance from '../../axios/axios2';
 import { Toast, ALERT_TYPE, AlertNotificationRoot } from 'react-native-alert-notification';
@@ -15,88 +12,35 @@ import { Toast, ALERT_TYPE, AlertNotificationRoot } from 'react-native-alert-not
 
 
 const IdentificationCard = () => {
-  let [idRole, setIdRole] = useState<number | null>(null);
   const [plateNumber, setPlateNumber] = useState('');
   const [vehicleInfo, setVehicleInfo] = useState<ICars[]>([]);
   const [searched, setSearched] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
-  const [seeSearch, setSeeSearch] = useState(false);
   const [modalVisiblePicture, setModalVisiblePicture] = useState(false);
-  const [capturedPhoto, setCapturedPhoto] = useState<IPhoto | string>('');
-  const [idPicture, setIdPicture]= useState(Number);
+/*   const [capturedPhoto, setCapturedPhoto] = useState<IPhoto | string>('');
+ */  const [idPicture, setIdPicture]= useState(Number);
   const cameraRef = useRef<any>(null); // Asegúrate de que el tipo sea correcto
   const [capturedImageURL, setCapturedImageURL] = useState('');
   const [captureCodeVehi, setCaptureCodeVehi] = useState('');
-  const [codeRTV,setCodeRtv]= useState('')
 
 
- /*   const getToken = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      return token;
-    } catch (error) {
-      console.error('Error al obtener el token:', error);
-      return null;
-    }
-  };
-
-  const decodeToken = async () => {
-    try {
-      const token = await getToken();
-      if (token) {
-        const decodedToken = jwtDecode<IDecodedToken>(token);
-        return decodedToken;
-      } else {
-        console.log('No se encontró un token');
-        return null;
-      }
-    } catch (error) {
-      console.error('Error al decodificar el token:', error);
-      return null;
-    }
-  };
-
-  const fetchRoleId = async () => {
-    const decodedToken = await decodeToken();
-    if (decodedToken ) {
-        if(decodedToken.role_id){
-          setIdRole(decodedToken.role_id);
-        }
-    }
-  };
-
-  const getPermissions = async () => {
-    console.log('ID del rol:', idRole);
-     try {
-      const response = await axios.get(`/role_permissions/${idRole}`);
-      const permissions = response.data.data;
-      const viewSearch = permissions.find((permission: any) => permission.name === 'eliminar');
-      if (viewSearch && viewSearch.state === false) {
-         console.log("estado",viewSearch.state )
-      } else {
-        setSeeSearch(true);
-      }
-      
  
-      console.log("que paso",viewSearch)
-    } catch (error) {
-      console.error('Error al obtener los permisos:', error);
-    } 
-  };  */
  
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(status === 'granted');
     })();
-    /* getPermissions()
-    fetchRoleId() */
+
     }, []);
 
   const clearData=()=>{
     setVehicleInfo([])
     setPlateNumber('')
     setSearched(false)
+  }
+  const clearStorage =()=>{
+      AsyncStorage.removeItem('codeRTV')
   }
   const searchVehicle = async () => {
 
@@ -116,10 +60,12 @@ const IdentificationCard = () => {
           type: ALERT_TYPE.DANGER,
         })
         clearData()
+        clearStorage()
       }
     } catch (error) {
       console.error(error);
       clearData()
+      clearStorage()
     }
   };
 
@@ -133,6 +79,7 @@ const IdentificationCard = () => {
     } catch (error) {
       console.error(error);
       clearData()
+      clearStorage()
     }
   };
    const getRegisterRTV = async (captureCodeVehi:number) => {
@@ -148,17 +95,20 @@ const IdentificationCard = () => {
             type: ALERT_TYPE.DANGER,
           });
           clearData()
+          clearStorage()
         }else {
           Toast.show({
             title: 'RTV',
             textBody: 'Si tienes registros.',
             type: ALERT_TYPE.SUCCESS,
           })
-          setCodeRtv(response.data[0].codigo)
+          const codeRtv=(response.data[0].codigo)
+          await AsyncStorage.setItem('codeRTV',codeRtv)
         }
     } catch (error) {
       console.error(error);
       clearData()
+      clearStorage()
       Toast.show({
         title: 'Error',
         textBody: 'Ha ocurrido un error al obtener los datos.',
@@ -226,11 +176,7 @@ const IdentificationCard = () => {
     <View style={styles.container}>
       <View style={styles.card}>
         <View>
-       {/*    {seeSearch && (
-                <Text style={styles.cardTitle}>Tomar foto</Text>
-          )       
-          }
-        */}   
+  
         <Text style={styles.cardTitle}>Identificación</Text>
         </View>
         <View>

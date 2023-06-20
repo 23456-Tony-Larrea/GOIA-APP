@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import IdentificationScreen from '../views/IdentificationScreen';
 import VisualInspectionScreen from './VisualInspectionScreen';
@@ -44,16 +45,30 @@ const decodeToken = async () => {
   }
 };
 
-
 const App = () => {
   const [userRole, setUserRole] = useState('');
   const [selectedTab, setSelectedTab] = useState(0);
   const [idRole, setIdRole] = useState<number>(0);
   const [permissions, setPermissions] = useState<IPermission[]>([]);
+  const [navigationDisabled, setNavigationDisabled] = useState<boolean>(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const handleTabPress = (index: any) => {
-    setSelectedTab(index);
-    console.log('Valor seleccionado:', index);
+
+  const sendDataProcess = async (value: number) => {
+    if (value === 0) {
+      return;
+    } else {
+      const body = {
+        tipo: value,
+        estado: 1
+      };
+      try {
+        const response = await axiosInstance.post('/listarProcedimientos', body);
+        console.log(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
   };
 
   const getPermissions = async () => {
@@ -77,15 +92,28 @@ const App = () => {
         setIdRole(decodedToken.role_id);
       }
     };
-  
+
     fetchUserRole();
   }, []);
-  
+
+  useEffect(() => {
+    const checkRTVCode = async () => {
+      const codeRTV = await AsyncStorage.getItem('codeRTV');
+      if (codeRTV) {
+        setNavigationDisabled(false);
+      } else {
+        setNavigationDisabled(true);
+      }
+    };
+
+    checkRTVCode();
+  }, []);
+
   useEffect(() => {
     getPermissions();
-  }, [idRole,userRole]);
+  }, [idRole, userRole]);
 
-  const renderScreen = (name: string, component: any, iconName: string) => {
+  const renderScreen = (name: string, component: any, iconName: string, value: number) => {
     return (
       <Tab.Screen
         name={name}
@@ -94,7 +122,26 @@ const App = () => {
           tabBarIcon: ({ color, size }) => (
             <Icon name={iconName} color={color} size={size} />
           ),
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...props}
+              disabled={navigationDisabled}
+              style={navigationDisabled ? { opacity: 0.5 } : {}}
+            />
+          ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (event) => {
+            event.preventDefault();
+            setSelectedTab(value);
+            if (!navigationDisabled) {
+              sendDataProcess(value);
+            } else {
+              Alert.alert('Sin proceso', 'No hay ningún proceso disponible');
+            }
+            navigation.navigate(name);
+          },
+        })}
       />
     );
   };
@@ -112,20 +159,20 @@ const App = () => {
     <Tab.Navigator>
       {userRole === 'superAdministrador' && (
         <>
-          {renderScreen('Roles y permisos', RolePermissionScreen, 'male')}
-          {renderScreen('Usuarios', UsersView, 'male')}
+          {renderScreen('Roles y permisos', RolePermissionScreen, 'male', 0)}
+          {renderScreen('Usuarios', UsersView, 'male', 0)}
         </>
       )}
 
       {isPermissionEnabled('identificacion') &&
-        renderScreen('Identificación', IdentificationScreen, 'car')}
+        renderScreen('Identificación', IdentificationScreen, 'car', 1)}
       {isPermissionEnabled('inspeccion visual') &&
-        renderScreen('Inspección Visual', VisualInspectionScreen, 'eye')}
-      {isPermissionEnabled('holguras') && 
-        renderScreen('Holguras', ClearancesScreen, 'key')}
+        renderScreen('Inspección Visual', VisualInspectionScreen, 'eye', 2)}
+      {isPermissionEnabled('holguras') &&
+        renderScreen('Holguras', ClearancesScreen, 'key', 3)}
       {isPermissionEnabled('llantas') &&
-        renderScreen('Llantas', WheelsScreen, 'circle')}
-      {renderScreen('Salir', ExitScreen, 'sign-out')}
+        renderScreen('Llantas', WheelsScreen, 'circle', 4)}
+      {renderScreen('Salir', ExitScreen, 'sign-out', 0)}
     </Tab.Navigator>
   );
 };
