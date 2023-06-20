@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Switch, Alert,TextInput,Button } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Switch, Alert, TextInput, Button, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from '../../axios/axios';
 import { IRole } from '../Interface/IRole';
@@ -8,40 +8,39 @@ import { IPermission } from '../Interface/IPermission';
 import Toast from 'react-native-toast-message';
 
 
-const RoleView = ({}) => {
+const RoleView = ({ }) => {
   const [roles, setRoles] = useState<IRole[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editedPermissions, setEditedPermissions] = useState(null);
   const [selectedName, setSelectedName] = useState('');
-  const [idRole,setIdRole]=useState(Number);
+  const [idRole, setIdRole] = useState(Number);
   const [permissionsModalTitle, setPermissionsModalTitle] = useState('');
   const [permissionsModalVisible, setPermissionsModalVisible] = useState(false);
   const [permissions, setPermissions] = useState<IPermission[]>([]);
-  const [rolePermissionId,setRolePermissionId]=useState(Number)
-  let [roleIdANDPermission,setRoleANDIdPermission]=useState(Number)
+  const [rolePermissionId, setRolePermissionId] = useState(Number)
+  let [roleIdANDPermission, setRoleANDIdPermission] = useState(Number)
 
 
-   
   useEffect(() => {
     getRoles()
     getPermissionRoleById(rolePermissionId)
   }, []);
-  const getRoles=async()=>{
+  const getRoles = async () => {
     try {
-        const response = await axios.get('/roles'); 
-         setRoles(response.data);
-        } catch (error) {
-        console.error('Error al obtener los roles:', error);
-      }
-}
-const clearData= async ()=>{
-  setSelectedName('')
-  setIdRole(0)
-}
-const createRole = async () => {
-    
+      const response = await axios.get('/roles');
+      setRoles(response.data);
+    } catch (error) {
+      console.error('Error al obtener los roles:', error);
+    }
+  }
+  const clearData = async () => {
+    setSelectedName('')
+    setIdRole(0)
+  }
+  const createRole = async () => {
+
     try {
-      if(idRole){
+      if (idRole) {
         const response = await axios.put(`/roles/${idRole}`, { name: selectedName });
         const createdRole = response.data;
         setRoles(prevRoles => [...prevRoles, createdRole]);
@@ -54,21 +53,21 @@ const createRole = async () => {
         });
         getRoles()
         setEditedPermissions(null);
-        }else{
-      const response = await axios.post('/roles', { name: selectedName });
-      const createdRole = response.data;
-      setRoles(prevRoles => [...prevRoles, createdRole]);
-      setModalVisible(false);
-      Dialog.show({
-        type: ALERT_TYPE.SUCCESS,
-        title: 'Rol creado',
-        textBody: 'El rol ha sido creado exitosamente.',
-        button: 'Cerrar',
-      });
-      getRoles()
-      setEditedPermissions(null);
-      clearData()
-    }
+      } else {
+        const response = await axios.post('/roles', { name: selectedName });
+        const createdRole = response.data;
+        setRoles(prevRoles => [...prevRoles, createdRole]);
+        setModalVisible(false);
+        Dialog.show({
+          type: ALERT_TYPE.SUCCESS,
+          title: 'Rol creado',
+          textBody: 'El rol ha sido creado exitosamente.',
+          button: 'Cerrar',
+        });
+        getRoles()
+        setEditedPermissions(null);
+        clearData()
+      }
     } catch (error) {
       console.error('Error al crear el rol:', error);
       Dialog.show({
@@ -79,12 +78,12 @@ const createRole = async () => {
       });
     }
   }
-  
-  const deleteRole=async (id:number) => {
+
+  const deleteRole = async (id: number) => {
     try {
       const response = await axios.delete(`/roles/${id}`);
       const deletedRole = response.data;
-      setRoles(prevRoles => prevRoles.filter(role => role.id!== deletedRole.id));
+      setRoles(prevRoles => prevRoles.filter(role => role.id !== deletedRole.id));
       Dialog.show({
         type: ALERT_TYPE.SUCCESS,
         title: 'Rol eliminado',
@@ -102,20 +101,20 @@ const createRole = async () => {
       });
     }
   }
-  const getPermissionRoleById=async(id:number)=>{
-    try{
+  const getPermissionRoleById = async (id: number) => {
+    try {
       const response = await axios.get(`/role_permissions/${id}`);
       const permission = response.data.data;
       console.log('Permissions:', permission);
-       setPermissions(permission);
-   }
-    catch(e){
+      setPermissions(permission);
+    }
+    catch (e) {
       console.log(e)
     }
-}
-  const updatePermissionState = async (permissionId:number, newState:boolean,roleId:number) => {
-   
-     try {
+  }
+  const updatePermissionState = async (permissionId: number, newState: boolean, roleId: number) => {
+
+    try {
       const response = await axios.put(`/roles/${roleId}/permissions/${permissionId}/state`, { newState });
       const updatedPermissions = permissions.map((permission) => {
         if (permission.id === permissionId) {
@@ -126,106 +125,111 @@ const createRole = async () => {
       console.log('Updated Permissions:', updatedPermissions); // Agrega este console.log para verificar los permisos actualizados
       setPermissions(updatedPermissions);
       Toast.show({
-        type:'success',
+        type: 'success',
         text1: 'Permiso',
         text2: "El permiso se ha actualizado",
       });
     } catch (error) {
       console.log(error);
-    } 
+    }
   };
   return (
     <AlertNotificationRoot>
-    <View style={styles.container}>
-      <View style={styles.rolesContainer}>
-        {roles.map((role, index) => {
-          if (role.name !== 'superAdministrador') { 
-            return (
-              <TouchableOpacity key={index} style={styles.roleItem} onPress={() => {
-                setPermissionsModalTitle(`Permisos de ${role.name}`);
-                setPermissionsModalVisible(true);
-                getPermissionRoleById(role.id);
-                setRoleANDIdPermission(role.id)
-              }}>
-                <Text style={styles.roleName}>{role.name}</Text>
-                <TouchableOpacity style={styles.editButton} onPress={() => {
-                  setIdRole(role.id);
-                  setModalVisible(true);
-                  setSelectedName(role.name);
-                }}>
-                  <Icon name="pencil" size={16} color="#FFF" />
+      <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+          <View style={styles.rolesContainer}>
+            {roles.map((role, index) => {
+              if (role.name !== 'superAdministrador') {
+                return (
+                  <TouchableOpacity key={index} style={styles.roleItem} onPress={() => {
+                    setPermissionsModalTitle(`Permisos de ${role.name}`);
+                    setPermissionsModalVisible(true);
+                    getPermissionRoleById(role.id);
+                    setRoleANDIdPermission(role.id)
+                  }}>
+                    <Text style={styles.roleName}>{role.name}</Text>
+                    <TouchableOpacity style={styles.editButton} onPress={() => {
+                      setIdRole(role.id);
+                      setModalVisible(true);
+                      setSelectedName(role.name);
+                    }}>
+                      <Icon name="pencil" size={16} color="#FFF" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.deleteButton} onPress={() => deleteRole(role.id)}>
+                      <Icon name="trash" size={16} color="#FFF" />
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                );
+              } else {
+                return null; // Omite el renderizado del rol de superAdministrador
+              }
+            })}
+          </View>
+        </ScrollView>
+        <TouchableOpacity style={styles.createButton} onPress={() => { setModalVisible(true); clearData(); }}>
+          <Icon name="user" size={20} style={styles.roleIcon} />
+          <Text style={styles.createButtonText}>Crear Rol</Text>
+        </TouchableOpacity>
+        {modalVisible && (
+          <Modal visible={modalVisible} transparent animationType="fade">
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Rol</Text>
+                <TextInput
+                  style={styles.roleNameInput}
+                  placeholder="Nombre del Rol"
+                  value={selectedName}
+                  onChangeText={setSelectedName}
+                />
+                <Button title="Guardar" onPress={createRole} />
+                <TouchableOpacity style={styles.closeButton} onPress={() => { setModalVisible(false); }}>
+                  <Text style={styles.closeButtonText}>Cerrar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.deleteButton} onPress={() => deleteRole(role.id)}>
-                  <Icon name="trash" size={16} color="#FFF" />
-                </TouchableOpacity>
-              </TouchableOpacity>
-            );
-           } else {
-            return null; // Omite el renderizado del rol de superAdministrador
-          } 
-        })}
-      </View>
-      <TouchableOpacity style={styles.createButton} onPress={() => { setModalVisible(true); clearData(); }}>
-        <Icon name="user" size={20} style={styles.roleIcon} />
-        <Text style={styles.createButtonText}>Crear Rol</Text>
-      </TouchableOpacity>
-      {modalVisible && (
-        <Modal visible={modalVisible} transparent animationType="fade">
-          <View style={styles.modalContainer}>
+              </View>
+            </View>
+          </Modal>
+        )}
+        {permissionsModalVisible && (
+          <Modal visible={permissionsModalVisible} transparent animationType="fade">
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Rol</Text>
-              <TextInput
-                style={styles.roleNameInput}
-                placeholder="Nombre del Rol"
-                value={selectedName}
-                onChangeText={setSelectedName}
-              />
-              <Button title="Guardar" onPress={createRole} />
-              <TouchableOpacity style={styles.closeButton} onPress={() => { setModalVisible(false); }}>
-                <Text style={styles.closeButtonText}>Cerrar</Text>
+              <Text style={styles.modalTitle}>{permissionsModalTitle}</Text>
+              <View style={styles.permissionList}>
+                {permissions.map((permission, index) => (
+                  <View key={index} style={styles.permissionItem}>
+                    <Text style={styles.permissionText}>{permission.name}</Text>
+                    <Switch
+                      value={permission.state}
+                      onValueChange={async (value) => {
+                        console.log('Switch Value:', value);
+                        await updatePermissionState(permission.id, value, roleIdANDPermission);
+                      }}
+                    />
+
+                  </View>
+                ))}
+              </View>
+              <TouchableOpacity style={styles.closeButton} onPress={() => {
+                setPermissionsModalVisible(false)
+                getPermissionRoleById(rolePermissionId)
+              }}>
+                <Text style={styles.closeButtonText}
+                >Cerrar</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </Modal>
-      )}
-      {permissionsModalVisible && (
-        <Modal visible={permissionsModalVisible} transparent animationType="fade">
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{permissionsModalTitle}</Text>
-            <View style={styles.permissionList}>
-              {permissions.map((permission, index) => (
-                <View key={index} style={styles.permissionItem}>
-                  <Text style={styles.permissionText}>{permission.name}</Text>
-                  <Switch
-      value={permission.state}
-  onValueChange={async (value) => {
-    console.log('Switch Value:', value);
-    await updatePermissionState(permission.id, value, roleIdANDPermission);
-  }}
-/>
+          </Modal>
+        )}
+      </View>
+    </AlertNotificationRoot>
 
-                </View>
-              ))}
-            </View>
-            <TouchableOpacity style={styles.closeButton} onPress={() => {setPermissionsModalVisible(false)
-              getPermissionRoleById(rolePermissionId)
-            }}>
-              <Text style={styles.closeButtonText}
-           >Cerrar</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      )}
-    </View>
-  </AlertNotificationRoot>
-  
-);
+  );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  scrollViewContainer: {
+    flexGrow: 1,
   },
   rolesContainer: {
     flex: 1,
@@ -326,15 +330,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  roleNameInput: {
+  roleIcon: {
+    marginRight: 10,
+  },
+ roleNameInput: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 10,
     paddingLeft: 5,
-  },
-  roleIcon: {
-    marginRight: 10,
   },
 });
 

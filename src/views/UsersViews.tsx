@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from '../../axios/axios';
 import { IUser } from '../Interface/IUser';
@@ -25,10 +25,10 @@ const UsersView = () => {
     }
   };
 
-const clearData=()=>{
-setValue(0)
-setUsername('')
-} 
+  const clearData = () => {
+    setValue(0);
+    setUsername('');
+  };
 
   const getRoles = async () => {
     try {
@@ -49,21 +49,20 @@ setUsername('')
       if (idUser) {
         await axios.put(`/users/${idUser}`, {
           username: username,
-          role_id: value,  
-          });
+          role_id: value,
+        });
 
         Toast.show({
           title: 'Usuario Actualizado',
           textBody: 'El usuario ha sido actualizado exitosamente.',
           type: ALERT_TYPE.SUCCESS,
         });
-        getRoles()
-
+        getRoles();
       } else {
         await axios.post('/register', {
           username: username,
           role_id: value,
-          password:"123456"
+          password: '123456',
         });
 
         Toast.show({
@@ -71,8 +70,8 @@ setUsername('')
           textBody: 'El usuario ha sido agregado exitosamente.',
           type: ALERT_TYPE.SUCCESS,
         });
-        getRoles()
-        clearData()
+        getRoles();
+        clearData();
       }
 
       setModalVisible(false);
@@ -100,7 +99,7 @@ setUsername('')
   const renderList = () => {
     return (
       <AlertNotificationRoot>
-        <View style={styles.rolesContainer}>
+        <ScrollView style={styles.rolesContainer}>
           {users.map((user, index) => (
             <View key={index} style={styles.roleItem}>
               <Text style={styles.roleName}>Usuario: {user.username}</Text>
@@ -121,7 +120,7 @@ setUsername('')
               </TouchableOpacity>
             </View>
           ))}
-        </View>
+        </ScrollView>
       </AlertNotificationRoot>
     );
   };
@@ -135,9 +134,12 @@ setUsername('')
 
   return (
     <View style={styles.container}>
-      <AddButton onPress={() =>{ setModalVisible(true)
-      clearData()
-      }} />
+      <AddButton
+        onPress={() => {
+          setModalVisible(true);
+          clearData();
+        }}
+      />
 
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
@@ -158,7 +160,7 @@ setUsername('')
               setItems={setRole}
             />
 
-            <TouchableOpacity style={styles.modalButton} onPress={()=>addUser()}>
+            <TouchableOpacity style={styles.modalButton} onPress={() => addUser()}>
               <Text style={styles.buttonText}>Agregar</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>

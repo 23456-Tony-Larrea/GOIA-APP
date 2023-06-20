@@ -9,11 +9,13 @@ import { Camera } from 'expo-camera';
 import { IDecodedToken } from '../Interface/IDecodedToken';
 import {IPhoto} from '../Interface/IPhoto'
 import axiosInstance from '../../axios/axios2';
+import { Toast, ALERT_TYPE, AlertNotificationRoot } from 'react-native-alert-notification';
+
 
 
 
 const IdentificationCard = () => {
-  let [idRole, setIdRole] = useState(Number);
+  let [idRole, setIdRole] = useState<number | null>(null);
   const [plateNumber, setPlateNumber] = useState('');
   const [vehicleInfo, setVehicleInfo] = useState<ICars[]>([]);
   const [searched, setSearched] = useState(false);
@@ -25,9 +27,10 @@ const IdentificationCard = () => {
   const cameraRef = useRef<any>(null); // Asegúrate de que el tipo sea correcto
   const [capturedImageURL, setCapturedImageURL] = useState('');
   const [captureCodeVehi, setCaptureCodeVehi] = useState('');
+  const [codeRTV,setCodeRtv]= useState('')
 
 
-   const getToken = async () => {
+ /*   const getToken = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
       return token;
@@ -55,8 +58,10 @@ const IdentificationCard = () => {
 
   const fetchRoleId = async () => {
     const decodedToken = await decodeToken();
-    if (decodedToken && decodedToken.role_id) {
-        setIdRole(decodedToken.role_id);
+    if (decodedToken ) {
+        if(decodedToken.role_id){
+          setIdRole(decodedToken.role_id);
+        }
     }
   };
 
@@ -77,15 +82,15 @@ const IdentificationCard = () => {
     } catch (error) {
       console.error('Error al obtener los permisos:', error);
     } 
-  }; 
+  };  */
  
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(status === 'granted');
     })();
-   fetchRoleId();
-     getPermissions(); 
+    /* getPermissions()
+    fetchRoleId() */
     }, []);
 
   const clearData=()=>{
@@ -100,25 +105,70 @@ const IdentificationCard = () => {
             "placa":`${plateNumber}`
       });
       setSearched(true);
+      if ( response.data[0] && response.data[0].vehi_codigo) {
       setCaptureCodeVehi(response.data[0].vehi_codigo)
-      getInformationCar(response.data[0].vehi_codigo) 
+      getInformationCar(response.data[0].vehi_codigo)
+      getRegisterRTV(response.data[0].vehi_codigo)
+      } else{
+        Toast.show({
+          title: 'Codigo',
+          textBody: 'No tienes codigo.',
+          type: ALERT_TYPE.DANGER,
+        })
+        clearData()
+      }
     } catch (error) {
       console.error(error);
+      clearData()
     }
   };
 
   const getInformationCar = async (captureCodeVehi:number) => {
     try {
       setSearched(true);
-      const response = await axios.post('/GetDatoVehiculo',{
+      const response = await axiosInstance.post('/GetDatoVehiculo',{
             "vehi_codigo":`${captureCodeVehi}`
       });
       setVehicleInfo(response.data);
     } catch (error) {
       console.error(error);
+      clearData()
     }
   };
-      const takePhoto = async (id: number) => {
+   const getRegisterRTV = async (captureCodeVehi:number) => {
+    try {
+      setSearched(true);
+      const response = await axiosInstance.post('/ObtenerRegistroRTV',{
+        "vehi_codigo":`${captureCodeVehi}`
+        })
+        if (response.data.length === 0) {
+          Toast.show({
+            title: 'RTV',
+            textBody: 'No se tienen registros.',
+            type: ALERT_TYPE.DANGER,
+          });
+          clearData()
+        }else {
+          Toast.show({
+            title: 'RTV',
+            textBody: 'Si tienes registros.',
+            type: ALERT_TYPE.SUCCESS,
+          })
+          setCodeRtv(response.data[0].codigo)
+        }
+    } catch (error) {
+      console.error(error);
+      clearData()
+      Toast.show({
+        title: 'Error',
+        textBody: 'Ha ocurrido un error al obtener los datos.',
+        type: ALERT_TYPE.DANGER,
+      });
+    }
+  } 
+  
+  
+    const takePhoto = async (id: number) => {
     setModalVisiblePicture(true);
     setIdPicture(id)
   };
@@ -172,14 +222,16 @@ const IdentificationCard = () => {
 
   
   return (
+    
     <View style={styles.container}>
       <View style={styles.card}>
         <View>
-          {seeSearch && (
+       {/*    {seeSearch && (
                 <Text style={styles.cardTitle}>Tomar foto</Text>
           )       
           }
-          <Text style={styles.cardTitle}>Identificación</Text>
+        */}   
+        <Text style={styles.cardTitle}>Identificación</Text>
         </View>
         <View>
           <View style={styles.search}>
@@ -205,12 +257,9 @@ const IdentificationCard = () => {
           ) : (
             vehicleInfo.map((vehicle, index) => (
               <View key={index} style={styles.card}>
+                
                 <Text style={styles.cardTitle}>Información del vehículo</Text>
                 <View style={styles.infoContainer}>
-                  <View style={styles.labelRow}>
-                    <Text style={styles.label}>Codigo del vehículo:</Text>
-                    <Text style={styles.value}>{vehicle.codigo}</Text>
-                  </View>
                   <View style={styles.labelRow}>
                     <Text style={styles.label}>Marca:</Text>
                     <Text style={styles.value}>{vehicle.marca}</Text>
@@ -228,7 +277,6 @@ const IdentificationCard = () => {
                     <Text style={styles.value}>{vehicle.cedula}</Text>
                   </View>
                   </View>
-
            </View>
             ))
           )}
@@ -248,7 +296,11 @@ const IdentificationCard = () => {
   )}
       </Modal>
 
-      <View style={styles.emptyDiv}></View>
+      <View style={styles.emptyDiv}>
+      <AlertNotificationRoot>
+</AlertNotificationRoot>     
+      </View>
+      
     </View>
   );
 };
@@ -333,7 +385,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyDiv: {
-    marginBottom: 100,
+    backgroundColor: '#FFF',
+    borderRadius: 5,
+    padding: 20,
+    marginBottom: 10,
+    width: '100%',
   },
   capturedImage: {
     width: 200,
