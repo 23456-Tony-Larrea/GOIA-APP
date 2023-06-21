@@ -59,13 +59,11 @@ const IdentificationCard = () => {
           textBody: 'No tienes codigo.',
           type: ALERT_TYPE.DANGER,
         })
-        clearData()
-        clearStorage()
+     
       }
     } catch (error) {
       console.error(error);
-      clearData()
-      clearStorage()
+     
     }
   };
 
@@ -78,8 +76,15 @@ const IdentificationCard = () => {
       setVehicleInfo(response.data);
     } catch (error) {
       console.error(error);
-      clearData()
-      clearStorage()
+    }
+  };
+  const saveCodeRtvToStorage = async (codeRtv: number) => {
+    try {
+      const codeRtvString = codeRtv.toString(); // Convertir el número a una cadena de texto
+      await AsyncStorage.setItem('codeRTV', codeRtvString);
+      console.log('Código RTV guardado correctamente en AsyncStorage.');
+    } catch (error) {
+      console.error('Error al guardar el código RTV en AsyncStorage:', error);
     }
   };
    const getRegisterRTV = async (captureCodeVehi:number) => {
@@ -94,21 +99,22 @@ const IdentificationCard = () => {
             textBody: 'No se tienen registros.',
             type: ALERT_TYPE.DANGER,
           });
-          clearData()
-          clearStorage()
-        }else {
+        } else {
           Toast.show({
             title: 'RTV',
-            textBody: 'Si tienes registros.',
+            textBody: 'Si tienes registros del RTV.',
             type: ALERT_TYPE.SUCCESS,
-          })
-          const codeRtv=(response.data[0].codigo)
-          await AsyncStorage.setItem('codeRTV',codeRtv)
+          });
+        
+          // Llamar a la función para guardar el código RTV en AsyncStorage
+          (async () => {
+            const codeRtv = response.data[0].codigo;
+            await saveCodeRtvToStorage(codeRtv);
+          })();
         }
     } catch (error) {
       console.error(error);
-      clearData()
-      clearStorage()
+  
       Toast.show({
         title: 'Error',
         textBody: 'Ha ocurrido un error al obtener los datos.',

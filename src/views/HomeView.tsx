@@ -72,7 +72,6 @@ const App = () => {
   };
 
   const getPermissions = async () => {
-    console.log('ID del rol:', idRole);
     try {
       const response = await axios.get(`/role_permissions/${idRole}`);
       const permissions = response.data.data;
@@ -96,18 +95,7 @@ const App = () => {
     fetchUserRole();
   }, []);
 
-  useEffect(() => {
-    const checkRTVCode = async () => {
-      const codeRTV = await AsyncStorage.getItem('codeRTV');
-      if (codeRTV) {
-        setNavigationDisabled(false);
-      } else {
-        setNavigationDisabled(true);
-      }
-    };
-
-    checkRTVCode();
-  }, []);
+ 
 
   useEffect(() => {
     getPermissions();
@@ -122,23 +110,13 @@ const App = () => {
           tabBarIcon: ({ color, size }) => (
             <Icon name={iconName} color={color} size={size} />
           ),
-          tabBarButton: (props) => (
-            <TouchableOpacity
-              {...props}
-              disabled={navigationDisabled}
-              style={navigationDisabled ? { opacity: 0.5 } : {}}
-            />
-          ),
+         
         }}
         listeners={({ navigation }) => ({
           tabPress: (event) => {
             event.preventDefault();
             setSelectedTab(value);
-            if (!navigationDisabled) {
-              sendDataProcess(value);
-            } else {
-              Alert.alert('Sin proceso', 'No hay ningún proceso disponible');
-            }
+            sendDataProcess(value);
             navigation.navigate(name);
           },
         })}

@@ -11,6 +11,7 @@ const ExitScreen =  ({ navigation }: { navigation: NavigationProp<any> }) => {
     try {
       // Eliminar el token del AsyncStorage
       await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('codeRTV')
       // Mostrar mensaje de éxito
       Toast.show({
         title: 'Cerrar sesión',

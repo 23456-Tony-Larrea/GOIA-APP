@@ -13,7 +13,7 @@ const Stack = createStackNavigator();
 
 const Navigation = () => {
   return (
-    <Stack.Navigator initialRouteName="Inicio">
+    <Stack.Navigator initialRouteName="Ingreso">
       <Stack.Screen name="Ingreso" component={LoginView} />
       <Stack.Screen name="Inicio" component={HomeScreen} />
       <Stack.Screen name="Registro" component={RegisterView} />
