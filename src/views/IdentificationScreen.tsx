@@ -42,8 +42,10 @@ const IdentificationCard = () => {
   const clearStorage =()=>{
       AsyncStorage.removeItem('codeRTV')
   }
-  const searchVehicle = async () => {
 
+ 
+  const searchVehicle = async () => {
+   
     try {
       const response = await axiosInstance.post('/GetCodVehiculo',{
             "placa":`${plateNumber}`
@@ -111,6 +113,7 @@ const IdentificationCard = () => {
             const codeRtv = response.data[0].codigo;
             await saveCodeRtvToStorage(codeRtv);
           })();
+          
         }
     } catch (error) {
       console.error(error);
