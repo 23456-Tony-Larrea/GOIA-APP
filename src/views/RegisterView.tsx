@@ -17,7 +17,6 @@ const RegisterView = () => {
     axios.post('/register', data)
       .then(response => {
         // Manejar la respuesta exitosa
-        console.log(response.data);
         Toast.show({
           type: 'success',
           text1: '¡Registro exitoso!',

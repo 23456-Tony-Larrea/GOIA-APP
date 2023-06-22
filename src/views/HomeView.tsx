@@ -33,7 +33,6 @@ const decodeToken = async () => {
     const token = await getToken();
     if (token) {
       const decodedToken = jwtDecode<IDecodedToken>(token);
-      console.log('Decoded token:', decodedToken);
       return decodedToken;
     } else {
       console.log('No se encontró un token');
@@ -47,27 +46,13 @@ const decodeToken = async () => {
 
 const App = () => {
   const [userRole, setUserRole] = useState('');
-  const [selectedTab, setSelectedTab] = useState(0);
   const [idRole, setIdRole] = useState<number>(0);
   const [permissions, setPermissions] = useState<IPermission[]>([]);
   const [navigationDisabled, setNavigationDisabled] = useState<boolean>(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [codeRtv, setCodeRtv] = useState('');
 
  
-  useEffect(() => {
-    if (codeRtv) {
-      sendDataProcess(selectedTab);
-    }
-  }, [codeRtv]);
-  
-  useEffect(() => {
-    if (selectedTab !== 0) {
-      sendDataProcess(selectedTab);
-    }
-  }, [selectedTab]);
+
   const getPermissions = async () => {
-    console.log('ID del rol:', idRole);
     try {
       const response = await axios.get(`/role_permissions/${idRole}`);
       const permissions = response.data.data;
@@ -91,52 +76,15 @@ const App = () => {
     fetchUserRole();
   }, []);
 
-  const checkRTVCode = async () => {
-  try {
-    const storedCodeRtv = await AsyncStorage.getItem('codeRTV');
-    if (storedCodeRtv) {
-      setCodeRtv(storedCodeRtv);
-      console.log('Código RTV guardado correctamente en AsyncStorage');
-    } else {
-      console.log('No se encontró el código RTV en Async Storage');
-    }
-  } catch (error) {
-    console.log('Error al obtener el código RTV:', error);
-  }
-};
-  useEffect(() => {
-    checkRTVCode();
-  }, []);
+  
 
   useEffect(() => {
     getPermissions();
   }, [idRole, userRole]);
 
  
-  const sendDataProcess = async (value: number) => {
-    checkRTVCode()
-    if (value === 0) {
-      return;
-    } else {
-      const body = {
-        tipo: value,
-        estado: 1
-      };
-      try {
-        if (codeRtv) {
-          console.log("si llego");
-          const response = await axiosInstance.post('/listarProcedimientos', body);
-          console.log(response.data);
-        } else {
-          console.log("Error: no hay código RTV");
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  };
-
-  const renderScreen = (name: string, component: any, iconName: string, value: number) => {
+ 
+  const renderScreen = (name: string, component: any, iconName: string) => {
     return (
       <Tab.Screen
         name={name}
@@ -145,19 +93,10 @@ const App = () => {
           tabBarIcon: ({ color, size }) => (
             <Icon name={iconName} color={color} size={size} />
           ),
-          tabBarButton: (props) => (
-            <TouchableOpacity
-              {...props}
-              disabled={navigationDisabled}
-              style={navigationDisabled ? { opacity: 0.5 } : {}}
-            />
-          ),
         }}
         listeners={({ navigation }) => ({
           tabPress: (event) => {
             event.preventDefault();
-            setSelectedTab(value);
-            sendDataProcess(value)
             navigation.navigate(name);
           },
         })}
@@ -178,20 +117,20 @@ const App = () => {
     <Tab.Navigator>
       {userRole === 'superAdministrador' && (
         <>
-          {renderScreen('Roles y permisos', RolePermissionScreen, 'male', 0)}
-          {renderScreen('Usuarios', UsersView, 'male', 0)}
+          {renderScreen('Roles y permisos', RolePermissionScreen, 'male')}
+          {renderScreen('Usuarios', UsersView, 'male')}
         </>
       )}
 
       {isPermissionEnabled('identificacion') &&
-        renderScreen('Identificación', IdentificationScreen, 'car', 1)}
+        renderScreen('Identificación', IdentificationScreen, 'car')}
       {isPermissionEnabled('inspeccion visual') &&
-        renderScreen('Inspección Visual', VisualInspectionScreen, 'eye', 2)}
+        renderScreen('Inspección Visual', VisualInspectionScreen, 'eye')}
       {isPermissionEnabled('holguras') &&
-        renderScreen('Holguras', ClearancesScreen, 'key', 3)}
+        renderScreen('Holguras', ClearancesScreen, 'key')}
       {isPermissionEnabled('llantas') &&
-        renderScreen('Llantas', WheelsScreen, 'circle', 4)}
-      {renderScreen('Salir', ExitScreen, 'sign-out', 0)}
+        renderScreen('Llantas', WheelsScreen, 'circle')}
+      {renderScreen('Salir', ExitScreen, 'sign-out')}
     </Tab.Navigator>
   );
 };

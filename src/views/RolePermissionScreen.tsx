@@ -122,7 +122,6 @@ const RoleView = ({ }) => {
         }
         return permission;
       });
-      console.log('Updated Permissions:', updatedPermissions); // Agrega este console.log para verificar los permisos actualizados
       setPermissions(updatedPermissions);
       Toast.show({
         type: 'success',
@@ -200,7 +199,6 @@ const RoleView = ({ }) => {
                     <Switch
                       value={permission.state}
                       onValueChange={async (value) => {
-                        console.log('Switch Value:', value);
                         await updatePermissionState(permission.id, value, roleIdANDPermission);
                       }}
                     />
