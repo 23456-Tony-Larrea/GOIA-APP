@@ -9,6 +9,7 @@ import IdentificationScreen from '../views/IdentificationScreen'
 //import host view  
 import Config from '../views/ConfigHostView'
 import Bluetooth from '../views/ClearancesScreen'
+import BluetoohScreen from '../views/ScreenBluetooj'
 const Stack = createStackNavigator();
 
 const Navigation = () => {

@@ -14,10 +14,10 @@ const BluetoothScreen: React.FC = () => {
   const [sendMessageId,setSendMessageId]=useState<string>('');
   const BleManagerModule = NativeModules.BleManager;
   const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
+  const [lastService, setLastService] = useState<null | string>(null);
+  const [lastCharacteristic, setLastCharacteristic] = useState<null | string>(null);
+  
 
-
-  const [lastServiceUUID, setLastServiceUUID] = useState<string>('');
-const [lastCharacteristicUUID, setLastCharacteristicUUID] = useState<string>('');
 
   useEffect(() => {
     initializeBluetooth();
@@ -134,6 +134,8 @@ const [lastCharacteristicUUID, setLastCharacteristicUUID] = useState<string>('')
         console.log("Último servicio:", lastService);
         
         console.log("Última característica:", lastCharacteristic);
+        setLastService(lastService?? null);
+        setLastCharacteristic(lastCharacteristic?? null);
       }
     } catch (error) {
       console.error("Error al conectar al dispositivo:", error);
@@ -151,6 +153,7 @@ const [lastCharacteristicUUID, setLastCharacteristicUUID] = useState<string>('')
         console.error('Ningún dispositivo seleccionado');
         return;
       }  
+      
       const services = await BleManager.retrieveServices(sendMessageId);
       const serviceUUIDs = Object.keys(services);
   
@@ -158,27 +161,29 @@ const [lastCharacteristicUUID, setLastCharacteristicUUID] = useState<string>('')
         console.error('No se encontraron servicios para el dispositivo seleccionado');
         return;
       }
-      const message = inputText;
-      const messageBytes = Array.from(message).map((char) => char.charCodeAt(0));
+      const data = new Uint8Array([36, 49, 49, 49, 49, 49, 35]);
+      const dataArray = Array.from(data); // Convertir Uint8Array a array de números
 
+     
       // Realiza el envío de datos al dispositivo
-      console.log(messageBytes);
+      console.log(dataArray);
 
-      BleManager.writeWithoutResponse(
-        sendMessageId,
-        '49535343-fe7d-4ae5-8fa9-9fafd205e455',
-        '49535343-026e-3a9b-954c-97daef17e26e',
-        messageBytes,
-      ) 
+      if (lastService && lastCharacteristic) {
+        BleManager.write(
+          sendMessageId,
+          lastService,
+          lastCharacteristic,
+          dataArray,
+        )
         .then(() => {
-          console.log('Datos enviados correctamente');
-          //decode array 
-          let decodedString= String.fromCharCode(...new Uint8Array([...messageBytes]));
-          console.log(decodedString)
-        })
+          console.log('Datos enviados correctamente'+dataArray);
+         })
         .catch((error) => {
           console.error('Error al enviar los datos:', error);
         });
+      } else {
+        console.error('Error: lastService o lastCharacteristic es null');
+      }
     } catch (error) {
       console.error('Error al enviar la trama:', error);
     }
@@ -230,11 +235,7 @@ const [lastCharacteristicUUID, setLastCharacteristicUUID] = useState<string>('')
       <Modal visible={isModalVisible} animationType="slide">
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Text>Enviar información al dispositivo</Text>
-          <TextInput
-            value={inputText}
-            onChangeText={handleInputChange}
-            placeholder="Ingresa tu información"
-          />
+
           <Button title="Enviar" onPress={sendInputText} />
         </View>
       </Modal>
