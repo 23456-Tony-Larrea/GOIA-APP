@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rtv/views/BluetoohView.dart';
+
+import 'package:rtv/views/LoginView.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
-      home: const BluetoothView(),
+      home: const LoginView(),
     );
   }
 }
