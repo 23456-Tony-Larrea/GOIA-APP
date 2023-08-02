@@ -30,46 +30,16 @@ class _BluetoothViewState extends State<BluetoothView> {
               onPressed: _bluetoothController.startScan,
               child: const Text('Iniciar escaneo'),
             ),
+            Expanded(
+              child: StreamBuilder<List<ScanResult>>(
+                stream: _bluetoothController.getScanResultsStream(),
+                initialData: [],
+                builder: (c, snapshot) => _buildDeviceList(snapshot.data!),
+              ),
+            ),
             ElevatedButton(
               onPressed: _bluetoothController.stop,
               child: const Text('Detener escaneo'),
-            ),
-            ElevatedButton(
-              onPressed: () => _bluetoothController.connectDevice(context),
-              child: const Text('Conectar dispositivo'),
-            ),
-            ElevatedButton(
-              onPressed: _bluetoothController.sendData,
-              child: const Text('Enviar datos'),
-            ),
-            Expanded(
-              child: FutureBuilder<List<BluetoothDevice>>(
-                future: _bluetoothController.getBondedDevices(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator(); // Muestra un indicador de carga mientras espera los datos.
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    final List<BluetoothDevice> bondedDevices = snapshot.data!;
-                    return ListView.builder(
-                      itemCount: bondedDevices.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final BluetoothDevice device = bondedDevices[index];
-                        return ListTile(
-                          title: Text(device.name.isNotEmpty
-                              ? device.name
-                              : "Desconocido"),
-                          subtitle: Text(device.id.toString()),
-                          onTap: () {
-                            // Puedes agregar lógica para conectar con el dispositivo cuando se haga clic en él
-                          },
-                        );
-                      },
-                    );
-                  }
-                },
-              ),
             ),
           ],
         ),
@@ -90,9 +60,8 @@ class _BluetoothViewState extends State<BluetoothView> {
             children: <Widget>[
               for (BluetoothDevice device in bondedDevices)
                 ListTile(
-                  title: Text(device.name.isNotEmpty
-                      ? device.name
-                      : "Desconocido"),
+                  title: Text(
+                      device.name.isNotEmpty ? device.name : "Desconocido"),
                   subtitle: Text(device.id.toString()),
                   onTap: () {
                     // Puedes agregar lógica para conectar con el dispositivo cuando se haga clic en él
@@ -113,4 +82,76 @@ class _BluetoothViewState extends State<BluetoothView> {
     );
   }
 
+  ListView _buildDeviceList(List<ScanResult> scanResults) {
+    return ListView.builder(
+      itemCount: scanResults.length,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () => _connectToDevice(context, scanResults[index].device),
+          child: ListTile(
+            title: Text(scanResults[index].device.name),
+            subtitle: Text('RSSI: ${scanResults[index].rssi}'),
+            trailing: ElevatedButton(
+              onPressed: () =>
+                  _connectToDevice(context, scanResults[index].device),
+              child: Text('Conectar'),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeviceNameDialog(
+      BuildContext context, String deviceName, BluetoothDevice device) {
+    showDialog(
+      //create connection device
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Conectar con $deviceName'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const Text(
+                  '¿Estás seguro de que quieres enviar datos a este dispositivo?'),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _bluetoothController.disconnectDevice(device);
+                    },
+                    child: const Text('Desconectar'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _bluetoothController.sendTrama();
+                    },
+                    child: const Text('Enviar'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _bluetoothController.turnOffTrama();
+                    },
+                    child: const Text('Apagar'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+//funcion crear
+  void _connectToDevice(BuildContext context, BluetoothDevice device) async {
+    bool connected = await _bluetoothController.connectDevice(context, device);
+    if (connected) {
+      _showDeviceNameDialog(context, device.name, device);
+    }
+  }
 }

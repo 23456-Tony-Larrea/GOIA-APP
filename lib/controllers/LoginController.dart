@@ -8,26 +8,11 @@ class LoginController {
   final TextEditingController passwordController = TextEditingController();
 
   Future<void> login(BuildContext context) async {
-    final String email = emailController.text;
+    final String username= emailController.text;
     final String password = passwordController.text;
 
-    final String url = 'http://localhost:4003';
-  await http.post(
-      Uri.parse('${url}/login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(
-        <String, String>{
-          'email': email,
-          'password': password,
-        },
-      ),
-
-     );
-
-
-    /*   final String url = 'http://192.168.2.69:4003';
+    
+    final String url = 'http://192.168.2.69:4003';
     final response = await http.post(
       Uri.parse('${url}/login'),
       headers: <String, String>{
@@ -35,12 +20,12 @@ class LoginController {
       },
       body: jsonEncode(
         <String, String>{
-          'email': email,
+          'username': username,
           'password': password,
         },
       ),
-    ); */
-/*     if (response.statusCode == 200) {
+    ); 
+     if (response.statusCode == 200) {
       // If the server did return a 200 CREATED response,
       // then parse the JSON.
       final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
@@ -65,9 +50,24 @@ class LoginController {
         },
       );
     } else {
-      // If the server did not return a 200 CREATED response,
-      // then throw an exception.
-      throw Exception('Failed to login user.');
-    } */
+      //show dialog login incorrecto
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Inicio de sesión fallido'),
+            content: const Text('El usuario o la contraseña son incorrectos.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } 
   }
 }

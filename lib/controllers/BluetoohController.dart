@@ -5,10 +5,11 @@ import 'package:permission_handler/permission_handler.dart';
 class BluetoohController {
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   List<ScanResult> scanResults = [];
-
+  List<BluetoothService>? _services;
   Stream<List<ScanResult>> getScanResultsStream() {
     return flutterBlue.scanResults;
   }
+
 
   Future<void> startScan() async {
     print("di click");
@@ -18,11 +19,11 @@ class BluetoohController {
       //print device scanner
       flutterBlue.scanResults.listen((results) {
         for (ScanResult r in results) {
-          print('${r.device.name} found! rssi: ${r.rssi}');
           scanResults.add(r);
+
+          print('${r.device.name} encontrado! rssi: ${r.rssi}');
         }
-      }
-      );
+      });
     } else {
       print("Permiso de ubicación denegado");
     }
@@ -32,55 +33,62 @@ class BluetoohController {
     flutterBlue.stopScan();
   }
 
-  Future<bool> connectDevice(BuildContext context) async {
-    for (ScanResult r in scanResults) {
-      if (r.device.name == 'Dual-SPP') {
-        await r.device.connect();
-        // Mostrar un AlertDialog solo si el dispositivo se conecta correctamente
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Conexión exitosa'),
-              content:
-                  const Text('El dispositivo se ha conectado exitosamente.'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-        return true; // Indica que el dispositivo se ha conectado correctamente
-      }
+  Future<bool> connectDevice(
+      BuildContext context, BluetoothDevice device) async {
+    try {
+      await device.connect();
+
+      _services = await device.discoverServices();
+      return true; // Indica que el dispositivo se ha conectado correctamente
+    } catch (e) {
+      print('Error al conectar con el dispositivo: $e');
+      return false; // Indica que ha ocurrido un error al conectar el dispositivo
     }
-    return false; // Indica que no se encontró el dispositivo Dual-SPP
   }
 
-  Future<void> sendData() async {
-    for (ScanResult r in scanResults) {
-      if (r.device.name == 'Dual-SPP') {
-        await r.device.connect();
-        List<BluetoothService> services = await r.device.discoverServices();
-        for (BluetoothService service in services) {
-          if (service.uuid.toString() ==
-              '49535343-fe7d-4ae5-8fa9-9fafd205e455') {
-            List<BluetoothCharacteristic> characteristics =
-                service.characteristics;
-            for (BluetoothCharacteristic c in characteristics) {
-              if (c.uuid.toString() == '49535343-026e-3a9b-954c-97daef17e26e') {
-                await c.write([36, 49, 49, 49, 49, 49, 35]);
-              }
-            }
-          }
+ Future<void> sendTrama() async {
+  try {
+    if (_services == null) {
+      print('Error: No se han descubierto los servicios del dispositivo.');
+      return;
+    }
+
+    for (BluetoothService service in _services!) {
+      var characteristics = service.characteristics;
+      // Obtener característica
+      for (BluetoothCharacteristic c in characteristics) {
+        if (c.properties.write) {
+          await c.write([36, 49, 49, 49, 49, 49, 35]);
+          print('Trama enviada: [36, 49, 49, 49, 49, 49, 35]');
         }
       }
     }
+  } catch (e) {
+    print('Error al enviar la trama: $e');
   }
+}
+
+Future<void> turnOffTrama() async {
+  try {
+    if (_services == null) {
+      print('Error: No se han descubierto los servicios del dispositivo.');
+      return;
+    }
+
+    for (BluetoothService service in _services!) {
+      var characteristics = service.characteristics;
+      // Obtener característica
+      for (BluetoothCharacteristic c in characteristics) {
+        if (c.properties.write) {
+          await c.write([36, 48, 48, 48, 48, 48, 35]);
+          print('Trama enviada: [36, 48, 48, 48, 48, 48, 35]');
+        }
+      }
+    }
+  } catch (e) {
+    print('Error al enviar la trama: $e');
+  }
+}
 
   Future<List<BluetoothDevice>> getBondedDevices() async {
     try {
@@ -90,6 +98,15 @@ class BluetoohController {
     } catch (e) {
       print("Error al obtener dispositivos vinculados: $e");
       return [];
+    }
+  }
+ //disconnect device
+  Future<void> disconnectDevice(BluetoothDevice device) async {
+    try {
+      await device.disconnect();
+      print('Dispositivo desconectado');
+    } catch (e) {
+      print('Error al desconectar el dispositivo: $e');
     }
   }
 }
