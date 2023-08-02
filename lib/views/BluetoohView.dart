@@ -126,18 +126,19 @@ class _BluetoothViewState extends State<BluetoothView> {
                     },
                     child: const Text('Desconectar'),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      _bluetoothController.sendTrama();
-                    },
-                    child: const Text('Enviar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      _bluetoothController.turnOffTrama();
-                    },
-                    child: const Text('Apagar'),
-                  ),
+                 ElevatedButton(
+  onPressed: () {
+    _bluetoothController.sendTrama(TramaType.Enviar);
+  },
+  child: const Text('Enviar'),
+),
+
+ElevatedButton(
+  onPressed: () {
+    _bluetoothController.sendTrama(TramaType.Apagar);
+  },
+  child: const Text('Apagar'),
+),
                 ],
               ),
             ],

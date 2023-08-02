@@ -2,10 +2,18 @@ import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+
+
+enum TramaType {
+  Enviar,
+  Apagar,
+}
+
 class BluetoohController {
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   List<ScanResult> scanResults = [];
   List<BluetoothService>? _services;
+ 
   Stream<List<ScanResult>> getScanResultsStream() {
     return flutterBlue.scanResults;
   }
@@ -46,11 +54,27 @@ class BluetoohController {
     }
   }
 
- Future<void> sendTrama() async {
+ Future<void> sendTrama(TramaType type) async {
   try {
     if (_services == null) {
       print('Error: No se han descubierto los servicios del dispositivo.');
       return;
+    }
+
+    List<int> trama;
+
+    switch (type) {
+      case TramaType.Enviar:
+        trama = [36, 49, 49, 49, 49, 49, 35];
+        print('Enviando trama: [36, 49, 49, 49, 49, 49, 35]');
+        break;
+      case TramaType.Apagar:
+        trama = [36, 48, 48, 48, 48, 48, 35];
+        print('Enviando trama: [36, 48, 48, 48, 48, 48, 35]');
+        break;
+      default:
+        print('Tipo de trama no válido');
+        return;
     }
 
     for (BluetoothService service in _services!) {
@@ -58,8 +82,7 @@ class BluetoohController {
       // Obtener característica
       for (BluetoothCharacteristic c in characteristics) {
         if (c.properties.write) {
-          await c.write([36, 49, 49, 49, 49, 49, 35]);
-          print('Trama enviada: [36, 49, 49, 49, 49, 49, 35]');
+          await c.write(trama);
         }
       }
     }
@@ -67,29 +90,6 @@ class BluetoohController {
     print('Error al enviar la trama: $e');
   }
 }
-
-Future<void> turnOffTrama() async {
-  try {
-    if (_services == null) {
-      print('Error: No se han descubierto los servicios del dispositivo.');
-      return;
-    }
-
-    for (BluetoothService service in _services!) {
-      var characteristics = service.characteristics;
-      // Obtener característica
-      for (BluetoothCharacteristic c in characteristics) {
-        if (c.properties.write) {
-          await c.write([36, 48, 48, 48, 48, 48, 35]);
-          print('Trama enviada: [36, 48, 48, 48, 48, 48, 35]');
-        }
-      }
-    }
-  } catch (e) {
-    print('Error al enviar la trama: $e');
-  }
-}
-
   Future<List<BluetoothDevice>> getBondedDevices() async {
     try {
       List<BluetoothDevice> bondedDevices = await flutterBlue.connectedDevices;
