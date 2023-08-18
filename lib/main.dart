@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 /* import 'package:rtv/views/LoginView.dart'; */
+import 'package:rtv/views/LoginView.dart';
 import 'package:rtv/views/BluetoohView.dart';
+import 'package:rtv/views/MenuView.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,8 +17,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: _title,
-      home: const BluetoothView(),
+      home: TabBarViewExample(),
+      routes: {
+      '/login' :(context)=> const LoginView(),
+      '/bluetooh': (context) => BluetoothView(),
+      '/menu': (context) => TabBarViewExample()
+      } 
     );
   }
 }
-
