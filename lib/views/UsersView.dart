@@ -12,6 +12,8 @@ class _UsersViewState extends State<UsersView> {
   final UsersController _controller = UsersController();
   late Future<List<Users>> _users;
   late Future<List<Role>> _roles;
+  int selectedRoleId = 0;
+  late Role selectedRole; // Declaración de la variable selectedRole
 
   @override
   void initState() {
@@ -20,7 +22,7 @@ class _UsersViewState extends State<UsersView> {
     _loadUsers();
     _roles = _controller.getRoles();
     _loadRoles();
-
+    selectedRole = Role(id: 0, name: '');
   }
 
   void _loadUsers() async {
@@ -29,14 +31,13 @@ class _UsersViewState extends State<UsersView> {
       _users = Future.value(users);
     });
   }
+
   void _loadRoles() async {
     List<Role> roles = await _controller.getRoles();
     setState(() {
       _roles = Future.value(roles);
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -85,10 +86,26 @@ class _UsersViewState extends State<UsersView> {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                _showEditUserDialog(context, user);
+            FutureBuilder<List<Role>>(
+              future:
+                  _roles, // La variable _roles debe ser un Future<List<Role>>
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(); // Muestra un indicador de carga mientras espera la resolución del Future
+                } else if (snapshot.hasError) {
+                  return Text('Error al cargar los roles');
+                } else if (snapshot.hasData) {
+                  List<Role> roles = snapshot.data!;
+
+                  return IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () {
+                      _showEditUserDialog(context, user);
+                    },
+                  );
+                } else {
+                  return SizedBox(); // En caso de que no haya datos aún
+                }
               },
             ),
             IconButton(
@@ -103,56 +120,58 @@ class _UsersViewState extends State<UsersView> {
     );
   }
 
+  void _showAddUserDialog(BuildContext context) async {
+    List<Role> roles = await _roles;
 
-void _showAddUserDialog(BuildContext context) async {
-  List<Role> roles = await _roles;
-  Role selectedRole = roles[0];
-   showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text('Agregar Usuario'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _controller.nameUserController,
-              decoration: InputDecoration(
-                labelText: 'Nombre',
+    Role selectedRole = roles[0]; // Valor predeterminado
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Agregar Usuario'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _controller.nameUserController,
+                decoration: InputDecoration(
+                  labelText: 'Nombre',
+                ),
               ),
-            ),
-            SizedBox(height: 20), // Espacio entre TextField y DropdownButton
-            DropdownButton<Role>(
-              value: selectedRole,
-              onChanged: (newValue) {
-                setState(() {
-                  selectedRole = newValue!;
-                });
+              SizedBox(height: 20),
+              DropdownButton<Role>(
+                value: selectedRole,
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedRole = newValue!;
+                    selectedRoleId =
+                        newValue.id; // Actualizar el ID seleccionado
+                  });
+                },
+                items: roles.map((role) {
+                  return DropdownMenuItem<Role>(
+                    value: role,
+                    child: Text(role.name),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Aquí puedes usar selectedRoleId para obtener el ID del rol seleccionado
+                // Llamar a la función addUser y enviar el ID
+                _controller.addUser(context, selectedRoleId);
               },
-              items: roles.map((role) {
-                return DropdownMenuItem<Role>(
-                  value: role,
-                  child: Text(role.name),
-                );
-              }).toList(),
+              child: Text('Aceptar'),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Aquí puedes usar selectedRole para obtener el rol seleccionado
-              // Ejecutar las acciones necesarias al presionar el botón Aceptar
-              Navigator.of(context).pop(); // Cerrar el diálogo
-            },
-            child: Text('Aceptar'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
+        );
+      },
+    );
+  }
 
   void _showDeleteUserDialog(BuildContext context, Users user) {
     showDialog(
@@ -183,44 +202,56 @@ void _showAddUserDialog(BuildContext context) async {
     );
   }
 
-  void _showEditUserDialog(BuildContext context, Users user) {
-    TextEditingController usernameController =
-        TextEditingController(text: user.username);
+void _showEditUserDialog(BuildContext context, Users user) async {
+  List<Role> roles = await _roles;
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Editar Usuario'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: usernameController,
-                decoration: InputDecoration(
-                  labelText: 'Nombre de Usuario',
-                ),
+  Role selectedRole = roles.firstWhere((role) => role.id == user.role_id);
+
+  TextEditingController nameController = TextEditingController(text: user.username);
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Editar Usuario'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Nombre',
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancelar'),
             ),
-            TextButton(
-              onPressed: () {
-                _controller.updateUsers(user.id, usernameController.text);
-                Navigator.of(context).pop();
-                _loadUsers();
+            SizedBox(height: 20),
+            DropdownButton<Role>(
+              value: selectedRole,
+              onChanged: (newValue) {
+                setState(() {
+                  selectedRole = newValue!;
+                });
               },
-              child: Text('Guardar'),
+              items: roles.map((role) {
+                return DropdownMenuItem<Role>(
+                  value: role,
+                  child: Text(role.name),
+                );
+              }).toList(),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // Here you can call your updateUsers function
+              _controller.updateUsers(context, user.id, nameController.text, selectedRole.id);
+            },
+            child: Text('Aceptar'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 }

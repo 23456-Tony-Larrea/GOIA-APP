@@ -9,17 +9,16 @@ import 'package:rtv/class/Role.dart';
 class UsersController {
   final TextEditingController nameUserController = TextEditingController();
   final TextEditingController passwordUserController = TextEditingController();
-  int roleId = 0; // Debes establecer el valor adecuado según tu lógica
 
-  Future<void> addUser(BuildContext context) async {
+  Future<void> addUser(BuildContext context, int roleId) async {
     final response = await http.post(
-      Uri.parse('${url}/users'),
+      Uri.parse('${url}/register'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(
         <String, dynamic>{
-          'name': nameUserController.text,
+          'username': nameUserController.text,
           'password':'123456',
           'role_id': roleId,
         },
@@ -63,28 +62,38 @@ class UsersController {
   }
 
   //edit users
-  Future<bool> updateUsers(int usersId, String newUsersName) {
-    return http
-        .put(
-      Uri.parse('${url}/users/$usersId'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+Future<void> updateUsers(BuildContext context, int usersId, String newUsersName, int role_id) async {
+  bool success = await http
+      .put(
+    Uri.parse('${url}/users/$usersId'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(
+      <String, dynamic>{
+        'username': newUsersName,
+        'role_id': role_id,
       },
-      body: jsonEncode(
-        <String, dynamic>{
-          'name': newUsersName,
-        },
-      ),
-    )
-        .then((response) {
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-  }
+    ),
+  )
+      .then((response) {
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }).catchError((error) {
+    print("Error updating user: $error");
+    return false;
+  });
 
+  if (success) {
+    Navigator.pop(context); // Close the dialog on success
+    // You might want to show a success message or update the user list here
+  } else {
+    // Show an error message or handle the error case
+  }
+}
   //delete users
   Future<bool> deleteUsers(int usersId) {
     return http.put(
