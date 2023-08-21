@@ -3,6 +3,8 @@ import 'dart:convert';
 import "package:http/http.dart" as http;
 import 'package:flutter/material.dart';
 import 'package:rtv/constants/url.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class LoginController {
   final TextEditingController emailController = TextEditingController();
@@ -25,10 +27,12 @@ class LoginController {
       ),
     );
     if (response.statusCode == 200) {
-      // If the server did return a 200 CREATED response,
-      // then parse the JSON.
+
       final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
       print(jsonResponse);
+        final String token = jsonResponse['token'];
+        final storage = FlutterSecureStorage();
+    await storage.write(key: 'helllo_token', value: token);
       // Mostrar un AlertDialog solo si el usuario se registra correctamente
       showDialog(
         context: context,

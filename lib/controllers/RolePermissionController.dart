@@ -11,7 +11,6 @@ class RolePemrissionController {
   final TextEditingController nameRoleController = TextEditingController();
 
   Future<void> addrole(BuildContext context) async {
-    final String name = nameRoleController.text;
     final response = await http.post(
       Uri.parse('${url}/roles'),
       headers: <String, String>{
