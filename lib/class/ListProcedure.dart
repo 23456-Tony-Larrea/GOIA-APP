@@ -1,47 +1,147 @@
-import 'package:rtv/class/Defecto.dart';  // Import your Defecto class
-
 class ListProcedure {
   final int codigo;
   final int numero;
   final int familia;
-  final String subFamilia;
+  final String subfamilia;
   final String abreviatura;
-  final String abreviatura_descripcion;
+  final String abreviaturaDescripcion;
+  final String subfamiliaDescripcion;
   final String categoria;
-  final String categoria_abreviatura;
-  final String categoria_descripcion;
+  final String categoriaAbreviatura;
+  final String categoriaDescripcion;
   final String procedimiento;
-  final List<Defecto> defectos;  // Use your Defecto class here
-  
-  // Constructor
+  final List<Defecto> defectos;
+  final DefectoEncontrado defectoEncontrado;
+
   ListProcedure({
     required this.codigo,
     required this.numero,
     required this.familia,
-    required this.subFamilia,
+    required this.subfamilia,
     required this.abreviatura,
-    required this.abreviatura_descripcion,
+    required this.abreviaturaDescripcion,
+    required this.subfamiliaDescripcion,
     required this.categoria,
-    required this.categoria_abreviatura,
-    required this.categoria_descripcion,
+    required this.categoriaAbreviatura,
+    required this.categoriaDescripcion,
     required this.procedimiento,
     required this.defectos,
+    required this.defectoEncontrado,
   });
 
-  // Factory method to create a ListProcedure instance from a JSON map
   factory ListProcedure.fromJson(Map<String, dynamic> json) {
     return ListProcedure(
       codigo: json['codigo'],
       numero: json['numero'],
       familia: json['familia'],
-      subFamilia: json['subfamilia'],
+      subfamilia: json['subfamilia'],
       abreviatura: json['abreviatura'],
-      abreviatura_descripcion: json['abreviatura_descripcion'],
+      abreviaturaDescripcion: json['abreviatura_descripcion'],
+      subfamiliaDescripcion: json['subfamilia_descripcion'],
       categoria: json['categoria'],
-      categoria_abreviatura: json['categoria_abreviatura'],
-      categoria_descripcion: json['categoria_descripcion'],
+      categoriaAbreviatura: json['categoria_abreviatura'],
+      categoriaDescripcion: json['categoria_descripcion'],
       procedimiento: json['procedimiento'],
-      defectos: List<Defecto>.from(json['defectos'].map((defectoJson) => Defecto.fromJson(defectoJson))),
+      defectos: List<Defecto>.from(json['defectos'].map((defecto) => Defecto.fromJson(defecto))),
+      defectoEncontrado: DefectoEncontrado.fromJson(json['defectoEncontrado']),
     );
+  }
+   @override
+  String toString() {
+    return '''
+    Código: $codigo
+    Número: $numero
+    Familia: $familia
+    Subfamilia: $subfamilia
+    Abreviatura: $abreviatura
+    Descripción Abreviatura: $abreviaturaDescripcion
+    Descripción Subfamilia: $subfamiliaDescripcion
+    Categoría: $categoria
+    Abreviatura Categoría: $categoriaAbreviatura
+    Descripción Categoría: $categoriaDescripcion
+    Procedimiento: $procedimiento
+    Defectos: $defectos
+    Defecto Encontrado: $defectoEncontrado
+    ''';
+  }
+}
+
+class Defecto {
+  final int codigo;
+  final String abreviatura;
+  final String descripcion;
+  final String numero;
+  final String codigoAs400;
+
+  Defecto({
+    required this.codigo,
+    required this.abreviatura,
+    required this.descripcion,
+    required this.numero,
+    required this.codigoAs400,
+  });
+
+  factory Defecto.fromJson(Map<String, dynamic> json) {
+    return Defecto(
+      codigo: json['codigo'],
+      abreviatura: json['abreviatura'],
+      descripcion: json['descripcion'],
+      numero: json['numero'],
+      codigoAs400: json['codigo_as400'],
+    );
+  }
+   @override
+  String toString() {
+    return '''
+    Código: $codigo
+    Abreviatura: $abreviatura
+    Descripción: $descripcion
+    Número: $numero
+    Código AS400: $codigoAs400
+    ''';
+  }
+}
+
+class DefectoEncontrado {
+  String numero;
+  String abreviatura;
+  String descripcion;
+  String codigoAs400;
+  String calificacion;
+  String ubicacion;
+  String observacion;
+
+  DefectoEncontrado({
+    this.numero = "",
+    this.abreviatura = "",
+    this.descripcion = "",
+    this.codigoAs400 = "",
+    this.calificacion = "",
+    this.ubicacion = "",
+    this.observacion = "",
+  });
+
+  factory DefectoEncontrado.fromJson(Map<String, dynamic> json) {
+    return DefectoEncontrado(
+      numero: json['numero'],
+      abreviatura: json['abreviatura'],
+      descripcion: json['descripcion'],
+      codigoAs400: json['codigo_as400'],
+      calificacion: json['calificacion'],
+      ubicacion: json['ubicacion'],
+      observacion: json['observacion'],
+    ); 
+  }
+    @override
+  String toString() {
+    return '''
+    Número: $numero
+    Abreviatura: $abreviatura
+    Descripción: $descripcion
+    Código AS400: $codigoAs400
+    Calificación: $calificacion
+    Ubicación: $ubicacion
+    Observación: $observacion
+    ''';
   }
 }

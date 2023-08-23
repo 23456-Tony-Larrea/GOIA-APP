@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:rtv/controllers/IdentificationController.dart';
+import '../class/ListProcedure.dart';
+
 
 class IdentificationView extends StatefulWidget {
   @override
   _IdentificationViewState createState() => _IdentificationViewState();
+
 }
 
 class _IdentificationViewState extends State<IdentificationView> {
   final IdentificationController _controller = IdentificationController();
-
+   List<ListProcedure> _procedures = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,6 +29,9 @@ class _IdentificationViewState extends State<IdentificationView> {
                   icon: Icon(Icons.clear),
                   onPressed: () {
                     _controller.placaController.clear();
+                    setState(() {
+                      _controller.carData = null; // Limpiamos la información del vehículo
+                    });
                   },
                 ),
               ),
@@ -34,10 +40,12 @@ class _IdentificationViewState extends State<IdentificationView> {
             ElevatedButton(
               onPressed: () async {
                 await _controller.searchVehicle(context, _controller.placaController.text);
+                 await _getProcedures();
                 setState(() {}); // Actualiza la vista después de obtener los datos
               },
               child: Text('Buscar'),
             ),
+       
             SizedBox(height: 16.0),
             if (_controller.carData != null)
               Card(
@@ -61,14 +69,69 @@ class _IdentificationViewState extends State<IdentificationView> {
                           _buildInfoField('Modelo', _controller.carData!.modelo),
                           _buildInfoField('Cliente', _controller.carData!.cliente),
                           _buildInfoField('Cédula', _controller.carData!.cedula),
+                          
                         ],
                       ),
                     ),
                   ],
                 ),
+              )
+            else
+              Card(
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Sin información de este vehículo.',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          _controller.placaController.clear();
+                          setState(() {
+                            _controller.carData = null; // Limpiamos la información del vehículo
+                          });
+                        },
+                        child: Text('Realizar una nueva consulta'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
+    Card(
+          elevation: 4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ListTile(
+                title: Text(
+                  'Items',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: _procedures.length,
+                itemBuilder: (context, index) {
+                  final procedure = _procedures[index];
+                  return ListTile(
+                    
+                    title: Text(procedure.procedimiento),
+                    subtitle: Text(procedure.abreviatura),
+                    // ... otros detalles del procedimiento ...
+                  );
+                },
+              ),
+            ],
+          ),
+        )
+    
           ],
+          
         ),
+        
       ),
     );
   }
@@ -96,6 +159,22 @@ class _IdentificationViewState extends State<IdentificationView> {
         ],
       ),
     );
+  }
+
+
+  
+   Future<void> _getProcedures() async {
+    try {
+      if (_controller.carData != null) {
+        List<ListProcedure> procedures = await _controller.lisProcedure();
+        setState(() {//itera en 0 
+          _procedures = procedures;
+
+        });
+      }
+    } catch (error) {
+      print(error);
+    }
   }
 }
 

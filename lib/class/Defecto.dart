@@ -1,7 +1,7 @@
 class Defecto {
   final int codigo;
-  final String descripcion;
   final String abreviatura;
+  final String descripcion;
   final String numero;
   final String codigo_as400;
 

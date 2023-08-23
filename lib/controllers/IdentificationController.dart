@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rtv/class/Cars.dart';
 import 'package:rtv/constants/url2.dart';
+import 'package:rtv/class/ListProcedure.dart';
 
 class IdentificationController {
   String? vehiCodigo;
@@ -40,6 +41,7 @@ class IdentificationController {
         fontSize: 16.0,
       );
       carData = await getInformationCar(vehiCodigo);
+      await getRegisterRTV(vehiCodigo);
     } else {
       // Alert que no se pudo encontrar el vehículo
       Fluttertoast.showToast(
@@ -67,39 +69,47 @@ class IdentificationController {
     if (response.statusCode == 200) {
       final List<dynamic> carDataList = jsonDecode(response.body);
       final dynamic firstCarData = carDataList.first;
-
-      // Agrega esta línea para imprimir el valor de firstCarData
-      print("Valor del primer carro: $firstCarData");
-
       return Cars.fromJson(firstCarData);
     } else {
       throw Exception('Failed to load car');
     }
   }
 
- /*  Future<List<Cars>> getRegisterRTV() async {
-    final response = await http.post(
-      Uri.parse('${url}/GetRegistroRTV'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'vehi_codigo': vehiCodigo,
-      }),
-    );
-    if (response.statusCode == 200) {
-      final List<dynamic> cars = jsonDecode(response.body);
-      return cars.map((json) => Cars.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load cars');
+  Future<void> getRegisterRTV(int vehiCodigo) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${url}/ObtenerRegistroRTV'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'vehi_codigo': vehiCodigo,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> carsRTV = jsonDecode(response.body);
+
+        if (carsRTV.isNotEmpty && carsRTV[0]['codigo'] != null) {
+          int rtvCode = carsRTV[0]['codigo'];
+          print('Código RTV: $rtvCode'); // Imprimir el código RTV
+        await lisProcedure();
+        } else {
+          print('No se encontró código RTV en la respuesta');
+        }
+      } else {
+        throw Exception('Failed to load cars');
+      }
+    } catch (error) {
+      print(error);
     }
   }
 
-  Future<void> lisProcedure() async {
+  Future<List<ListProcedure>> lisProcedure() async {
     try {
       if (codeRTV) {
         final response = await http.post(
-          Uri.parse('/listarProcedimientos'), // Replace with your API endpoint
+          Uri.parse('${url}/listarProcedimientos'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
@@ -109,25 +119,39 @@ class IdentificationController {
           }),
         );
         if (response.statusCode == 200) {
-          final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-          listProcedure = json.decode(response.body);
-          listDefects = json.decode(response.body);
-          print(listProcedure);
+          final List<dynamic> jsonResponse = jsonDecode(response.body);
+
+          final List<ListProcedure> procedures = [];
+          for (final procedureJson in jsonResponse) {
+            final ListProcedure procedure =
+                ListProcedure.fromJson(procedureJson);
+            procedures.add(procedure);
+          }
+
+          print("Lista de Procedimientos: $procedures");
+          return procedures;
         } else {
           print('Error: ${response.statusCode}');
+          throw Exception(
+              'Failed to load procedures'); // Lanza una excepción en caso de error
         }
       } else {
         Fluttertoast.showToast(
-            msg: "el vehiculo no tiene RTV",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.redAccent,
-            textColor: Colors.white,
-            fontSize: 16.0);
+          msg: "el vehiculo no tiene RTV",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        throw Exception(
+            'Vehicle has no RTV'); // Lanza una excepción en caso de que el vehículo no tenga RTV
       }
     } catch (e) {
       print(e);
+      throw Exception(
+          'An error occurred'); // Lanza una excepción en caso de excepción
     }
-  } */
+  }
 }
