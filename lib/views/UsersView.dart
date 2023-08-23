@@ -120,58 +120,59 @@ class _UsersViewState extends State<UsersView> {
     );
   }
 
-  void _showAddUserDialog(BuildContext context) async {
-    List<Role> roles = await _roles;
+ void _showAddUserDialog(BuildContext context) async {
+  List<Role> roles = await _roles;
 
-    Role selectedRole = roles[0]; // Valor predeterminado
+  Role selectedRole = roles[0]; // Valor predeterminado
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Agregar Usuario'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _controller.nameUserController,
-                decoration: InputDecoration(
-                  labelText: 'Nombre',
-                ),
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Agregar Usuario'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _controller.nameUserController,
+              decoration: InputDecoration(
+                labelText: 'Nombre',
               ),
-              SizedBox(height: 20),
-              DropdownButton<Role>(
-                value: selectedRole,
-                onChanged: (newValue) {
-                  setState(() {
-                    selectedRole = newValue!;
-                    selectedRoleId =
-                        newValue.id; // Actualizar el ID seleccionado
-                  });
-                },
-                items: roles.map((role) {
-                  return DropdownMenuItem<Role>(
-                    value: role,
-                    child: Text(role.name),
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                // Aquí puedes usar selectedRoleId para obtener el ID del rol seleccionado
-                // Llamar a la función addUser y enviar el ID
-                _controller.addUser(context, selectedRoleId);
+            ),
+            SizedBox(height: 20),
+            DropdownButton<Role>(
+              value: selectedRole,
+              onChanged: (newValue) {
+                setState(() {
+                  selectedRole = newValue!;
+                  selectedRoleId = newValue.id; // Actualizar el ID seleccionado
+                });
               },
-              child: Text('Aceptar'),
+              items: roles.map((role) {
+                return DropdownMenuItem<Role>(
+                  value: role,
+                  child: Text(role.name),
+                );
+              }).toList(),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              // Aquí puedes usar selectedRoleId para obtener el ID del rol seleccionado
+              // Llamar a la función addUser y enviar el ID
+              await _controller.addUser(context, selectedRoleId);
+              _loadUsers(); // Actualiza la lista de usuarios después de agregar
+              Navigator.pop(context); // Cerrar el diálogo
+            },
+            child: Text('Aceptar'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   void _showDeleteUserDialog(BuildContext context, Users user) {
     showDialog(
@@ -206,7 +207,6 @@ void _showEditUserDialog(BuildContext context, Users user) async {
   List<Role> roles = await _roles;
 
   Role selectedRole = roles.firstWhere((role) => role.id == user.role_id);
-
   TextEditingController nameController = TextEditingController(text: user.username);
 
   showDialog(
@@ -245,6 +245,7 @@ void _showEditUserDialog(BuildContext context, Users user) async {
             onPressed: () {
               // Here you can call your updateUsers function
               _controller.updateUsers(context, user.id, nameController.text, selectedRole.id);
+              _loadUsers();
             },
             child: Text('Aceptar'),
           ),

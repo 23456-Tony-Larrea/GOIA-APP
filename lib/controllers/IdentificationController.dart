@@ -1,9 +1,9 @@
 import 'dart:convert';
 import "package:http/http.dart" as http;
 import 'package:flutter/material.dart';
-import 'package:rtv/constants/url2.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rtv/class/Cars.dart';
+import 'package:rtv/constants/url2.dart';
 
 class IdentificationController {
   String? vehiCodigo;
@@ -11,6 +11,8 @@ class IdentificationController {
   List<dynamic> listDefects = [];
   final TextEditingController placaController = TextEditingController();
   bool codeRTV = true;
+  Cars? carData;
+
   Future<void> searchVehicle(BuildContext context, String placa) async {
     final response = await http.post(
       Uri.parse('${url}/GetCodVehiculo'),
@@ -21,36 +23,38 @@ class IdentificationController {
         'placa': placaController.text,
       }),
     );
+
+    int vehiCodigo; // Declarar vehiCodigo en este alcance
     if (response.statusCode == 200) {
-      // If the server did return a 200 CREATED response,
-      // then parse the JSON.
-      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-      vehiCodigo = jsonResponse['vehi_codigo'][0]['vehi_codigo'];
-
-      print(jsonResponse);
+      final List<dynamic> jsonResponse = jsonDecode(response.body);
+      final Map<String, dynamic> firstElement = jsonResponse[0];
+      vehiCodigo = firstElement['vehi_codigo'];
 
       Fluttertoast.showToast(
-          msg: "el carro a sido buscado con exito",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.greenAccent,
-          textColor: Colors.white,
-          fontSize: 16.0);
+        msg: "El carro ha sido buscado con éxito",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.greenAccent,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      carData = await getInformationCar(vehiCodigo);
     } else {
-      //alert que no se creo
+      // Alert que no se pudo encontrar el vehículo
       Fluttertoast.showToast(
-          msg: "el usuario no se pudo crear",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.redAccent,
-          textColor: Colors.white,
-          fontSize: 16.0);
+        msg: "El vehículo no se pudo encontrar",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.redAccent,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     }
   }
 
-  Future<List<Cars>> getInformationCar() async {
+  Future<Cars> getInformationCar(int vehiCodigo) async {
     final response = await http.post(
       Uri.parse('${url}/GetDatoVehiculo'),
       headers: <String, String>{
@@ -61,14 +65,19 @@ class IdentificationController {
       }),
     );
     if (response.statusCode == 200) {
-      final List<dynamic> cars = jsonDecode(response.body);
-      return cars.map((json) => Cars.fromJson(json)).toList();
+      final List<dynamic> carDataList = jsonDecode(response.body);
+      final dynamic firstCarData = carDataList.first;
+
+      // Agrega esta línea para imprimir el valor de firstCarData
+      print("Valor del primer carro: $firstCarData");
+
+      return Cars.fromJson(firstCarData);
     } else {
-      throw Exception('Failed to load cars');
+      throw Exception('Failed to load car');
     }
   }
 
-  Future<List<Cars>> getRegisterRTV() async {
+ /*  Future<List<Cars>> getRegisterRTV() async {
     final response = await http.post(
       Uri.parse('${url}/GetRegistroRTV'),
       headers: <String, String>{
@@ -120,6 +129,5 @@ class IdentificationController {
     } catch (e) {
       print(e);
     }
-  }
-  
+  } */
 }

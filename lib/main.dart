@@ -5,7 +5,7 @@ import 'package:rtv/views/LoginView.dart';
 import 'package:rtv/views/BluetoohView.dart';
 import 'package:rtv/views/MenuView.dart';
 import 'package:rtv/views/UsersView.dart';
-
+import 'package:rtv/views/IdentificationView.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,11 +17,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: _title, home:LoginView(), routes: {
+    return MaterialApp(title: _title, home: IdentificationView(), routes: {
       '/login': (context) => const LoginView(),
       '/bluetooh': (context) => BluetoothView(),
       '/menu': (context) => TabBarViewExample(),
       '/users': (context) => UsersView(),
+      '/identification': (context) => IdentificationView(),
     });
   }
 }
