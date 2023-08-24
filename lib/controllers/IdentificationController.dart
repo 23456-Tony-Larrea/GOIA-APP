@@ -95,7 +95,15 @@ class IdentificationController {
           print('Código RTV: $rtvCode'); // Imprimir el código RTV
         await lisProcedure();
         } else {
-          print('No se encontró código RTV en la respuesta');
+        Fluttertoast.showToast(
+        msg: "el vehiculo no tiene RTV",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.redAccent,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
         }
       } else {
         throw Exception('Failed to load cars');
@@ -107,7 +115,7 @@ class IdentificationController {
 
  Future<List<ListProcedure>> lisProcedure() async {
   try {
-    if (codeRTV) {
+    /* if (codeRTV) { */
       final response = await http.post(
         Uri.parse('${url}/listarProcedimientos'),
         headers: <String, String>{
@@ -148,7 +156,7 @@ class IdentificationController {
         print('Error: ${response.statusCode}');
         throw Exception('Failed to load procedures');
       }
-    } else {
+   /*  } else {
       Fluttertoast.showToast(
         msg: "el vehiculo no tiene RTV",
         toastLength: Toast.LENGTH_SHORT,
@@ -159,7 +167,7 @@ class IdentificationController {
         fontSize: 16.0,
       );
       throw Exception('Vehicle has no RTV');
-    }
+    } */
   } catch (e) {
     print(e);
     throw Exception('An error occurred');

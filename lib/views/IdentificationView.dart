@@ -14,6 +14,9 @@ class _IdentificationViewState extends State<IdentificationView> {
    List<ListProcedure> _procedures = [];
      List<ListProcedure> _procedures0 = []; // Agrega esta línea
   List<ListProcedure> _procedures1 = []; // Agrega esta línea
+    Defecto? selectedDefecto;
+  DefectoEncontrado? defectoEncontrado;
+
 
   @override
   Widget build(BuildContext context) {
@@ -302,6 +305,10 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
                   title: Text(defecto.abreviatura),
                   subtitle: Text(defecto.descripcion),
                   trailing: Text('Código AS400: ${defecto.codigoAs400}'),
+                  onTap: () {
+                    Navigator.pop(context); 
+                    _showDefectoModal(context, defecto);
+                  },
                 );
               },
             ),
@@ -312,7 +319,108 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
   );
 }
 
+void _showDefectoModal(BuildContext context, Defecto defecto) {
+  if (defecto.abreviatura == "OTROS") {
+    _showOtrosModal(context);
+  } else {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, setState) {
+            List<String> checkboxTitles = [
+              'Calificación 1',
+              'Calificación 2',
+              'Calificación 3',
+              'Cancelar',
+            ];
 
+            return Container(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Defecto: ${defecto.abreviatura}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  // ... (mostrar más información del defecto)
+                  SizedBox(height: 16),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: checkboxTitles.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        leading: Checkbox(
+                          value: false, // Aquí debes manejar el estado del checkbox
+                          onChanged: (value) {
+                            // Aquí puedes manejar el cambio de estado del checkbox
+                          },
+                        ),
+                        title: Text(checkboxTitles[index]),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+void _showOtrosModal(BuildContext context) {
+  String userInput = ""; // Variable para almacenar la entrada del usuario
+
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, setState) {
+          return Container(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Defecto: OTROS',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text('Descripción: OTROS(A INTRODUCIR POR EL INSPECTOR DE LINEA)'),
+                SizedBox(height: 16),
+                TextField(
+                  maxLines: 4, // Cuatro líneas para un cuadro de texto grande
+                  onChanged: (value) {
+                    userInput = value; // Actualiza la entrada del usuario
+                  },
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    // Aquí puedes guardar la entrada del usuario
+                    print('Entrada del usuario: $userInput');
+                    Navigator.pop(context); // Cierra el modal
+                  },
+                  child: Text('Guardar'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
 void main() {
   runApp(MaterialApp(
     home: IdentificationView(),
