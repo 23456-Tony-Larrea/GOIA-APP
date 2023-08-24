@@ -105,53 +105,64 @@ class IdentificationController {
     }
   }
 
-  Future<List<ListProcedure>> lisProcedure() async {
-    try {
-      if (codeRTV) {
-        final response = await http.post(
-          Uri.parse('${url}/listarProcedimientos'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode({
-            'tipo': 1,
-            'estado': 1,
-          }),
-        );
-        if (response.statusCode == 200) {
-          final List<dynamic> jsonResponse = jsonDecode(response.body);
+ Future<List<ListProcedure>> lisProcedure() async {
+  try {
+    if (codeRTV) {
+      final response = await http.post(
+        Uri.parse('${url}/listarProcedimientos'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({
+          'tipo': 1,
+          'estado': 1,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonResponse = jsonDecode(response.body);
 
-          final List<ListProcedure> procedures = [];
-          for (final procedureJson in jsonResponse) {
-            final ListProcedure procedure =
-                ListProcedure.fromJson(procedureJson);
-            procedures.add(procedure);
-          }
-
-          print("Lista de Procedimientos: $procedures");
-          return procedures;
-        } else {
-          print('Error: ${response.statusCode}');
-          throw Exception(
-              'Failed to load procedures'); // Lanza una excepción en caso de error
+        final List<ListProcedure> procedures = [];
+        for (final procedureJson in jsonResponse) {
+          final ListProcedure procedure = ListProcedure.fromJson(procedureJson);
+          procedures.add(procedure);
         }
+
+        print("Lista de Procedimientos: $procedures");
+        
+        // Separar los procedimientos en dos listas diferentes
+        List<ListProcedure> procedureList0 = [];
+        List<ListProcedure> procedureList1 = [];
+        if (procedures.isNotEmpty) {
+          procedureList0.add(procedures[0]);
+        }
+        if (procedures.length > 1) {
+          procedureList1.add(procedures[1]);
+        }
+        
+        // Imprimir o realizar acciones con los procedimientos separados
+        print("Procedimiento 0: $procedureList0");
+        print("Procedimiento 1: $procedureList1");
+        
+        return procedures;
       } else {
-        Fluttertoast.showToast(
-          msg: "el vehiculo no tiene RTV",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.redAccent,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-        throw Exception(
-            'Vehicle has no RTV'); // Lanza una excepción en caso de que el vehículo no tenga RTV
+        print('Error: ${response.statusCode}');
+        throw Exception('Failed to load procedures');
       }
-    } catch (e) {
-      print(e);
-      throw Exception(
-          'An error occurred'); // Lanza una excepción en caso de excepción
+    } else {
+      Fluttertoast.showToast(
+        msg: "el vehiculo no tiene RTV",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.redAccent,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      throw Exception('Vehicle has no RTV');
     }
+  } catch (e) {
+    print(e);
+    throw Exception('An error occurred');
   }
+}
 }

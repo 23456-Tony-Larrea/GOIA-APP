@@ -12,6 +12,9 @@ class IdentificationView extends StatefulWidget {
 class _IdentificationViewState extends State<IdentificationView> {
   final IdentificationController _controller = IdentificationController();
    List<ListProcedure> _procedures = [];
+     List<ListProcedure> _procedures0 = []; // Agrega esta línea
+  List<ListProcedure> _procedures1 = []; // Agrega esta línea
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,38 +103,77 @@ class _IdentificationViewState extends State<IdentificationView> {
                   ),
                 ),
               ),
-    Card(
+if (_procedures0.isNotEmpty)
+ Column(
+  children: _procedures0.asMap().entries.map((entry) {
+    final procedure = entry.value;
+
+    return GestureDetector(
+      onTap: () {
+        _showDefectsModal(context, procedure.defectos);
+      },
+      child: Card(
+        elevation: 4,
+        child: Column(
+          children: [
+            ListTile(
+              leading: Icon(Icons.list),
+              title: Text(
+                'Items',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildProcedureField('Procedimiento', procedure.procedimiento),
+                  _buildProcedureField('Abreviatura', procedure.abreviatura),
+                  _buildProcedureField('Descripción Abreviatura', procedure.abreviaturaDescripcion),
+                  // ...agrega los campos restantes aquí
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }).toList(),
+),
+  if (_procedures1.isNotEmpty)
+  Column(
+    children: _procedures1.asMap().entries.map((entry) {
+      final procedure = entry.value;
+
+      return GestureDetector(
+        onTap: () {
+          _showDefectsModal(context, procedure.defectos);
+        },
+        child: Card(
           elevation: 4,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ListTile(
-                title: Text(
-                  'Items',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildProcedureField('Procedimiento', procedure.procedimiento),
+                    _buildProcedureField('Abreviatura', procedure.abreviatura),
+                    _buildProcedureField('Descripción Abreviatura', procedure.abreviaturaDescripcion),
+                    // ...agrega los campos restantes aquí
+                  ],
                 ),
-              ),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: _procedures.length,
-                itemBuilder: (context, index) {
-                  final procedure = _procedures[index];
-                  return ListTile(
-                    
-                    title: Text(procedure.procedimiento),
-                    subtitle: Text(procedure.abreviatura),
-                    // ... otros detalles del procedimiento ...
-                  );
-                },
               ),
             ],
           ),
-        )
-    
-          ],
-          
         ),
-        
+      );
+    }).toList(),
+  ),
+          ],
+        ),
       ),
     );
   }
@@ -163,20 +205,113 @@ class _IdentificationViewState extends State<IdentificationView> {
 
 
   
-   Future<void> _getProcedures() async {
-    try {
-      if (_controller.carData != null) {
-        List<ListProcedure> procedures = await _controller.lisProcedure();
-        setState(() {//itera en 0 
-          _procedures = procedures;
-
-        });
-      }
-    } catch (error) {
-      print(error);
+ Future<void> _getProcedures() async {
+  try {
+    if (_controller.carData != null) {
+      List<ListProcedure> procedures = await _controller.lisProcedure();
+      setState(() {
+        _procedures = procedures;
+        if (_procedures.isNotEmpty) {
+          _procedures0.add(_procedures[0]);
+          if (_procedures.length > 1) {
+            _procedures1.add(_procedures[1]);
+          }
+        }
+      });
     }
+  } catch (error) {
+    print(error);
   }
 }
+}
+  Widget _buildProcedureField(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildProcedureCard(ListProcedure procedure) {
+  return Card(
+    elevation: 4,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          title: Text(
+            'Procedimiento: ${procedure.procedimiento}',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Abreviatura: ${procedure.abreviatura}'),
+              Text('subfamilia: ${procedure.subfamilia}'),
+              // Aquí puedes mostrar más detalles si lo necesitas
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Defectos',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            SizedBox(height: 8),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: defectos.length,
+              itemBuilder: (context, index) {
+                final defecto = defectos[index];
+                return ListTile(
+                  title: Text(defecto.abreviatura),
+                  subtitle: Text(defecto.descripcion),
+                  trailing: Text('Código AS400: ${defecto.codigoAs400}'),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 
 void main() {
   runApp(MaterialApp(
