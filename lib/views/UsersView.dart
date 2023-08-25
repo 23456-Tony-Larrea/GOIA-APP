@@ -95,8 +95,6 @@ class _UsersViewState extends State<UsersView> {
                 } else if (snapshot.hasError) {
                   return Text('Error al cargar los roles');
                 } else if (snapshot.hasData) {
-                  List<Role> roles = snapshot.data!;
-
                   return IconButton(
                     icon: Icon(Icons.edit),
                     onPressed: () {

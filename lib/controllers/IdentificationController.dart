@@ -5,6 +5,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rtv/class/Cars.dart';
 import 'package:rtv/constants/url2.dart';
 import 'package:rtv/class/ListProcedure.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class IdentificationController {
   String? vehiCodigo;
@@ -92,6 +94,7 @@ class IdentificationController {
 
         if (carsRTV.isNotEmpty && carsRTV[0]['codigo'] != null) {
           int rtvCode = carsRTV[0]['codigo'];
+          await saveCodeRTV('codeTV', rtvCode);
           print('Código RTV: $rtvCode'); // Imprimir el código RTV
         await lisProcedure();
         } else {
@@ -173,4 +176,8 @@ class IdentificationController {
     throw Exception('An error occurred');
   }
 }
+  Future<void> saveCodeRTV(String key, int value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(key, value);
+  }
 }
