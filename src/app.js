@@ -19,6 +19,7 @@ const __dirname = path.resolve(path.dirname(''));
 dotenv.config(__dirname,'../.env')
 app.set('port', process.env.PORT);
 app.use(express.json());
+app.use(express.urlencoded({extended:false}));
 app.use(UsersRoute)
 app.use(DepartmentRoute)
 app.use(LoginRegisterRoute)

@@ -91,22 +91,34 @@ export const updateUser = async (req, res) => {
     }
 }
 
-export const UpdateStateUser= async (req,res)=>{
-    const {id} = req.params;
+export const UpdateStateUser = async (req, res) => {
+    const { id } = req.params;
+
     try {
         const user = await Users.findOne({
-            where: {id}
+            where: { id }
         });
-        if(user.state){
-            user.state=false;
-        }else{
-            user.state=true;
+
+        if (user) {
+            // Verificar si user es null antes de acceder a la propiedad state
+            if (user.state) {
+                user.state = false;
+            } else {
+                user.state = true;
+            }
+            await user.save();
+            res.json({
+                data: user
+            });
+        } else {
+            res.status(404).json({
+                error: 'User not found'
+            });
         }
-        await user.save();
-        res.json({
-            data: user
-        });
     } catch (error) {
         console.log(error);
+        res.status(500).json({
+            error: 'Internal server error'
+        });
     }
 }
