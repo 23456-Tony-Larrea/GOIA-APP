@@ -9,7 +9,7 @@ export const sequelize =new Sequelize(
     process.env.DB_PASSWORD,   
     {
             host:'localhost',
-            port:5433,
+           /*  port:5433, */
             dialect: 'postgres',
             }
 )
