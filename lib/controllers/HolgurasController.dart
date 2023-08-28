@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import "package:http/http.dart" as http;
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:rtv/class/ListProcedureVisualInspection.dart';
+import 'package:rtv/class/Holguras.dart';
 import 'package:rtv/constants/url2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class VisualInspectionController {
-  Future<List<ListProcedureInspection>> listInspectionProcedure() async {
+class HolgurasController {
+  Future<List<Holguras>> listHolguras() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       int codeRTV = prefs.getInt('codeTV') ?? 0;
@@ -19,20 +19,20 @@ class VisualInspectionController {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode({
-            'tipo': 2,
+            'tipo': 3,
             'estado': 1,
           }),
         );
 
         if (response.statusCode == 200) {
           final List<dynamic> jsonResponse = jsonDecode(response.body);
-          final List<ListProcedureInspection> visualInspection =
-              jsonResponse.map((data) => ListProcedureInspection.fromJson(data)).toList();
+          final List<Holguras> holguras =
+              jsonResponse.map((data) => Holguras.fromJson(data)).toList();
 
-          print("Lista de Procedimientos: $visualInspection");
+          print("Lista de Procedimientos: $holguras");
           
-          if (visualInspection.isNotEmpty) {
-            return visualInspection;
+          if (holguras.isNotEmpty) {
+            return holguras;
           } else {
             _showToast("Failed to load procedures");
             throw Exception('Failed to load procedures');

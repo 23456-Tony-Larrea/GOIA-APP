@@ -1,158 +1,189 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
-import 'package:rtv/controllers/BluetoohController.dart';
+import 'package:rtv/class/Holguras.dart';
+import 'package:rtv/controllers/HolgurasController.dart';
 
 class HolgurasView extends StatefulWidget {
-  const HolgurasView({Key? key}) : super(key: key);
-
   @override
   _HolgurasViewState createState() => _HolgurasViewState();
 }
 
 class _HolgurasViewState extends State<HolgurasView> {
-  final BluetoohController _bluetoothController = BluetoohController();
+  final HolgurasController _controller = HolgurasController();
+  List<List<Holguras>> _procedureListHolguras = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProcedures();
+  }
+
+  Future<void> _loadProcedures() async {
+    try {
+      List<Holguras> holguras =
+          await _controller.listHolguras();
+
+      if (holguras.isNotEmpty) {
+        for (int i = 0; i < 18; i++) {
+          _procedureListHolguras.add(holguras
+              .where((holgurass) => holgurass.abreviatura == i)
+              .toList());
+        }
+
+        setState(() {});
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void _showDefectsModal(BuildContext context, Defecto defect) {
+    bool isOtherDefect = defect.abreviatura == 'OTROS';
+    String description = '';
+    List<bool> selectedRatings = [false, false, false];
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              title: Text('Defecto: ${defect.descripcion}'),
+              onTap: () {},
+            ),
+            Divider(),
+            if (isOtherDefect)
+              Column(
+                children: [
+                  Text('Descripción del defecto:'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                      decoration: InputDecoration(labelText: 'Descripción'),
+                      onChanged: (value) {
+                        setState(() {
+                          description = value;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                ],
+              ),
+            if (!isOtherDefect)
+              Column(
+                children: [
+                  Text('Calificación:'),
+                  CheckboxListTile(
+                    title: Text('Calificación 1'),
+                    value: selectedRatings[0],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedRatings[0] = value!;
+                      });
+                    },
+                  ),
+                  CheckboxListTile(
+                    title: Text('Calificación 2'),
+                    value: selectedRatings[1],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedRatings[1] = value!;
+                      });
+                    },
+                  ),
+                  CheckboxListTile(
+                    title: Text('Calificación 3'),
+                    value: selectedRatings[2],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedRatings[2] = value!;
+                      });
+                    },
+                  ),
+                  CheckboxListTile(
+                    title: Text('Cancelar'),
+                    value: selectedRatings[2],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedRatings[2] = value!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ElevatedButton(
+              onPressed: () {
+                // Implement your logic to save the defect details
+                // You can use 'description' and 'selectedRatings' here
+                Navigator.of(context).pop();
+              },
+              child: Text("Guardar"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bluetooth'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: _showBondedDevices,
-              child: const Text('Mostrar dispositivos vinculados'),
-            ),
-            ElevatedButton(
-              onPressed: _bluetoothController.startScan,
-              child: const Text('Iniciar escaneo'),
-            ),
-            Expanded(
-              child: StreamBuilder<List<ScanResult>>(
-                stream: _bluetoothController.getScanResultsStream(),
-                initialData: [],
-                builder: (c, snapshot) => _buildDeviceList(snapshot.data!),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: _bluetoothController.stop,
-              child: const Text('Detener escaneo'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showBondedDevices() async {
-    final List<BluetoothDevice> bondedDevices =
-        await _bluetoothController.getBondedDevices();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Dispositivos vinculados'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              for (BluetoothDevice device in bondedDevices)
-                ListTile(
-                  title: Text(
-                      device.name.isNotEmpty ? device.name : "Desconocido"),
-                  subtitle: Text(device.id.toString()),
-                  onTap: () {
-                    // Puedes agregar lógica para conectar con el dispositivo cuando se haga clic en él
-                  },
-                ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  ListView _buildDeviceList(List<ScanResult> scanResults) {
-    return ListView.builder(
-      itemCount: scanResults.length,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () => _connectToDevice(context, scanResults[index].device),
-          child: ListTile(
-            title: Text(scanResults[index].device.name),
-            subtitle: Text('RSSI: ${scanResults[index].rssi}'),
-            trailing: ElevatedButton(
-              onPressed: () =>
-                  _connectToDevice(context, scanResults[index].device),
-              child: Text('Conectar'),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showDeviceNameDialog(
-      BuildContext context, String deviceName, BluetoothDevice device) {
-    showDialog(
-      //create connection device
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Conectar con $deviceName'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const Text(
-                  '¿Estás seguro de que quieres enviar datos a este dispositivo?'),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _bluetoothController.disconnectDevice(device);
+      body: _procedureListHolguras.isNotEmpty
+          ? Scrollbar(
+              child: ListView(
+                children: _procedureListHolguras.map((procedures) {
+                  return ExpansionPanelList(
+                    elevation: 1,
+                    expandedHeaderPadding: EdgeInsets.all(0),
+                    expansionCallback: (int index, bool isExpanded) {
+                      setState(() {
+                        procedures[index].isExpanded = !isExpanded;
+                      });
                     },
-                    child: const Text('Desconectar'),
-                  ),
-                 ElevatedButton(
-  onPressed: () {
-    _bluetoothController.sendTrama(TramaType.Enviar);
-  },
-  child: const Text('Enviar'),
-),
-
-ElevatedButton(
-  onPressed: () {
-    _bluetoothController.sendTrama(TramaType.Apagar);
-  },
-  child: const Text('Apagar'),
-),
-                ],
+                    children: procedures.map((procedure) {
+                      return ExpansionPanel(
+                        headerBuilder: (BuildContext context, bool isExpanded) {
+                          return ListTile(
+                            title: RichText(
+                              text: TextSpan(
+                                style: DefaultTextStyle.of(context).style,
+                                children: [
+                                  TextSpan(
+                                    text: 'Procedimiento ',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  TextSpan(text: '${procedure.procedimiento}'),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        body: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: procedure.defectos.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return ListTile(
+                              title: Text(
+                                  'Defecto: ${procedure.defectos[index].descripcion}'),
+                              onTap: () {
+                                _showDefectsModal(
+                                    context, procedure.defectos[index]);
+                              },
+                            );
+                          },
+                        ),
+                        isExpanded: procedure.isExpanded,
+                      );
+                    }).toList(),
+                  );
+                }).toList(),
               ),
-            ],
-          ),
-        );
-      },
+            )
+          : Center(
+              child: CircularProgressIndicator(),
+            ),
     );
-  }
-
-//funcion crear
-  void _connectToDevice(BuildContext context, BluetoothDevice device) async {
-    bool connected = await _bluetoothController.connectDevice(context, device);
-    if (connected) {
-      _showDeviceNameDialog(context, device.name, device);
-    }
   }
 }

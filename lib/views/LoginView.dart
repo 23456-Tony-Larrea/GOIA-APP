@@ -15,9 +15,6 @@ class _LoginPageState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
       body: Column(
         children: <Widget>[
           Container(
