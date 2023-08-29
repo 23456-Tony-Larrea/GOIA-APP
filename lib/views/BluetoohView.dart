@@ -15,15 +15,11 @@ class _BluetoothViewState extends State<BluetoothView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ElevatedButton(
-              onPressed: _showBondedDevices,
-              child: const Text('Mostrar dispositivos vinculados'),
-            ),
+            
             ElevatedButton(
               onPressed: _bluetoothController.startScan,
               child: const Text('Iniciar escaneo'),
@@ -40,46 +36,17 @@ class _BluetoothViewState extends State<BluetoothView> {
               child: const Text('Detener escaneo'),
             ),
           ],
+          
         ),
+        
       ),
+      
     );
+    
   }
 
-  void _showBondedDevices() async {
-    final List<BluetoothDevice> bondedDevices =
-        await _bluetoothController.getBondedDevices();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Dispositivos vinculados'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              for (BluetoothDevice device in bondedDevices)
-                ListTile(
-                  title: Text(
-                      device.name.isNotEmpty ? device.name : "Desconocido"),
-                  subtitle: Text(device.id.toString()),
-                  onTap: () {
-                    // Puedes agregar lógica para conectar con el dispositivo cuando se haga clic en él
-                  },
-                ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
+ 
   ListView _buildDeviceList(List<ScanResult> scanResults) {
     return ListView.builder(
       itemCount: scanResults.length,
@@ -124,19 +91,18 @@ class _BluetoothViewState extends State<BluetoothView> {
                     },
                     child: const Text('Desconectar'),
                   ),
-                 ElevatedButton(
-  onPressed: () {
-    _bluetoothController.sendTrama(TramaType.Enviar);
-  },
-  child: const Text('Enviar'),
-),
-
-ElevatedButton(
-  onPressed: () {
-    _bluetoothController.sendTrama(TramaType.Apagar);
-  },
-  child: const Text('Apagar'),
-),
+                  ElevatedButton(
+                    onPressed: () {
+                      _bluetoothController.sendTrama(TramaType.Enviar);
+                    },
+                    child: const Text('Enviar'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _bluetoothController.sendTrama(TramaType.Apagar);
+                    },
+                    child: const Text('Apagar'),
+                  ),
                 ],
               ),
             ],

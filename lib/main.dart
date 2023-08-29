@@ -24,6 +24,8 @@ class MyApp extends StatelessWidget {
       '/menu': (context) => TabBarViewExample(),
       '/users': (context) => UsersView(),
       '/identification': (context) => IdentificationView(),
+      '/visual_inspection': (context) => VisualInspectionView(),
+      '/holguras': (context) => HolgurasView(),
     });
   }
 }

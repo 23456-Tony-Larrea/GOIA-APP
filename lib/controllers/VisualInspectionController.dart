@@ -12,7 +12,7 @@ class VisualInspectionController {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       int codeRTV = prefs.getInt('codeTV') ?? 0;
       
-      /* if (codeRTV != 0) { */
+      if (codeRTV != 0) { 
         final response = await http.post(
           Uri.parse('${url}/listarProcedimientos'),
           headers: <String, String>{
@@ -41,10 +41,10 @@ class VisualInspectionController {
           _showToast("Failed to load procedures");
           throw Exception('Failed to load procedures');
         }
-    /*   } else {
+     } else {
         _showToast("el vehiculo no tiene RTV");
         throw Exception('Vehicle has no RTV');
-      } */
+      } 
     } catch (e) {
       print(e);
       throw Exception('An error occurred');

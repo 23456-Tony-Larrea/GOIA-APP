@@ -28,12 +28,9 @@ class BluetoohController {
       flutterBlue.scanResults.listen((results) {
         for (ScanResult r in results) {
           scanResults.add(r);
-
-          print('${r.device.name} encontrado! rssi: ${r.rssi}');
         }
       });
     } else {
-      print("Permiso de ubicación denegado");
     }
   }
 
@@ -49,7 +46,6 @@ class BluetoohController {
       _services = await device.discoverServices();
       return true; // Indica que el dispositivo se ha conectado correctamente
     } catch (e) {
-      print('Error al conectar con el dispositivo: $e');
       return false; // Indica que ha ocurrido un error al conectar el dispositivo
     }
   }
@@ -66,11 +62,9 @@ class BluetoohController {
     switch (type) {
       case TramaType.Enviar:
         trama = [36, 49, 49, 49, 49, 49, 35];
-        print('Enviando trama: [36, 49, 49, 49, 49, 49, 35]');
         break;
       case TramaType.Apagar:
         trama = [36, 48, 48, 48, 48, 48, 35];
-        print('Enviando trama: [36, 48, 48, 48, 48, 48, 35]');
         break;
       default:
         print('Tipo de trama no válido');
@@ -79,7 +73,6 @@ class BluetoohController {
 
     for (BluetoothService service in _services!) {
       var characteristics = service.characteristics;
-      // Obtener característica
       for (BluetoothCharacteristic c in characteristics) {
         if (c.properties.write) {
           await c.write(trama);
@@ -93,10 +86,8 @@ class BluetoohController {
   Future<List<BluetoothDevice>> getBondedDevices() async {
     try {
       List<BluetoothDevice> bondedDevices = await flutterBlue.connectedDevices;
-      print("Dispositivos vinculados encontrados: $bondedDevices");
       return bondedDevices;
     } catch (e) {
-      print("Error al obtener dispositivos vinculados: $e");
       return [];
     }
   }
@@ -104,9 +95,8 @@ class BluetoohController {
   Future<void> disconnectDevice(BluetoothDevice device) async {
     try {
       await device.disconnect();
-      print('Dispositivo desconectado');
+   
     } catch (e) {
-      print('Error al desconectar el dispositivo: $e');
     }
   }
 }

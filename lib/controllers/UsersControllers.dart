@@ -19,7 +19,7 @@ class UsersController {
       body: jsonEncode(
         <String, dynamic>{
           'username': nameUserController.text,
-          'password':'123456',
+          'password': '123456',
           'role_id': roleId,
         },
       ),
@@ -55,6 +55,7 @@ class UsersController {
     final response = await http.get(Uri.parse('${url}/users'));
     if (response.statusCode == 200) {
       final List<dynamic> users = jsonDecode(response.body);
+      print(users);
       return users.map((json) => Users.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load users');
@@ -62,38 +63,40 @@ class UsersController {
   }
 
   //edit users
-Future<void> updateUsers(BuildContext context, int usersId, String newUsersName, int role_id) async {
-  bool success = await http
-      .put(
-    Uri.parse('${url}/users/$usersId'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode(
-      <String, dynamic>{
-        'username': newUsersName,
-        'role_id': role_id,
+  Future<void> updateUsers(BuildContext context, int usersId,
+      String newUsersName, int role_id) async {
+    bool success = await http
+        .put(
+      Uri.parse('${url}/users/$usersId'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
       },
-    ),
-  )
-      .then((response) {
-    if (response.statusCode == 200) {
-      return true;
-    } else {
+      body: jsonEncode(
+        <String, dynamic>{
+          'username': newUsersName,
+          'role_id': role_id,
+        },
+      ),
+    )
+        .then((response) {
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    }).catchError((error) {
+      print("Error updating user: $error");
       return false;
-    }
-  }).catchError((error) {
-    print("Error updating user: $error");
-    return false;
-  });
+    });
 
-  if (success) {
-    Navigator.pop(context); // Close the dialog on success
-    // You might want to show a success message or update the user list here
-  } else {
-    // Show an error message or handle the error case
+    if (success) {
+      Navigator.pop(context); // Close the dialog on success
+      // You might want to show a success message or update the user list here
+    } else {
+      // Show an error message or handle the error case
+    }
   }
-}
+
   //delete users
   Future<bool> deleteUsers(int usersId) {
     return http.put(

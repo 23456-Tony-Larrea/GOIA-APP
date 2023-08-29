@@ -22,14 +22,20 @@ class ConfigHostController {
     if (response.statusCode == 200) {
       // Guardar los valores en SharedPreferences
       final jsonResponse = json.decode(response.body);
-      final estaIp = jsonResponse[0]['esta_ip'];
-      final estaHost = jsonResponse[0]['esta_host'];
-      final host = "http://192.168.2.68:8080";
+        print(jsonResponse);
+    if (jsonResponse is List && jsonResponse.isNotEmpty) {
+  final firstObject = jsonResponse[0];
+  
+  if (firstObject.containsKey('esta_ip') && firstObject.containsKey('esta_host')) {
+    final estaIp = firstObject['esta_ip'];
+    final estaHost = firstObject['esta_host'];
+    final host = "http://192.168.2.68:8080";
+    await saveHostToSharedPreferences('esta_ip', estaIp);
+    await saveHostToSharedPreferences('esta_host', estaHost);
+    await saveHostToSharedPreferences('host', host);
 
-      await saveHostToSharedPreferences('esta_ip', estaIp);
-      await saveHostToSharedPreferences('esta_host', estaHost);
-      await saveHostToSharedPreferences('host', host);
-
+  }
+} 
       Fluttertoast.showToast(
           msg: "el host ha sido guardado con éxito",
           toastLength: Toast.LENGTH_SHORT,
@@ -54,5 +60,9 @@ class ConfigHostController {
   Future<void> saveHostToSharedPreferences(String key, String value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value);
+  }
+  Future<String?> getHostFromSharedPreferences() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('esta_host');
   }
 }

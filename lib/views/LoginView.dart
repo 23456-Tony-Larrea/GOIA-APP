@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rtv/controllers/LoginController.dart';
 import 'package:rtv/controllers/ConfigHostController.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -22,41 +23,65 @@ class _LoginPageState extends State<LoginView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                GestureDetector(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Configura tu host'),
-                          content: TextField(
-                            controller: _configHostController.configController,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Host',
-                            ),
-                          ),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                _configHostController.addConfig(context);
-                              },
-                              child: const Text('Guardar'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('Cerrar'),
-                            ),
-                          ],
-        
-                    
+                FutureBuilder<String?>(
+                  future: _configHostController.getHostFromSharedPreferences(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data != null) {
+                      Fluttertoast.showToast(
+                          msg: "el host ha sido guardado con éxito",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.CENTER,
+                          backgroundColor: Colors.greenAccent,
+                          textColor: Colors.white,
+                          fontSize: 16.0
+                      );
+                      return Container();
+                    } else {
+                      Fluttertoast.showToast(
+                          msg: "el host no se pudo guardar",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.CENTER,
+                          backgroundColor: Colors.redAccent,
+                          textColor: Colors.white,
+                          fontSize: 16.0
                         );
-                      },
-                    );
+                      return GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Configura tu host'),
+                                content: TextField(
+                                  controller:
+                                      _configHostController.configController,
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Host',
+                                  ),
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      _configHostController.addConfig(context);
+                                    },
+                                    child: const Text('Guardar'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Cerrar'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: const Icon(Icons.settings),
+                      );
+                    }
                   },
-                  child: const Icon(Icons.settings),
                 ),
               ],
             ),

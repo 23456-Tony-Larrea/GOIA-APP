@@ -10,7 +10,6 @@ class VisualInspectionView extends StatefulWidget {
 class _VisualInspectionViewState extends State<VisualInspectionView> {
   final VisualInspectionController _controller = VisualInspectionController();
   List<List<ListProcedureInspection>> _procedureLists = [];
-
   @override
   void initState() {
     super.initState();
@@ -36,95 +35,137 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
     }
   }
 
-  void _showDefectsModal(BuildContext context, Defecto defect) {
-    bool isOtherDefect = defect.abreviatura == 'OTROS';
-    String description = '';
-    List<bool> selectedRatings = [false, false, false];
+void _showDefectsModal(BuildContext context, Defecto defect) {
+  bool isOtherDefect = defect.abreviatura == 'OTROS';
+  String description = '';
+  String classification = '';
+  List<bool> selectedRatings = [false, false, false];
 
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              title: Text('Defecto: ${defect.descripcion}'),
-              onTap: () {},
-            ),
-            Divider(),
-            if (isOtherDefect)
-              Column(
-                children: [
-                  Text('Descripción del defecto:'),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: TextField(
-                      decoration: InputDecoration(labelText: 'Descripción'),
-                      onChanged: (value) {
-                        setState(() {
-                          description = value;
-                        });
-                      },
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Defecto: ${defect.descripcion}'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              if (isOtherDefect)
+                Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Text('Descripción del defecto:'),
+                        TextField(
+                          decoration: InputDecoration(labelText: 'Descripción'),
+                          onChanged: (value) {
+                            setState(() {
+                              description = value;
+                            });
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 10),
-                ],
-              ),
-            if (!isOtherDefect)
-              Column(
-                children: [
-                  Text('Calificación:'),
-                  CheckboxListTile(
-                    title: Text('Calificación 1'),
-                    value: selectedRatings[0],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedRatings[0] = value!;
-                      });
-                    },
+                ),
+              if (!isOtherDefect)
+                Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Text('Ubicación:'),
+                        DropdownButton<String>(
+                          value: '12',
+                          items: [
+                            DropdownMenuItem(
+                              value: '12',
+                              child: Text('12'),
+                            ),
+                            DropdownMenuItem(
+                              value: '13',
+                              child: Text('13'),
+                            ),
+                            DropdownMenuItem(
+                              value: '14',
+                              child: Text('14'),
+                            ),
+                            DropdownMenuItem(
+                              value: '15',
+                              child: Text('15'),
+                            ),
+                            DropdownMenuItem(
+                              value: '16',
+                              child: Text('16'),
+                            ),
+                            DropdownMenuItem(
+                              value: '17',
+                              child: Text('17'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              classification = value!;
+                            });
+                          },
+                        ),
+                        Text('Tomar foto:'),
+                        // Add logic for capturing a photo
+                        Text('Calificación:'),
+                        Column(
+                          children: [
+                            CheckboxListTile(
+                              title: Text('Calificación 1'),
+                              value: selectedRatings[0],
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedRatings[0] = value!;
+                                });
+                              },
+                            ),
+                            CheckboxListTile(
+                              title: Text('Calificación 2'),
+                              value: selectedRatings[1],
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedRatings[1] = value!;
+                                });
+                              },
+                            ),
+                            CheckboxListTile(
+                              title: Text('Calificación 3'),
+                              value: selectedRatings[2],
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedRatings[2] = value!;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  CheckboxListTile(
-                    title: Text('Calificación 2'),
-                    value: selectedRatings[1],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedRatings[1] = value!;
-                      });
-                    },
-                  ),
-                  CheckboxListTile(
-                    title: Text('Calificación 3'),
-                    value: selectedRatings[2],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedRatings[2] = value!;
-                      });
-                    },
-                  ),
-                  CheckboxListTile(
-                    title: Text('Cancelar'),
-                    value: selectedRatings[2],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedRatings[2] = value!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ElevatedButton(
-              onPressed: () {
-                // Implement your logic to save the defect details
-                // You can use 'description' and 'selectedRatings' here
-                Navigator.of(context).pop();
-              },
-              child: Text("Guardar"),
-            ),
-          ],
-        );
-      },
-    );
-  }
+                ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          ElevatedButton(
+            onPressed: () {
+              // Implement your logic to save the defect details
+              // You can use 'description', 'classification', and 'selectedRatings' here
+              Navigator.of(context).pop();
+            },
+            child: Text("Guardar"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -151,8 +192,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                                 children: [
                                   TextSpan(
                                     text: 'Procedimiento ',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
+                                    style: TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   TextSpan(text: '${procedure.procedimiento}'),
                                 ],
@@ -165,11 +205,9 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                           itemCount: procedure.defectos.length,
                           itemBuilder: (BuildContext context, int index) {
                             return ListTile(
-                              title: Text(
-                                  'Defecto: ${procedure.defectos[index].descripcion}'),
+                              title: Text('Defecto: ${procedure.defectos[index].descripcion}'),
                               onTap: () {
-                                _showDefectsModal(
-                                    context, procedure.defectos[index]);
+                                _showDefectsModal(context, procedure.defectos[index]);
                               },
                             );
                           },
