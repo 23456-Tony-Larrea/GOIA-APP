@@ -28,23 +28,44 @@ class _LoginPageState extends State<LoginView> {
                   builder: (context, snapshot) {
                     if (snapshot.hasData && snapshot.data != null) {
                       Fluttertoast.showToast(
-                          msg: "el host ha sido guardado con éxito",
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.CENTER,
-                          backgroundColor: Colors.greenAccent,
-                          textColor: Colors.white,
-                          fontSize: 16.0
+                        msg: "el host ha sido guardado con éxito",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM_LEFT,
+                        backgroundColor: Colors.greenAccent,
+                        textColor: Colors.white,
+                        fontSize: 16.0,
+                        timeInSecForIosWeb: 5, // display duration for web
                       );
+                      //traer estaHost
+                      _configHostController
+                          .getHostFromSharedPreferences()
+                          .then((estaIp) {
+                        if (estaIp != null) {
+                          // Mostrar un mensaje Toast con el valor de esta_host
+                          print(estaIp);
+                          Fluttertoast.showToast(
+                            msg: 'Tu host es: $estaIp',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM_LEFT,
+                            backgroundColor: Colors.greenAccent,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
+                          ;
+                        }
+                      });
+
                       return Container();
                     } else {
                       Fluttertoast.showToast(
-                          msg: "el host no se pudo guardar",
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.CENTER,
-                          backgroundColor: Colors.redAccent,
-                          textColor: Colors.white,
-                          fontSize: 16.0
-                        );
+                        msg: "el host no se pudo guardar",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        backgroundColor: Colors.redAccent,
+                        textColor: Colors.white,
+                        fontSize: 16.0,
+                        timeInSecForIosWeb: 5, // display duration for web
+                      );
                       return GestureDetector(
                         onTap: () {
                           showDialog(

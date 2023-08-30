@@ -6,16 +6,20 @@ import 'package:rtv/class/Cars.dart';
 import 'package:rtv/constants/url2.dart';
 import 'package:rtv/class/ListProcedure.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class IdentificationController {
-  String? vehiCodigo;
+  int? vehiCodigo;
   List<dynamic> listProcedure = [];
   List<dynamic> listDefects = [];
   final TextEditingController placaController = TextEditingController();
   bool codeRTV = true;
   Cars? carData;
+  int? savedRtvCode;
   final TextEditingController observationController = TextEditingController();
-
+  int?
+      _userRoleId; // Declaración de la variable global para almacenar el userRoleId
 
   Future<void> searchVehicle(BuildContext context, String placa) async {
     final response = await http.post(
@@ -28,11 +32,11 @@ class IdentificationController {
       }),
     );
 
-    int vehiCodigo; // Declarar vehiCodigo en este alcance
     if (response.statusCode == 200) {
       final List<dynamic> jsonResponse = jsonDecode(response.body);
       final Map<String, dynamic> firstElement = jsonResponse[0];
-      vehiCodigo = firstElement['vehi_codigo'];
+      this.vehiCodigo = firstElement['vehi_codigo'];
+      await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
 
       Fluttertoast.showToast(
         msg: "El carro ha sido buscado con éxito",
@@ -43,8 +47,9 @@ class IdentificationController {
         textColor: Colors.white,
         fontSize: 16.0,
       );
-      carData = await getInformationCar(vehiCodigo);
-      await getRegisterRTV(vehiCodigo);
+
+      carData = await getInformationCar(this.vehiCodigo ?? 0);
+      await getRegisterRTV(this.vehiCodigo ?? 0);
     } else {
       // Alert que no se pudo encontrar el vehículo
       Fluttertoast.showToast(
@@ -95,11 +100,11 @@ class IdentificationController {
 
         if (carsRTV.isNotEmpty && carsRTV[0]['codigo'] != null) {
           int rtvCode = carsRTV[0]['codigo'];
+          savedRtvCode = rtvCode;
           await saveCodeRTV('codeTV', rtvCode);
-          print('Código RTV: $rtvCode'); // Imprimir el código RTV
           await lisProcedure();
         } else {
-          codeRTV = false; 
+          codeRTV = false;
           Fluttertoast.showToast(
             msg: "el vehiculo no tiene RTV",
             toastLength: Toast.LENGTH_SHORT,
@@ -120,7 +125,7 @@ class IdentificationController {
 
   Future<List<ListProcedure>> lisProcedure() async {
     try {
-      if (codeRTV) { 
+      /* if (codeRTV) { */
       final response = await http.post(
         Uri.parse('${url}/listarProcedimientos'),
         headers: <String, String>{
@@ -140,8 +145,6 @@ class IdentificationController {
           procedures.add(procedure);
         }
 
-        print("Lista de Procedimientos: $procedures");
-
         // Separar los procedimientos en dos listas diferentes
         List<ListProcedure> procedureList0 = [];
         List<ListProcedure> procedureList1 = [];
@@ -151,30 +154,24 @@ class IdentificationController {
         if (procedures.length > 1) {
           procedureList1.add(procedures[1]);
         }
-
-        // Imprimir o realizar acciones con los procedimientos separados
-        print("Procedimiento 0: $procedureList0");
-        print("Procedimiento 1: $procedureList1");
-
         return procedures;
       } else {
         print('Error: ${response.statusCode}');
         throw Exception('Failed to load procedures');
       }
-       } else {
-      Fluttertoast.showToast(
-        msg: "el vehiculo no tiene RTV",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 5,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-        webPosition: "center",
-        
-      );
-      throw Exception('Vehicle has no RTV');
-    } 
+      /* } else {
+        Fluttertoast.showToast(
+          msg: "el vehiculo no tiene RTV",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          webPosition: "center",
+        );
+        throw Exception('Vehicle has no RTV');
+      } */
     } catch (e) {
       print(e);
       throw Exception('An error occurred');
@@ -186,118 +183,69 @@ class IdentificationController {
     await prefs.setInt(key, value);
   }
 
-  Future<void> saveIdentificationObservation(BuildContext build , String numero , String abreviatura , String descripcion ,String Codigo_as400, String observation) async {
+  Future<void> saveVehi_code(String key, int value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(key, value);
+  }
+
+  Future<void> saveIdentificationObservation(
+    BuildContext build,
+    int codigo,
+    String numero,
+    String abreviatura,
+    String descripcion,
+    String Codigo_as400,
+    String observation,
+    String KM,
+    String ubicaciones,
+    int calificacion, // Agrega la calificación
+  ) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? estaHost = prefs.getString('esta_host');
+    DateTime now = DateTime.now();
+    String formattedDate = now.toLocal().toString().split('.')[0];
+    await getUserRoleAndPermissions();
+    print("no entro,${_userRoleId}");
+    SharedPreferences prefs2 = await SharedPreferences.getInstance();
+    int? codeRTVexample = prefs2.getInt('codeTV');
+    int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
     final data = [
       {
-        "vehi_codigo":vehiCodigo,
-        "codigoRTV":codeRTV
-      },
- {
-            "codigo": 1,
-            "numero": 1,
-            "familia": 1,
-            "subfamilia": "1",
-            "abreviatura": "IDENTIFICACION",
-            "abreviatura_descripcion": "IDENTIFICACION DEL VEHICULO",
-            "subfamilia_descripcion": "NUMERO DE PLACA",
-            "categoria": "01",
-            "categoria_abreviatura": "NUMERO DE PLACA",
-            "categoria_descripcion": "NUMERO DE PLACA",
-            "procedimiento":
-                "COMPROBAR EL ESTADO, FIJACION Y UBICACION DE LAS PLACAS. CONSTATAR QUE EL NUMERO DE PLACA CORRESPONDE A LA DOCUMENTACION.",
-            "defectos": [
-              {
-                "codigo": 10,
-                "abreviatura": "OTROS",
-                "descripcion": "OTROS(A INTRODUCIR POR EL INSPECTOR DE LINEA)",
-                "numero": "01",
-                "codigo_as400": "010101"
-              },
-              {
-                "codigo": 11,
-                "abreviatura": "CORRESPONDE",
-                "descripcion":
-                    "NÚMERO DE PLACA NO COINCIDE CON LA DOCUMENTACIÓN",
-                "numero": "02",
-                "codigo_as400": "010102"
-              },
-              {
-                "codigo": 12,
-                "abreviatura": "EXIST/DETERIORO",
-                "descripcion": "PLACAS INEXISTENTES O DETERIORADAS.",
-                "numero": "03",
-                "codigo_as400": "010103"
-              },
-              {
-                "codigo": 13,
-                "abreviatura": "ILEGIBLE",
-                "descripcion": "PLACAS ILEGIBLES",
-                "numero": "04",
-                "codigo_as400": "010104"
-              },
-              {
-                "codigo": 14,
-                "abreviatura": "POSICIÓN",
-                "descripcion":
-                    "PLACAS SITUADAS EN POSICIÓN O LUGAR INCORRECTO.",
-                "numero": "05",
-                "codigo_as400": "010105"
-              },
-              {
-                "codigo": 15,
-                "abreviatura": "SUJECIÓN",
-                "descripcion": "DEFECTOS DE SUJECIÓN EN LAS PLACAS",
-                "numero": "06",
-                "codigo_as400": "010106"
-              }
-            ],
+        "rete_codigo": codeRTVexample,
+        "vehi_codigo": vehiCodigo2,
+        "kilometraje": KM,
+        "dato": [
+          {
+            "codigo": codigo,
             "defectoEncontrado": {
-              'numero': numero,
-              'abreviatura': abreviatura,
-              'descripcion': descripcion,
-              'Codigo_as400': Codigo_as400,
-              'observacion': observation
+              "numero": numero,
+              "abreviatura": abreviatura,
+              "descripcion": descripcion,
+              "codigo_as400": Codigo_as400,
+              "ubicacion":ubicaciones,
+              "calificacion":calificacion,
+              "observacion": observation
             }
           },
           {
-            "codigo": 2,
-            "numero": 2,
-            "familia": 1,
-            "subfamilia": "2",
-            "abreviatura": "IDENTIFICACION",
-            "abreviatura_descripcion": "IDENTIFICACION DEL VEHICULO",
-            "subfamilia_descripcion": "NUMERO DE CHASIS O VIN",
-            "categoria": "01",
-            "categoria_abreviatura": "NUMERO DE CHASIS O VIN",
-            "categoria_descripcion": "NUMERO DE CHASIS O VIN",
-            "procedimiento":
-                "COMPROBAR LA COINCIDENCIA DEL NÚMERO VISUALIZADO EN EL VEHICULO CON LA DOCUMENTACION (PARTE DEL TRABAJO)",
-            "defectos": [
-              {
-                "codigo": 16,
-                "abreviatura": "OTROS",
-                "descripcion":
-                    "OTROS (A INTRODUCIR POR EL INSPECTOR DE LÍNEA )",
-                "numero": "01",
-                "codigo_as400": "010201"
-              },
-              {
-                "codigo": 17,
-                "abreviatura": "NO CORRESPONDE",
-                "descripcion":
-                    "NÚMERO DE CHASIS NO COINCIDE CON LA DOCUMENTACIÓN.",
-                "numero": "02",
-                "codigo_as400": "010202"
-              }
-            ],
-            'defectoEncontrado': {
-              'numero': numero,
-              'abreviatura': abreviatura,
-              'descripcion': descripcion,
-              'Codigo_as400': Codigo_as400,
-              'observacion': observation
+            "codigo": "",
+            "defectoEncontrado": {
+              "numero": "",
+              "abreviatura": "",
+              "descripcion": "",
+              "codigo_as400": "",
+              "observacion": ""
             }
-          },
+          }
+        ],
+        "fotos": [
+          {"f": "", "filename": ""},
+          {"f": "", "filename": ""}
+        ],
+        "fecha_inicio": formattedDate,
+        "usua_codigo": _userRoleId,
+        "esta_host": estaHost
+      }
     ];
     try {
       final response = await http.post(
@@ -333,8 +281,20 @@ class IdentificationController {
       print(e);
       throw Exception('An error occurred');
     }
-
   }
 
+  Future<void> getUserRoleAndPermissions() async {
+    final storage = FlutterSecureStorage();
+    String? token = await storage.read(key: 'helllo_token');
 
+    if (token != null) {
+      try {
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+        _userRoleId = decodedToken['role_id']; // Almacena el role_id
+        print('User Role ID: $_userRoleId');
+      } catch (error) {
+        print('Error decoding token: $error');
+      }
+    }
+  }
 }

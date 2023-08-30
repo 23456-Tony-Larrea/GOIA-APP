@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rtv/controllers/IdentificationController.dart';
 import '../class/ListProcedure.dart';
 
@@ -20,11 +21,12 @@ class _IdentificationViewState extends State<IdentificationView> {
     super.initState();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Scrollbar(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -152,6 +154,7 @@ class _IdentificationViewState extends State<IdentificationView> {
                           ),
                         ],
                       ),
+
                     ),
                   );
                 }).toList(),
@@ -193,6 +196,7 @@ class _IdentificationViewState extends State<IdentificationView> {
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -393,6 +397,8 @@ void _showDefectoModal(BuildContext context, Defecto defecto) {
 }
 
 void _showOtrosModal(BuildContext context, Defecto defecto) {
+  List<int> selectedLocations = [];
+ int selectedCalification = 1;
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
@@ -401,62 +407,178 @@ void _showOtrosModal(BuildContext context, Defecto defecto) {
           final IdentificationController _controller =
               IdentificationController();
           final TextEditingController _ob = TextEditingController();
-          return Container(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Defecto: ${defecto.abreviatura}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text('Descripción: ${defecto.descripcion}'),
-                SizedBox(height: 16),
-                DropdownButton<int>(
-                  value: 9, // Valor inicial del Dropdown (puedes ajustarlo)
-                  onChanged: (int? newValue) {
-                    setState(() {
-                      // Aquí puedes manejar el cambio de valor del Dropdown
-                    });
-                  },
-                  items: List.generate(
-                    9, // Cantidad de ítems en el Dropdown (9 al 17)
-                    (index) => DropdownMenuItem<int>(
-                      value: index + 9,
-                      child: Text((index + 9).toString()),
+          final TextEditingController _kilometrajeController =
+              TextEditingController();
+
+          return SingleChildScrollView(
+            child: Container(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Defecto: ${defecto.abreviatura}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),
-                ),
-                SizedBox(height: 16),
-                Image.asset('assets/images/carrito.png', width: 100, height: 100), // Ajusta el tamaño de la imagen según tus necesidades
-                SizedBox(height: 16),
-                TextField(
-                  maxLines: 4,
-                  controller: _ob,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Observación',
+                  SizedBox(height: 8),
+                  Text('Descripción: ${defecto.descripcion}'),
+                  SizedBox(height: 16),
+              DropdownButtonFormField<int>(
+  decoration: InputDecoration(
+    labelText: 'Elige las ubicaciones',
+    border: OutlineInputBorder(),
+  ),
+  value: 9, // Establece el valor inicial aquí
+ onChanged: (int? newValue) {
+  setState(() {
+    if (newValue != null) {
+      selectedLocations.add(newValue);
+    }
+  });
+},
+  items: List.generate(
+    9,
+    (index) => DropdownMenuItem<int>(
+      value: index + 9,
+      child: Text((index + 9).toString()),
+    ),
+  ),
+), if (selectedLocations.isNotEmpty)
+                    Card(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: Text('Ubicaciones seleccionadas:'),
+                          ),
+                          Column(
+                            children: selectedLocations.map((location) {
+                              return ListTile(
+                                title: Text(location.toString()),
+                                trailing: IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      selectedLocations.remove(location);
+                                    });
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(height: 16),
+                  Image.asset(
+                    'assets/images/carrito.png',
+                    width: 250,
+                    height: 250,
                   ),
-                ),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    _controller.saveIdentificationObservation(
-                      context,
-                      defecto.numero,
-                      defecto.abreviatura,
-                      defecto.descripcion,
-                      defecto.codigoAs400,
-                      _ob.text,
-                    );
-                  },
-                  child: Text('Guardar'),
-                ),
-              ],
+                  SizedBox(height: 16),
+                  TextField(
+                    maxLines: 4,
+                    controller: _ob,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Observación',
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    maxLines: 1,
+                    controller: _kilometrajeController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Kilometraje',
+                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
+                  ),
+                  SizedBox(height: 16),
+ Card(
+                    // Card para la calificación
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: Text('Calificación'),
+                        ),
+                        ListTile(
+                          title: Text('Calificación: $selectedCalification'),
+                          trailing: Icon(Icons.arrow_drop_down),
+                          onTap: () {
+                            // Abre un Dialog para seleccionar la calificación
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Selecciona la calificación'),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        title: Text('1'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 1;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      ListTile(
+                                        title: Text('2'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 2;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      ListTile(
+                                        title: Text('3'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 3;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16),
+
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      _controller.saveIdentificationObservation(
+                        context,
+                        defecto.codigo,
+                        defecto.numero,
+                        defecto.abreviatura,
+                        defecto.descripcion,
+                        defecto.codigoAs400,
+                        _ob.text,
+                        _kilometrajeController.text,
+                        selectedLocations.join(','),
+                        selectedCalification, // Agrega la calificación
+                      );
+                    },
+                    child: Text('Guardar'),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -464,6 +586,8 @@ void _showOtrosModal(BuildContext context, Defecto defecto) {
     },
   );
 }
+
+
 
 void main() {
   runApp(MaterialApp(

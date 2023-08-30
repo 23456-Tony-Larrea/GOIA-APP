@@ -63,6 +63,6 @@ class ConfigHostController {
   }
   Future<String?> getHostFromSharedPreferences() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString('esta_host');
+  return prefs.getString('esta_ip');
   }
 }

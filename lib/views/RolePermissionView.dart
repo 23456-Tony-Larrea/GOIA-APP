@@ -30,45 +30,47 @@ class _RolesViewState extends State<RolesView> {
     });
 
     }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                _showAddRoleDialog(context);
-              },
-              child: const Text('Agregar Rol'),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: FutureBuilder<List<Role>>(
-                future: _roles,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return ListView.builder(
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              _showAddRoleDialog(context);
+            },
+            child: const Text('Agregar Rol'),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: FutureBuilder<List<Role>>(
+              future: _roles,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  return Scrollbar(
+                    child: ListView.builder(
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
                         return _buildRoleItem(snapshot.data![index]);
                       },
-                    );
-                  }
-                },
-              ),
+                    ),
+                  );
+                }
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildRoleItem(Role role) {
     return Card(
