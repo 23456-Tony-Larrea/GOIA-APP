@@ -25,10 +25,6 @@ class UsersController {
       ),
     );
     if (response.statusCode == 200) {
-      // If the server did return a 200 CREATED response,
-      // then parse the JSON.
-      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-      print(jsonResponse);
       Fluttertoast.showToast(
           msg: "el usuario a sido creado con exito",
           toastLength: Toast.LENGTH_SHORT,
@@ -55,7 +51,6 @@ class UsersController {
     final response = await http.get(Uri.parse('${url}/users'));
     if (response.statusCode == 200) {
       final List<dynamic> users = jsonDecode(response.body);
-      print(users);
       return users.map((json) => Users.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load users');

@@ -205,42 +205,132 @@ class IdentificationController {
     DateTime now = DateTime.now();
     String formattedDate = now.toLocal().toString().split('.')[0];
     await getUserRoleAndPermissions();
-    print("no entro,${_userRoleId}");
     SharedPreferences prefs2 = await SharedPreferences.getInstance();
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
+    int? estaCodigo = prefs2.getInt('esta_codigo');
+
     final data = [
       {
         "rete_codigo": codeRTVexample,
         "vehi_codigo": vehiCodigo2,
         "kilometraje": KM,
+        "esta_codigo": estaCodigo,
         "dato": [
           {
-            "codigo": codigo,
+            "codigo": 1,
+            "numero": 1,
+            "familia": 1,
+            "subfamilia": "1",
+            "abreviatura": "IDENTIFICACION",
+            "abreviatura_descripcion": "IDENTIFICACION DEL VEHICULO",
+            "subfamilia_descripcion": "NUMERO DE PLACA",
+            "categoria": "01",
+            "categoria_abreviatura": "NUMERO DE PLACA",
+            "categoria_descripcion": "NUMERO DE PLACA",
+            "procedimiento":
+                "COMPROBAR EL ESTADO, FIJACION Y UBICACION DE LAS PLACAS. CONSTATAR QUE EL NUMERO DE PLACA CORRESPONDE A LA DOCUMENTACION.",
+            "defectos": [
+              {
+                "codigo": 10,
+                "abreviatura": "OTROS",
+                "descripcion": "OTROS(A INTRODUCIR POR EL INSPECTOR DE LINEA)",
+                "numero": "01",
+                "codigo_as400": "010101"
+              },
+              {
+                "codigo": 11,
+                "abreviatura": "CORRESPONDE",
+                "descripcion":
+                    "NÚMERO DE PLACA NO COINCIDE CON LA DOCUMENTACIÓN",
+                "numero": "02",
+                "codigo_as400": "010102"
+              },
+              {
+                "codigo": 12,
+                "abreviatura": "EXIST/DETERIORO",
+                "descripcion": "PLACAS INEXISTENTES O DETERIORADAS.",
+                "numero": "03",
+                "codigo_as400": "010103"
+              },
+              {
+                "codigo": 13,
+                "abreviatura": "ILEGIBLE",
+                "descripcion": "PLACAS ILEGIBLES",
+                "numero": "04",
+                "codigo_as400": "010104"
+              },
+              {
+                "codigo": 14,
+                "abreviatura": "POSICIÓN",
+                "descripcion":
+                    "PLACAS SITUADAS EN POSICIÓN O LUGAR INCORRECTO.",
+                "numero": "05",
+                "codigo_as400": "010105"
+              },
+              {
+                "codigo": 15,
+                "abreviatura": "SUJECIÓN",
+                "descripcion": "DEFECTOS DE SUJECIÓN EN LAS PLACAS",
+                "numero": "06",
+                "codigo_as400": "010106"
+              }
+            ],
             "defectoEncontrado": {
               "numero": numero,
               "abreviatura": abreviatura,
               "descripcion": descripcion,
               "codigo_as400": Codigo_as400,
-              "ubicacion":ubicaciones,
-              "calificacion":calificacion,
+              "ubicacion": ubicaciones,
+              "calificacion": calificacion,
               "observacion": observation
             }
           },
           {
-            "codigo": "",
+            "codigo": 2,
+            "numero": 2,
+            "familia": 1,
+            "subfamilia": "2",
+            "abreviatura": "IDENTIFICACION",
+            "abreviatura_descripcion": "IDENTIFICACION DEL VEHICULO",
+            "subfamilia_descripcion": "NUMERO DE CHASIS O VIN",
+            "categoria": "01",
+            "categoria_abreviatura": "NUMERO DE CHASIS O VIN",
+            "categoria_descripcion": "NUMERO DE CHASIS O VIN",
+            "procedimiento":
+                "COMPROBAR LA COINCIDENCIA DEL NÚMERO VISUALIZADO EN EL VEHICULO CON LA DOCUMENTACION (PARTE DEL TRABAJO)",
+            "defectos": [
+              {
+                "codigo": 16,
+                "abreviatura": "OTROS",
+                "descripcion":
+                    "OTROS (A INTRODUCIR POR EL INSPECTOR DE LÍNEA )",
+                "numero": "01",
+                "codigo_as400": "010201"
+              },
+              {
+                "codigo": 17,
+                "abreviatura": "NO CORRESPONDE",
+                "descripcion":
+                    "NÚMERO DE CHASIS NO COINCIDE CON LA DOCUMENTACIÓN.",
+                "numero": "02",
+                "codigo_as400": "010202"
+              }
+            ],
             "defectoEncontrado": {
               "numero": "",
               "abreviatura": "",
               "descripcion": "",
               "codigo_as400": "",
+              "calificacion": "",
+              "ubicacion": "",
               "observacion": ""
             }
           }
         ],
         "fotos": [
-          {"f": "", "filename": ""},
-          {"f": "", "filename": ""}
+          {"f": "", "filename": "", "filepath": ""},
+          {"f": "", "filename": "", "filepath": ""}
         ],
         "fecha_inicio": formattedDate,
         "usua_codigo": _userRoleId,
@@ -249,7 +339,7 @@ class IdentificationController {
     ];
     try {
       final response = await http.post(
-        Uri.parse('${url}/GuardarIdentificacion'),
+        Uri.parse('${url}/GuardarIdentificacion1'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -291,7 +381,6 @@ class IdentificationController {
       try {
         Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
         _userRoleId = decodedToken['role_id']; // Almacena el role_id
-        print('User Role ID: $_userRoleId');
       } catch (error) {
         print('Error decoding token: $error');
       }
