@@ -208,15 +208,17 @@ class IdentificationController {
     SharedPreferences prefs2 = await SharedPreferences.getInstance();
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
-    int? estaCodigo = prefs2.getInt('esta_codigo');
-
-    final data = [
-      {
-        "rete_codigo": codeRTVexample,
+    try {
+      final response = await http.post(
+        Uri.parse('${url}/GuardarIdentificacion1'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+                  "rete_codigo": codeRTVexample,
         "vehi_codigo": vehiCodigo2,
         "kilometraje": KM,
-        "esta_codigo": estaCodigo,
-        "dato": [
+        "dato":jsonEncode([
           {
             "codigo": 1,
             "numero": 1,
@@ -322,28 +324,20 @@ class IdentificationController {
               "abreviatura": "",
               "descripcion": "",
               "codigo_as400": "",
-              "calificacion": "",
               "ubicacion": "",
+              "calificacion": "",
               "observacion": ""
             }
           }
-        ],
-        "fotos": [
+        ]),
+        "fotos": jsonEncode([
           {"f": "", "filename": "", "filepath": ""},
           {"f": "", "filename": "", "filepath": ""}
-        ],
+         ]),
         "fecha_inicio": formattedDate,
         "usua_codigo": _userRoleId,
-        "esta_host": estaHost
-      }
-    ];
-    try {
-      final response = await http.post(
-        Uri.parse('${url}/GuardarIdentificacion1'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(data),
+           "esta_host":estaHost
+        }),
       );
       if (response.statusCode == 200) {
         Fluttertoast.showToast(
