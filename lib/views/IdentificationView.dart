@@ -138,6 +138,7 @@ Widget build(BuildContext context) {
                         fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
+                
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -758,8 +759,6 @@ final FocusNode _kilometrajeFocusNode = FocusNode();
     },
   );
 }
-
-
 
 void main() {
   runApp(MaterialApp(
