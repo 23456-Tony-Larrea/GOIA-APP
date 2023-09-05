@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rtv/class/ListProcedureVisualInspection.dart';
 import 'package:rtv/controllers/VisualInspectionController.dart';
 
@@ -27,7 +28,6 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
               .where((procedure) => procedure.numero == i)
               .toList());
         }
-
         setState(() {});
       }
     } catch (e) {
@@ -35,193 +35,550 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
     }
   }
 
-void _showDefectsModal(BuildContext context, Defecto defect) {
-  bool isOtherDefect = defect.abreviatura == 'OTROS';
-  String description = '';
-  String classification = '';
-  List<bool> selectedRatings = [false, false, false];
-
-  showDialog(
+  void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
+     showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Defecto: ${defect.descripcion}'),
-        content: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              if (isOtherDefect)
-                Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
+      return Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Defectos',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            SizedBox(height: 8),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: defectos.length,
+              itemBuilder: (context, index) {
+                final defecto = defectos[index];
+                return ListTile(
+                  title: Text(defecto.abreviatura),
+                  subtitle: Text(defecto.descripcion),
+                  trailing: Text('Código AS400: ${defecto.codigoAs400}'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  _showDefectoModal(context, defecto);
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+  }
+void _showDefectoModal(BuildContext context, Defecto defecto) {
+ List<int> selectedLocations = [];
+ int selectedCalification = 1;
+           final VisualInspectionController _controller =
+              VisualInspectionController();
+          final TextEditingController _kilometrajeC =
+              TextEditingController();
+              final FocusNode _obFocusNode = FocusNode();
+final FocusNode _kilometrajeFocusNode = FocusNode();
+  if (defecto.abreviatura == "OTROS") {
+    _showOtrosModal(context, defecto);
+  } else {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, setState) {
+
+          return SingleChildScrollView(
+            child: GestureDetector(
+              onTap: () {
+                _obFocusNode.unfocus();
+                _kilometrajeFocusNode.unfocus();
+              },
+            child: Container(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Defecto: ${defecto.abreviatura}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text('Descripción: ${defecto.descripcion}'),
+                  SizedBox(height: 16),
+              DropdownButtonFormField<int>(
+  decoration: InputDecoration(
+    labelText: 'Elige las ubicaciones',
+    border: OutlineInputBorder(),
+  ),
+  value: 9, // Establece el valor inicial aquí
+ onChanged: (int? newValue) {
+  setState(() {
+    if (newValue != null) {
+      selectedLocations.add(newValue);
+    }
+  });
+},
+  items: List.generate(
+    9,
+    (index) => DropdownMenuItem<int>(
+      value: index + 9,
+      child: Text((index + 9).toString()),
+    ),
+  ),
+), if (selectedLocations.isNotEmpty)
+                    Card(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: Text('Ubicaciones seleccionadas:'),
+                          ),
+                          Column(
+                            children: selectedLocations.map((location) {
+                              return ListTile(
+                                title: Text(location.toString()),
+                                trailing: IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      selectedLocations.remove(location);
+                                    });
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(height: 16),
+                  Image.asset(
+                    'assets/images/carrito.png',
+                    width: 250,
+                    height: 250,
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    maxLines: 1,
+                    controller: _kilometrajeC,
+                    focusNode: _kilometrajeFocusNode,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Kilometraje',
+                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
+                  ),
+                  SizedBox(height: 16),
+ Card(
+                    // Card para la calificación
                     child: Column(
                       children: [
-                        Text('Descripción del defecto:'),
-                        TextField(
-                          decoration: InputDecoration(labelText: 'Descripción'),
-                          onChanged: (value) {
-                            setState(() {
-                              description = value;
-                            });
-                          },
+                        ListTile(
+                          title: Text('Calificación'),
                         ),
+                        ListTile(
+                          title: Text('Calificación: $selectedCalification'),
+                          trailing: Icon(Icons.arrow_drop_down),
+                          onTap: () {
+                            // Abre un Dialog para seleccionar la calificación
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Selecciona la calificación'),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        title: Text('1'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 1;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      ListTile(
+                                        title: Text('2'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 2;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      ListTile(
+                                        title: Text('3'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 3;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                       ListTile(
+                                        title: Text('Cancelar'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 4;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                              
+                                );
+                              },
+                            );
+                          },
+                        
+                        ),
+
                       ],
                     ),
                   ),
-                ),
-              if (!isOtherDefect)
-                Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Column(
-                      children: [
-                        Text('Ubicación:'),
-                        DropdownButton<String>(
-                          value: '12',
-                          items: [
-                            DropdownMenuItem(
-                              value: '12',
-                              child: Text('12'),
-                            ),
-                            DropdownMenuItem(
-                              value: '13',
-                              child: Text('13'),
-                            ),
-                            DropdownMenuItem(
-                              value: '14',
-                              child: Text('14'),
-                            ),
-                            DropdownMenuItem(
-                              value: '15',
-                              child: Text('15'),
-                            ),
-                            DropdownMenuItem(
-                              value: '16',
-                              child: Text('16'),
-                            ),
-                            DropdownMenuItem(
-                              value: '17',
-                              child: Text('17'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              classification = value!;
-                            });
-                          },
-                        ),
-                        Text('Tomar foto:'),
-                        // Add logic for capturing a photo
-                        Text('Calificación:'),
-                        Column(
-                          children: [
-                            CheckboxListTile(
-                              title: Text('Calificación 1'),
-                              value: selectedRatings[0],
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedRatings[0] = value!;
-                                });
-                              },
-                            ),
-                            CheckboxListTile(
-                              title: Text('Calificación 2'),
-                              value: selectedRatings[1],
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedRatings[1] = value!;
-                                });
-                              },
-                            ),
-                            CheckboxListTile(
-                              title: Text('Calificación 3'),
-                              value: selectedRatings[2],
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedRatings[2] = value!;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      _controller.saveVisualInspection(
+                        context,
+                        defecto.codigo,
+                        defecto.numero,
+                        defecto.abreviatura,
+                        defecto.descripcion,
+                        defecto.codigoAs400,
+                       _kilometrajeC.text, // Cambiar a _kilometrajeController.text
+                       selectedLocations.join(','),
+                       selectedCalification, // Agrega la calificación
+                      );
+                    },
+                    child: Text('Guardar'),
                   ),
-                ),
-            ],
+                ],
+              ),
+            ),
+            )
+          );
+        },
+      );
+    },
+  );
+  }
+}
+
+
+
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: _procedureLists.isNotEmpty
+        ? Scrollbar(
+            child: ListView(
+              children: _procedureLists.map((procedures) {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: procedures.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final procedure = procedures[index];
+                    return GestureDetector(
+                      onTap: () {
+                        _showDefectsModal(context, procedure.defectos);
+                      },
+                      child: Card(
+                        elevation: 4,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Items', // Agrega el mensaje aquí
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward, // Agrega el icono aquí
+                                    size: 24,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              _buildProcedureField(
+                                  'Procedimiento', procedure.procedimiento),
+                              _buildProcedureField(
+                                  'Abreviatura', procedure.abreviatura),
+                              _buildProcedureField(
+                                  'Descripción Abreviatura',
+                                  procedure.abreviaturaDescripcion),
+                              // ...agrega los campos restantes aquí
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }).toList(),
+            ),
+          )
+        : Center(
+            child: CircularProgressIndicator(),
+          ),
+  );
+}
+  Widget _buildProcedureField(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label:',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
         ),
-        actions: <Widget>[
-          ElevatedButton(
-            onPressed: () {
-              // Implement your logic to save the defect details
-              // You can use 'description', 'classification', and 'selectedRatings' here
-              Navigator.of(context).pop();
-            },
-            child: Text("Guardar"),
+        SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(fontSize: 16),
           ),
-        ],
+        ),
+      ],
+    ),
+  );
+}
+void _showOtrosModal(BuildContext context, Defecto defecto) {
+  List<int> selectedLocations = [];
+ int selectedCalification = 1;
+           final VisualInspectionController _controller =
+              VisualInspectionController();
+          final TextEditingController _ob = TextEditingController();
+          final TextEditingController _kilometrajeController =
+              TextEditingController();
+              final FocusNode _obFocusNode = FocusNode();
+final FocusNode _kilometrajeFocusNode = FocusNode();
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, setState) {
+
+          return SingleChildScrollView(
+            child: GestureDetector(
+              onTap: () {
+                _obFocusNode.unfocus();
+                _kilometrajeFocusNode.unfocus();
+              },
+            child: Container(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Defecto: ${defecto.abreviatura}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text('Descripción: ${defecto.descripcion}'),
+                  SizedBox(height: 16),
+              DropdownButtonFormField<int>(
+  decoration: InputDecoration(
+    labelText: 'Elige las ubicaciones',
+    border: OutlineInputBorder(),
+  ),
+  value: 9, // Establece el valor inicial aquí
+ onChanged: (int? newValue) {
+  setState(() {
+    if (newValue != null) {
+      selectedLocations.add(newValue);
+    }
+  });
+},
+  items: List.generate(
+    9,
+    (index) => DropdownMenuItem<int>(
+      value: index + 9,
+      child: Text((index + 9).toString()),
+    ),
+  ),
+), if (selectedLocations.isNotEmpty)
+                    Card(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: Text('Ubicaciones seleccionadas:'),
+                          ),
+                          Column(
+                            children: selectedLocations.map((location) {
+                              return ListTile(
+                                title: Text(location.toString()),
+                                trailing: IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      selectedLocations.remove(location);
+                                    });
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(height: 16),
+                  Image.asset(
+                    'assets/images/carrito.png',
+                    width: 250,
+                    height: 250,
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: _ob,
+                    focusNode: _obFocusNode,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Observación',
+
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    maxLines: 1,
+                    controller: _kilometrajeController,
+                    focusNode: _kilometrajeFocusNode,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Kilometraje',
+                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
+                  ),
+                  SizedBox(height: 16),
+ Card(
+                    // Card para la calificación
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: Text('Calificación'),
+                        ),
+                        ListTile(
+                          title: Text('Calificación: $selectedCalification'),
+                          trailing: Icon(Icons.arrow_drop_down),
+                          onTap: () {
+                            // Abre un Dialog para seleccionar la calificación
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Selecciona la calificación'),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        title: Text('1'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 1;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      ListTile(
+                                        title: Text('2'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 2;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      ListTile(
+                                        title: Text('3'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 3;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                       ListTile(
+                                        title: Text('Cancelar'),
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCalification = 4;
+                                          });
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                              
+                                );
+                              },
+                            );
+                          },
+                        
+                        ),
+
+                      ],
+                    ),
+                  ),
+          
+                  SizedBox(height: 16),
+
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      _controller.saveIdentificationVisualInspectionObservation(
+                        context,
+                        defecto.codigo,
+                        defecto.numero,
+                        defecto.abreviatura,
+                        defecto.descripcion,
+                        defecto.codigoAs400,
+                        _ob.text,
+                        _kilometrajeController.text,
+                        selectedLocations.join(','),
+                        selectedCalification, // Agrega la calificación
+                      );
+                    },
+                    child: Text('Guardar'),
+                  ),
+                ],
+              ),
+            ),
+            )
+          );
+        },
       );
     },
   );
 }
 
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _procedureLists.isNotEmpty
-          ? Scrollbar(
-              child: ListView(
-                children: _procedureLists.map((procedures) {
-                  return ExpansionPanelList(
-                    elevation: 1,
-                    expandedHeaderPadding: EdgeInsets.all(0),
-                    expansionCallback: (int index, bool isExpanded) {
-                      setState(() {
-                        procedures[index].isExpanded = !isExpanded;
-                      });
-                    },
-                    children: procedures.map((procedure) {
-                      return ExpansionPanel(
-                        headerBuilder: (BuildContext context, bool isExpanded) {
-                          return ListTile(
-                            title: RichText(
-                              text: TextSpan(
-                                style: DefaultTextStyle.of(context).style,
-                                children: [
-                                  TextSpan(
-                                    text: 'Procedimiento ',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  TextSpan(text: '${procedure.procedimiento}'),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                        body: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: procedure.defectos.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return ListTile(
-                              title: Text('Defecto: ${procedure.defectos[index].descripcion}'),
-                              onTap: () {
-                                _showDefectsModal(context, procedure.defectos[index]);
-                              },
-                            );
-                          },
-                        ),
-                        isExpanded: procedure.isExpanded,
-                      );
-                    }).toList(),
-                  );
-                }).toList(),
-              ),
-            )
-          : Center(
-              child: CircularProgressIndicator(),
-            ),
-    );
-  }
 }

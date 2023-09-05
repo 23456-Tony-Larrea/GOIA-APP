@@ -300,7 +300,6 @@ Widget _buildProcedureCard(ListProcedure procedure) {
 }
 
 void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
-  //CREAR UN IF PARA MOSTRAR SHOEMODAL OTROS
   
   showModalBottomSheet(
     context: context,
@@ -342,13 +341,11 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
 }
 
 void _showDefectoModal(BuildContext context, Defecto defecto) {
-
-
-   List<int> selectedLocations = [];
+ List<int> selectedLocations = [];
  int selectedCalification = 1;
            final IdentificationController _controller =
               IdentificationController();
-          final TextEditingController _kilometrajeController =
+          final TextEditingController _kilometrajeC =
               TextEditingController();
               final FocusNode _obFocusNode = FocusNode();
 final FocusNode _kilometrajeFocusNode = FocusNode();
@@ -436,7 +433,7 @@ final FocusNode _kilometrajeFocusNode = FocusNode();
                   SizedBox(height: 16),
                   TextField(
                     maxLines: 1,
-                    controller: _kilometrajeController,
+                    controller: _kilometrajeC,
                     focusNode: _kilometrajeFocusNode,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
@@ -520,6 +517,17 @@ final FocusNode _kilometrajeFocusNode = FocusNode();
                   SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
+                      _controller.saveIdentification(
+                        context,
+                        defecto.codigo,
+                        defecto.numero,
+                        defecto.abreviatura,
+                        defecto.descripcion,
+                        defecto.codigoAs400,
+                       _kilometrajeC.text, // Cambiar a _kilometrajeController.text
+                       selectedLocations.join(','),
+                       selectedCalification, // Agrega la calificación
+                      );
                     },
                     child: Text('Guardar'),
                   ),

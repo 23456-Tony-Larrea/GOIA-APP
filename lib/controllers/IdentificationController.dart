@@ -18,8 +18,7 @@ class IdentificationController {
   Cars? carData;
   int? savedRtvCode;
   final TextEditingController observationController = TextEditingController();
-  int?
-      _userRoleId; // Declaración de la variable global para almacenar el userRoleId
+  int? _userRoleId; // Declaración de la variable global para almacenar el userRoleId
 
   Future<void> searchVehicle(BuildContext context, String placa) async {
     final response = await http.post(
@@ -125,7 +124,7 @@ class IdentificationController {
 
   Future<List<ListProcedure>> lisProcedure() async {
     try {
-      /* if (codeRTV) { */
+       if (codeRTV) { 
       final response = await http.post(
         Uri.parse('${url}/listarProcedimientos'),
         headers: <String, String>{
@@ -159,7 +158,7 @@ class IdentificationController {
         print('Error: ${response.statusCode}');
         throw Exception('Failed to load procedures');
       }
-      /* } else {
+       } else {
         Fluttertoast.showToast(
           msg: "el vehiculo no tiene RTV",
           toastLength: Toast.LENGTH_SHORT,
@@ -171,7 +170,7 @@ class IdentificationController {
           webPosition: "center",
         );
         throw Exception('Vehicle has no RTV');
-      } */
+      } 
     } catch (e) {
       print(e);
       throw Exception('An error occurred');
@@ -215,9 +214,202 @@ class IdentificationController {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
+          "rete_codigo": codeRTVexample,
+          "vehi_codigo": vehiCodigo2,
+          "kilometraje": KM,
+          "dato": jsonEncode([
+            {
+              "codigo": 1,
+              "numero": 1,
+              "familia": 1,
+              "subfamilia": "1",
+              "abreviatura": "IDENTIFICACION",
+              "abreviatura_descripcion": "IDENTIFICACION DEL VEHICULO",
+              "subfamilia_descripcion": "NUMERO DE PLACA",
+              "categoria": "01",
+              "categoria_abreviatura": "NUMERO DE PLACA",
+              "categoria_descripcion": "NUMERO DE PLACA",
+              "procedimiento":
+                  "COMPROBAR EL ESTADO, FIJACION Y UBICACION DE LAS PLACAS. CONSTATAR QUE EL NUMERO DE PLACA CORRESPONDE A LA DOCUMENTACION.",
+              "defectos": [
+                {
+                  "codigo": 10,
+                  "abreviatura": "OTROS",
+                  "descripcion":
+                      "OTROS(A INTRODUCIR POR EL INSPECTOR DE LINEA)",
+                  "numero": "01",
+                  "codigo_as400": "010101"
+                },
+                {
+                  "codigo": 11,
+                  "abreviatura": "CORRESPONDE",
+                  "descripcion":
+                      "NÚMERO DE PLACA NO COINCIDE CON LA DOCUMENTACIÓN",
+                  "numero": "02",
+                  "codigo_as400": "010102"
+                },
+                {
+                  "codigo": 12,
+                  "abreviatura": "EXIST/DETERIORO",
+                  "descripcion": "PLACAS INEXISTENTES O DETERIORADAS.",
+                  "numero": "03",
+                  "codigo_as400": "010103"
+                },
+                {
+                  "codigo": 13,
+                  "abreviatura": "ILEGIBLE",
+                  "descripcion": "PLACAS ILEGIBLES",
+                  "numero": "04",
+                  "codigo_as400": "010104"
+                },
+                {
+                  "codigo": 14,
+                  "abreviatura": "POSICIÓN",
+                  "descripcion":
+                      "PLACAS SITUADAS EN POSICIÓN O LUGAR INCORRECTO.",
+                  "numero": "05",
+                  "codigo_as400": "010105"
+                },
+                {
+                  "codigo": 15,
+                  "abreviatura": "SUJECIÓN",
+                  "descripcion": "DEFECTOS DE SUJECIÓN EN LAS PLACAS",
+                  "numero": "06",
+                  "codigo_as400": "010106"
+                }
+              ],
+              "defectoEncontrado": {
+                "numero": numero,
+                "abreviatura": abreviatura,
+                "descripcion": descripcion,
+                "codigo_as400": Codigo_as400,
+                "ubicacion": ubicaciones,
+                "calificacion": calificacion,
+                "observacion": observation
+              }
+            },
+            {
+              "codigo": 2,
+              "numero": 2,
+              "familia": 1,
+              "subfamilia": "2",
+              "abreviatura": "IDENTIFICACION",
+              "abreviatura_descripcion": "IDENTIFICACION DEL VEHICULO",
+              "subfamilia_descripcion": "NUMERO DE CHASIS O VIN",
+              "categoria": "01",
+              "categoria_abreviatura": "NUMERO DE CHASIS O VIN",
+              "categoria_descripcion": "NUMERO DE CHASIS O VIN",
+              "procedimiento":
+                  "COMPROBAR LA COINCIDENCIA DEL NÚMERO VISUALIZADO EN EL VEHICULO CON LA DOCUMENTACION (PARTE DEL TRABAJO)",
+              "defectos": [
+                {
+                  "codigo": 16,
+                  "abreviatura": "OTROS",
+                  "descripcion":
+                      "OTROS (A INTRODUCIR POR EL INSPECTOR DE LÍNEA )",
+                  "numero": "01",
+                  "codigo_as400": "010201"
+                },
+                {
+                  "codigo": 17,
+                  "abreviatura": "NO CORRESPONDE",
+                  "descripcion":
+                      "NÚMERO DE CHASIS NO COINCIDE CON LA DOCUMENTACIÓN.",
+                  "numero": "02",
+                  "codigo_as400": "010202"
+                }
+              ],
+              "defectoEncontrado": {
+                "numero": "",
+                "abreviatura": "",
+                "descripcion": "",
+                "codigo_as400": "",
+                "ubicacion": "",
+                "calificacion": "",
+                "observacion": ""
+              }
+            }
+          ]),
+          "fotos": jsonEncode([
+            {"f": "", "filename": "", "filepath": ""},
+            {"f": "", "filename": "", "filepath": ""}
+          ]),
+          "fecha_inicio": formattedDate,
+          "usua_codigo": _userRoleId,
+          "esta_host": estaHost
+        }),
+      );
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(
+          msg: "La identificación ha sido creada con éxito",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.greenAccent,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        Navigator.pop(build);
+      } else {
+        Fluttertoast.showToast(
+          msg: "La identificación no se pudo crear",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
+    } catch (e) {
+      print(e);
+      throw Exception('An error occurred');
+    }
+  }
+
+  Future<void> getUserRoleAndPermissions() async {
+    final storage = FlutterSecureStorage();
+    String? token = await storage.read(key: 'helllo_token');
+
+    if (token != null) {
+      try {
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+        _userRoleId = decodedToken['role_id']; // Almacena el role_id
+      } catch (error) {
+        print('Error decoding token: $error');
+      }
+    }
+  }
+
+  Future<void> saveIdentification(
+    BuildContext build,
+    int codigoIdentification,
+    String numeroIdentification,
+    String abreviaturaIdentification,
+    String descripcionIdentification,
+    String Codigo_as400Identification,
+    String kmIdentification,
+    String ubicacionesIdentification,
+    int calificacionIdentification, // Agrega la calificación
+  ) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? estaHost = prefs.getString('esta_host');
+    DateTime now = DateTime.now();
+    String formattedDate = now.toLocal().toString().split('.')[0];
+    await getUserRoleAndPermissions();
+    SharedPreferences prefs2 = await SharedPreferences.getInstance();
+    int? codeRTVexample = prefs2.getInt('codeTV');
+    int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
+  try {
+      final response = await http.post(
+        Uri.parse('${url}/GuardarIdentificacion1'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
                   "rete_codigo": codeRTVexample,
         "vehi_codigo": vehiCodigo2,
-        "kilometraje": KM,
+        "kilometraje": kmIdentification,
         "dato":jsonEncode([
           {
             "codigo": 1,
@@ -279,13 +471,13 @@ class IdentificationController {
               }
             ],
             "defectoEncontrado": {
-              "numero": numero,
-              "abreviatura": abreviatura,
-              "descripcion": descripcion,
-              "codigo_as400": Codigo_as400,
-              "ubicacion": ubicaciones,
-              "calificacion": calificacion,
-              "observacion": observation
+             "numero": "",
+              "abreviatura": "",
+              "descripcion": "",
+              "codigo_as400": "",
+              "ubicacion": "",
+              "calificacion": "",
+              "observacion": ""
             }
           },
           {
@@ -320,13 +512,13 @@ class IdentificationController {
               }
             ],
             "defectoEncontrado": {
-              "numero": "",
-              "abreviatura": "",
-              "descripcion": "",
-              "codigo_as400": "",
-              "ubicacion": "",
-              "calificacion": "",
-              "observacion": ""
+                  "numero": numeroIdentification,
+              "abreviatura": abreviaturaIdentification,
+              "descripcion": descripcionIdentification,
+              "codigo_as400": Codigo_as400Identification,
+              "ubicacion": ubicacionesIdentification,
+              "calificacion": calificacionIdentification,
+              "observacion":""
             }
           }
         ]),
@@ -364,20 +556,6 @@ class IdentificationController {
     } catch (e) {
       print(e);
       throw Exception('An error occurred');
-    }
-  }
-
-  Future<void> getUserRoleAndPermissions() async {
-    final storage = FlutterSecureStorage();
-    String? token = await storage.read(key: 'helllo_token');
-
-    if (token != null) {
-      try {
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        _userRoleId = decodedToken['role_id']; // Almacena el role_id
-      } catch (error) {
-        print('Error decoding token: $error');
-      }
-    }
+    } 
   }
 }
