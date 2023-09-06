@@ -174,7 +174,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                "Abreviatura : ${procedure.abreviatura}",
+                                                "Abreviatura : ${procedure.abreviaturaDescripcion}",
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 18,
@@ -184,7 +184,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                                                   height:
                                                       4), // Espacio entre el título y el subtítulo
                                               Text(
-                                                "Descripción: ${procedure.abreviaturaDescripcion}", // Agrega el subtítulo aquí
+                                                "Descripción: ${procedure.abreviatura}", // Agrega el subtítulo aquí
                                                 overflow: TextOverflow
                                                     .ellipsis, // Manejo del desbordamiento
                                                 maxLines:
@@ -286,11 +286,9 @@ class _HolgurasViewState extends State<HolgurasView> {
 
   void _showOtrosModal(BuildContext context, Defecto defecto) {
     List<int> selectedLocations = [];
-    int selectedCalification = 1;
+    int? selectedCalification = null;
     final HolgurasController _controller = HolgurasController();
     final TextEditingController _ob = TextEditingController();
-    final TextEditingController _kilometrajeController =
-        TextEditingController();
     final FocusNode _obFocusNode = FocusNode();
     final FocusNode _kilometrajeFocusNode = FocusNode();
     showModalBottomSheet(
@@ -382,87 +380,59 @@ class _HolgurasViewState extends State<HolgurasView> {
                       ),
                     ),
                     SizedBox(height: 16),
-                    TextField(
-                      maxLines: 1,
-                      controller: _kilometrajeController,
-                      focusNode: _kilometrajeFocusNode,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Kilometraje',
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    Card(
+                     Card(
                       // Card para la calificación
                       child: Column(
                         children: [
                           ListTile(
                             title: Text('Calificación'),
                           ),
-                          ListTile(
-                            title: Text('Calificación: $selectedCalification'),
-                            trailing: Icon(Icons.arrow_drop_down),
-                            onTap: () {
-                              // Abre un Dialog para seleccionar la calificación
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Selecciona la calificación'),
-                                    content: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        ListTile(
-                                          title: Text('1'),
-                                          onTap: () {
-                                            setState(() {
-                                              selectedCalification = 1;
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                        ListTile(
-                                          title: Text('2'),
-                                          onTap: () {
-                                            setState(() {
-                                              selectedCalification = 2;
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                        ListTile(
-                                          title: Text('3'),
-                                          onTap: () {
-                                            setState(() {
-                                              selectedCalification = 3;
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                        ListTile(
-                                          title: Text('Cancelar'),
-                                          onTap: () {
-                                            setState(() {
-                                              selectedCalification = 4;
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
+                           ListTile(
+                title: Text('Calificación: ${selectedCalification ?? 'Sin calificación'}'),
+              ),
+                            RadioListTile<int>(
+                title: Text('1'),
+                value: 1,
+                groupValue: selectedCalification,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCalification = value!;
+                  });
+                },
+              ),
+              RadioListTile<int>(
+                title: Text('2'),
+                value: 2,
+                groupValue: selectedCalification,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCalification = value!;
+                  });
+                },
+              ),
+              RadioListTile<int>(
+                title: Text('3'),
+                value: 3,
+                groupValue: selectedCalification,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCalification = value!;
+                  });
+                },
+              ),
+               RadioListTile<int>(
+                title: Text('Cancelar'),
+                value: 4,
+                groupValue: selectedCalification,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCalification = value!;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
                     SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
@@ -474,7 +444,6 @@ class _HolgurasViewState extends State<HolgurasView> {
                           defecto.descripcion,
                           defecto.codigoAs400,
                           _ob.text,
-                          _kilometrajeController.text,
                           selectedLocations.join(','),
                           selectedCalification, // Agrega la calificación
                         );
@@ -533,11 +502,9 @@ class _HolgurasViewState extends State<HolgurasView> {
 
   void _showDefectoModal(BuildContext context, Defecto defecto) {
     List<int> selectedLocations = [];
-    int selectedCalification = 1;
+    int ?selectedCalification = null;
     final HolgurasController _controller = HolgurasController();
-    final TextEditingController _kilometrajeC = TextEditingController();
     final FocusNode _obFocusNode = FocusNode();
-    final FocusNode _kilometrajeFocusNode = FocusNode();
     if (defecto.abreviatura == "OTROS") {
       _showOtrosModal(context, defecto);
     } else {
@@ -550,7 +517,6 @@ class _HolgurasViewState extends State<HolgurasView> {
                   child: GestureDetector(
                 onTap: () {
                   _obFocusNode.unfocus();
-                  _kilometrajeFocusNode.unfocus();
                 },
                 child: Container(
                   padding: EdgeInsets.all(16.0),
@@ -619,88 +585,61 @@ class _HolgurasViewState extends State<HolgurasView> {
                         width: 250,
                         height: 250,
                       ),
+            
                       SizedBox(height: 16),
-                      TextField(
-                        maxLines: 1,
-                        controller: _kilometrajeC,
-                        focusNode: _kilometrajeFocusNode,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Kilometraje',
-                        ),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                      ),
-                      SizedBox(height: 16),
-                      Card(
-                        // Card para la calificación
-                        child: Column(
-                          children: [
-                            ListTile(
-                              title: Text('Calificación'),
-                            ),
-                            ListTile(
-                              title:
-                                  Text('Calificación: $selectedCalification'),
-                              trailing: Icon(Icons.arrow_drop_down),
-                              onTap: () {
-                                // Abre un Dialog para seleccionar la calificación
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text('Selecciona la calificación'),
-                                      content: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          ListTile(
-                                            title: Text('1'),
-                                            onTap: () {
-                                              setState(() {
-                                                selectedCalification = 1;
-                                              });
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          ListTile(
-                                            title: Text('2'),
-                                            onTap: () {
-                                              setState(() {
-                                                selectedCalification = 2;
-                                              });
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          ListTile(
-                                            title: Text('3'),
-                                            onTap: () {
-                                              setState(() {
-                                                selectedCalification = 3;
-                                              });
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          ListTile(
-                                            title: Text('Cancelar'),
-                                            onTap: () {
-                                              setState(() {
-                                                selectedCalification = 4;
-                                              });
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
+                       Card(
+                      // Card para la calificación
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: Text('Calificación'),
+                          ),
+                          ListTile(
+                title: Text('Calificación: ${selectedCalification ?? 'Sin calificación'}'),
+              ),
+                            RadioListTile<int>(
+                title: Text('1'),
+                value: 1,
+                groupValue: selectedCalification,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCalification = value!;
+                  });
+                },
+              ),
+              RadioListTile<int>(
+                title: Text('2'),
+                value: 2,
+                groupValue: selectedCalification,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCalification = value!;
+                  });
+                },
+              ),
+              RadioListTile<int>(
+                title: Text('3'),
+                value: 3,
+                groupValue: selectedCalification,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCalification = value!;
+                  });
+                },
+              ),
+               RadioListTile<int>(
+                title: Text('Cancelar'),
+                value: 4,
+                groupValue: selectedCalification,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCalification = value!;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
                       SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () {
@@ -711,8 +650,6 @@ class _HolgurasViewState extends State<HolgurasView> {
                             defecto.abreviatura,
                             defecto.descripcion,
                             defecto.codigoAs400,
-                            _kilometrajeC
-                                .text, // Cambiar a _kilometrajeController.text
                             selectedLocations.join(','),
                             selectedCalification, // Agrega la calificación
                           );

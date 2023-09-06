@@ -203,9 +203,8 @@ class HolgurasController {
     String descripcion,
     String Codigo_as400,
     String observation,
-    String KM,
     String ubicaciones,
-    int calificacion, // Agrega la calificación
+    int? calificacion, // Agrega la calificación
   ) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? estaHost = prefs.getString('esta_host');
@@ -224,7 +223,6 @@ class HolgurasController {
         body: jsonEncode(<String, dynamic>{
           "rete_codigo": codeRTVexample,
           "vehi_codigo": vehiCodigo2,
-          "kilometraje": KM,
           "dato": jsonEncode([
             {
               "codigo": 1,
@@ -382,9 +380,8 @@ class HolgurasController {
     String abreviaturaIdentification,
     String descripcionIdentification,
     String Codigo_as400Identification,
-    String kmIdentification,
     String ubicacionesIdentification,
-    int calificacionIdentification, // Agrega la calificación
+    int? calificacionIdentification, // Agrega la calificación
   ) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? estaHost = prefs.getString('esta_host');
@@ -403,7 +400,6 @@ class HolgurasController {
         body: jsonEncode(<String, dynamic>{
                   "rete_codigo": codeRTVexample,
         "vehi_codigo": vehiCodigo2,
-        "kilometraje": kmIdentification,
         "dato":jsonEncode([
           {
             "codigo": 1,

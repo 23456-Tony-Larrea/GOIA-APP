@@ -206,7 +206,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     String observation,
     String KM,
     String ubicaciones,
-    int calificacion, // Agrega la calificación
+    int? calificacion, // Agrega la calificación
   ) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? estaHost = prefs.getString('esta_host');
@@ -385,7 +385,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     String Codigo_as400Identification,
     String kmIdentification,
     String ubicacionesIdentification,
-    int calificacionIdentification, // Agrega la calificación
+    int? calificacionIdentification, // Agrega la calificación
   ) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? estaHost = prefs.getString('esta_host');
