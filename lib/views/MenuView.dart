@@ -7,6 +7,7 @@
   import 'package:rtv/views/LlantasView.dart';
   import 'package:rtv/views/ExitView.dart';
   import 'package:rtv/controllers/PermissionViewController.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
   class TabBarViewExample extends StatefulWidget {
     @override
@@ -25,6 +26,7 @@
       _permissionController = PermissionController();
       testDecodingToken();
     }
+
 
     void testDecodingToken() async {
       await _permissionController.getUserRoleAndPermissions();

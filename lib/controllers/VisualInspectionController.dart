@@ -7,19 +7,123 @@ import 'package:rtv/constants/url2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import '../class/Cars.dart';
 
 
 class VisualInspectionController {
-   int? savedRtvCode;
-   int? _userRoleId;
+   final TextEditingController placaController = TextEditingController();
+  bool codeRTV = true;
+  Cars? carData;
+  int? savedRtvCode;
+  int? _userRoleId;
+  int? vehiCodigo;
+
 final TextEditingController observationController = TextEditingController();
 
+  Future<void> searchVehicle(BuildContext context, String placa) async {
+    final response = await http.post(
+      Uri.parse('${url}/GetCodVehiculo'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'placa': placaController.text,
+      }),
+    );
 
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonResponse = jsonDecode(response.body);
+      final Map<String, dynamic> firstElement = jsonResponse[0];
+      this.vehiCodigo = firstElement['vehi_codigo'];
+      await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
+
+      Fluttertoast.showToast(
+        msg: "El carro ha sido buscado con éxito",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.greenAccent,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
+      carData = await getInformationCar(this.vehiCodigo ?? 0);
+      await getRegisterRTV(this.vehiCodigo ?? 0);
+    } else {
+      // Alert que no se pudo encontrar el vehículo
+      Fluttertoast.showToast(
+        msg: "El vehículo no se pudo encontrar",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 5,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+Future<Cars> getInformationCar(int vehiCodigo) async {
+    final response = await http.post(
+      Uri.parse('${url}/GetDatoVehiculo'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'vehi_codigo': vehiCodigo,
+      }),
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> carDataList = jsonDecode(response.body);
+      final dynamic firstCarData = carDataList.first;
+      return Cars.fromJson(firstCarData);
+    } else {
+      throw Exception('Failed to load car');
+    }
+  }
+
+  Future<void> getRegisterRTV(int vehiCodigo) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${url}/ObtenerRegistroRTV'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'vehi_codigo': vehiCodigo,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> carsRTV = jsonDecode(response.body);
+
+        if (carsRTV.isNotEmpty && carsRTV[0]['codigo'] != null) {
+          int rtvCode = carsRTV[0]['codigo'];
+          savedRtvCode = rtvCode;
+          await saveCodeRTV('codeTV', rtvCode);
+          await listInspectionProcedure();
+        } else {
+          codeRTV = false;
+          Fluttertoast.showToast(
+            msg: "el vehiculo no tiene RTV",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 5,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+      } else {
+        throw Exception('Failed to load cars');
+      }
+    } catch (error) {
+      print(error);
+    }
+  }
   Future<List<ListProcedureInspection>> listInspectionProcedure() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       int codeRTV = prefs.getInt('codeTV') ?? 0;
-      
       if (codeRTV != 0) { 
         final response = await http.post(
           Uri.parse('${url}/listarProcedimientos'),

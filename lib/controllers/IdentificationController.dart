@@ -197,7 +197,7 @@ class IdentificationController {
     String observation,
     String KM,
     String ubicaciones,
-    int calificacion, // Agrega la calificación
+    int? calificacion, // Agrega la calificación
   ) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? estaHost = prefs.getString('esta_host');
@@ -390,7 +390,7 @@ class IdentificationController {
     String Codigo_as400Identification,
     String kmIdentification,
     String ubicacionesIdentification,
-    int calificacionIdentification, // Agrega la calificación
+    int? calificacionIdentification, // Agrega la calificación
   ) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? estaHost = prefs.getString('esta_host');
