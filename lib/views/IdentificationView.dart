@@ -16,6 +16,8 @@ class _IdentificationViewState extends State<IdentificationView> {
   List<ListProcedure> _procedures1 = []; // Agrega esta línea
   Defecto? selectedDefecto;
   DefectoEncontrado? defectoEncontrado;
+bool _isDataFound = false;
+
 
   @override
   void initState() {
@@ -56,18 +58,21 @@ class _IdentificationViewState extends State<IdentificationView> {
                 ),
               ),
               SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () async {
-                  await _controller.searchVehicle(
-                      context, _controller.placaController.text);
-                  await _getProcedures();
-                  setState(
-                      () {}); // Actualiza la vista después de obtener los datos
-                },
-                child: Text('Buscar'),
-              ),
+             ElevatedButton(
+  onPressed: () async {
+    await _controller.searchVehicle(
+        context, _controller.placaController.text);
+    await _getProcedures();
+    
+    // Verifica si se encontró información antes de cambiar el estado
+    setState(() {
+      _isDataFound = (_controller.carData != null);
+    });
+  },
+  child: Text('Buscar'),
+),
               SizedBox(height: 16.0),
-              if (_controller.carData != null)
+              if (_isDataFound)
                 Card(
                   elevation: 4,
                   child: Column(
@@ -100,8 +105,8 @@ class _IdentificationViewState extends State<IdentificationView> {
                     ],
                   ),
                 )
-              else
-                Card(
+            else
+                                Card(
                   elevation: 4,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -130,7 +135,6 @@ class _IdentificationViewState extends State<IdentificationView> {
                   child: Column(
                     children: _procedures0.asMap().entries.map((entry) {
                       final procedure = entry.value;
-
                       return GestureDetector(
                         onTap: () {
                           _showDefectsModal(context, procedure.defectos);
@@ -171,40 +175,47 @@ class _IdentificationViewState extends State<IdentificationView> {
                     }).toList(),
                   ),
                 ),
-              if (_procedures1.isNotEmpty)
-                Column(
-                  children: _procedures1.asMap().entries.map((entry) {
-                    final procedure = entry.value;
+               if (_procedures1.isNotEmpty)
+  SingleChildScrollView(
+    child: Column(
+      children: _procedures1.asMap().entries.map((entry) {
+        final procedure = entry.value;
 
-                    return GestureDetector(
-                      onTap: () {
-                        _showDefectsModal(context, procedure.defectos);
-                      },
-                      child: Card(
-                        elevation: 4,
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildProcedureField(
-                                      'Procedimiento', procedure.procedimiento),
-                                  _buildProcedureField(
-                                      'Abreviatura', procedure.abreviatura),
-                                  _buildProcedureField(
-                                      'Descripción Abreviatura',
-                                      procedure.abreviaturaDescripcion),
-                                  // ...agrega los campos restantes aquí
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+        return GestureDetector(
+          onTap: () {
+            _showDefectsModal(context, procedure.defectos);
+          },
+          child: Card(
+            elevation: 4,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildProcedureField(
+                        'Procedimiento',
+                        procedure.procedimiento,
                       ),
-                    );
-                  }).toList(),
+                      _buildProcedureField(
+                        'Abreviatura',
+                        procedure.abreviatura,
+                      ),
+                      _buildProcedureField(
+                        'Descripción Abreviatura',
+                        procedure.abreviaturaDescripcion,
+                      ),
+                      // ...agrega los campos restantes aquí
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    ),
                 ),
             ],
           ),

@@ -30,7 +30,7 @@ class _HolgurasViewState extends State<HolgurasView> {
           await _controller.listInspectionProcedure();
 
       if (holgurasInspection.isNotEmpty) {
-        for (int i = 0; i < 70; i++) {
+        for (int i = 0; i < 265; i++) {
           _holgurasLists.add(holgurasInspection
               .where((procedure) => procedure.numero == i)
               .toList());
@@ -174,7 +174,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                "Abreviatura : ${procedure.abreviaturaDescripcion}",
+                                                "Procedimiento : ${procedure.procedimiento}",
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 18,
@@ -184,7 +184,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                                                   height:
                                                       4), // Espacio entre el título y el subtítulo
                                               Text(
-                                                "Descripción: ${procedure.abreviatura}", // Agrega el subtítulo aquí
+                                                "Descripción: ${procedure.abreviaturaDescripcion}", // Agrega el subtítulo aquí
                                                 overflow: TextOverflow
                                                     .ellipsis, // Manejo del desbordamiento
                                                 maxLines:
