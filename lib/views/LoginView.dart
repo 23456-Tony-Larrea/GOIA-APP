@@ -107,44 +107,73 @@ class _LoginPageState extends State<LoginView> {
               ],
             ),
           ),
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const Text(
-                    'Login',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: TextField(
-                      controller: _loginController.emailController,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Usuario',
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: TextField(
-                      controller: _loginController.passwordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Contraseña',
-                      ),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _loginController.login(context),
-                    child: const Text('Ingresar'),
-                  ),
-                ],
+        Expanded(
+  child: Stack(
+    children: [
+      // Fondo con imagen transparente
+      Image.asset(
+        'assets/images/fondo.png',
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      ),
+Center(
+  child: Card(
+    margin: EdgeInsets.all(10.0),
+    elevation: 5.0,
+    child: Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Text(
+              'RTV-SYSTEM',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          CircleAvatar(
+            backgroundImage: AssetImage('assets/images/logoMecanico.png'),
+            radius: 40,
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: TextField(
+              controller: _loginController.emailController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Usuario',
+                prefixIcon: Icon(Icons.person), // Agrega un ícono de usuario
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: TextField(
+              controller: _loginController.passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Contraseña',
+                prefixIcon: Icon(Icons.lock), // Agrega un ícono de candado
+              ),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => _loginController.login(context),
+            icon: Icon(Icons.login), // Agrega un ícono al botón "Ingresar"
+            label: Text('Ingresar'),
+          ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
         ],
       ),
     );

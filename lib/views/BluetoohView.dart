@@ -11,55 +11,66 @@ class BluetoothView extends StatefulWidget {
 
 class _BluetoothViewState extends State<BluetoothView> {
   final BluetoohController _bluetoothController = BluetoohController();
+bool isBluetoothOn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startScanning(); // Inicia el escaneo cuando la pantalla se carga
+  }
+
+  void _startScanning() async {
+    final bluetoothState = await FlutterBlue.instance.state;
+  setState(() {
+    isBluetoothOn = bluetoothState == BluetoothState.on;
+  });
+
+  if (isBluetoothOn) {
+    await _bluetoothController.startScan();
+  }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            
-            ElevatedButton(
-              onPressed: _bluetoothController.startScan,
-              child: const Text('Iniciar escaneo'),
-            ),
-            Expanded(
-              child: StreamBuilder<List<ScanResult>>(
-                stream: _bluetoothController.getScanResultsStream(),
-                initialData: [],
-                builder: (c, snapshot) => _buildDeviceList(snapshot.data!),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: _bluetoothController.stop,
-              child: const Text('Detener escaneo'),
-            ),
-          ],
-          
-        ),
-        
+      appBar: AppBar(
+        title: Text('Bluetooth'),
       ),
-      
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: StreamBuilder<List<ScanResult>>(
+              stream: _bluetoothController.getScanResultsStream(),
+              initialData: [],
+              builder: (c, snapshot) => _buildDeviceList(snapshot.data!),
+            ),
+          ),ElevatedButton(
+  onPressed: () {
+    _bluetoothController.startScan();
+  },
+  child: const Text('Escanear'),
+),
+],
+      ),
     );
-    
   }
 
-
- 
   ListView _buildDeviceList(List<ScanResult> scanResults) {
     return ListView.builder(
       itemCount: scanResults.length,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () => _connectToDevice(context, scanResults[index].device),
-          child: ListTile(
-            title: Text(scanResults[index].device.name),
-            subtitle: Text('RSSI: ${scanResults[index].rssi}'),
-            trailing: ElevatedButton(
-              onPressed: () =>
-                  _connectToDevice(context, scanResults[index].device),
-              child: Text('Conectar'),
+          onTap: () {
+            _connectToDevice(context, scanResults[index].device);
+            _showDeviceNameDialog(context, scanResults[index].device.name, scanResults[index].device);
+          },
+          child: Card(
+            elevation: 2.0,
+            margin: EdgeInsets.all(8.0),
+            child: ListTile(
+              leading: Icon(Icons.bluetooth),
+              title: Text(scanResults[index].device.name),
+              subtitle: Text('RSSI: ${scanResults[index].rssi}'),
             ),
           ),
         );
@@ -67,56 +78,45 @@ class _BluetoothViewState extends State<BluetoothView> {
     );
   }
 
-  void _showDeviceNameDialog(
-      BuildContext context, String deviceName, BluetoothDevice device) {
-    showDialog(
-      //create connection device
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Conectar con $deviceName'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const Text(
-                  '¿Estás seguro de que quieres enviar datos a este dispositivo?'),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _bluetoothController.disconnectDevice(device);
-                    },
-                    child: const Text('Desconectar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      _bluetoothController.sendTrama(TramaType.Enviar);
-                    },
-                    child: const Text('Enviar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      _bluetoothController.sendTrama(TramaType.Apagar);
-                    },
-                    child: const Text('Apagar'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-//funcion crear
   void _connectToDevice(BuildContext context, BluetoothDevice device) async {
     bool connected = await _bluetoothController.connectDevice(context, device);
     if (connected) {
-      _showDeviceNameDialog(context, device.name, device);
+      // Realizar acciones adicionales después de la conexión.
     }
   }
+
+void _showDeviceNameDialog(BuildContext context, String deviceName, BluetoothDevice device) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+  title: Text('Test de Funcionamiento'),
+  content: Column(
+    mainAxisSize: MainAxisSize.min,
+    children: <Widget>[
+      const SizedBox(height: 16),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          IconButton(
+            icon: Icon(Icons.power_settings_new), // Icono para encender
+            onPressed: () async {
+              await _bluetoothController.sendTrama(TramaType.Enviar);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.power_off), // Icono para apagar
+            onPressed: () async {
+              await _bluetoothController.sendTrama(TramaType.Apagar);
+            },
+          ),
+            ],
+      ),
+    ],
+  ),
+);
+    },
+  );
+}
+
 }

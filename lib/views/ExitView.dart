@@ -1,10 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ExitView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Esta vista ya esta aparte "Exit"'),
+    return AlertDialog(
+      title: Text('¿Seguro que quieres cerrar sesión y borrar la información?'),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () async {
+            Navigator.pop(context); // Cierra el diálogo
+            final prefs = await SharedPreferences.getInstance();
+            prefs.remove('vehi_codigo');
+            prefs.remove('hello_token');
+            prefs.remove('codeTV');
+  
+            Navigator.pushNamed(context, '/login');
+          },
+          child: Text('Aceptar'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context,'/exit');
+          },
+          child: Text('Cancelar'),
+        ),
+      ],
     );
   }
 }

@@ -220,14 +220,14 @@ class _HolgurasViewState extends State<HolgurasView> {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(top: 16.0, right: 16.0),
+        padding: const EdgeInsets.only(top: 2.0, right: 2.0),
         child: Align(
           alignment: Alignment.topRight,
           child: FloatingActionButton(
             onPressed: () {
               Navigator.pushNamed(context, '/bluetooh');
             },
-            child: Icon(Icons.directions_car),
+            child: Icon(Icons.bluetooth),
           ),
         ),
       ),
