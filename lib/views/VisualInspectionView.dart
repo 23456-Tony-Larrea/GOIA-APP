@@ -42,24 +42,25 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
         'codeTV'); // Esto eliminará el valor 'codeTV' de SharedPreferences
   }
 
-  void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Defectos',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Defectos',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
-              SizedBox(height: 8),
-              ListView.builder(
+            ),
+            SizedBox(height: 8),
+            Expanded(
+              child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: defectos.length,
                 itemBuilder: (context, index) {
@@ -75,20 +76,19 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                   );
                 },
               ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   void _showDefectoModal(BuildContext context, Defecto defecto) {
     List<int> selectedLocations = [];
     int? selectedCalification = null;
     final VisualInspectionController _controller = VisualInspectionController();
-    final TextEditingController _kilometrajeC = TextEditingController();
     final FocusNode _obFocusNode = FocusNode();
-    final FocusNode _kilometrajeFocusNode = FocusNode();
     if (defecto.abreviatura == "OTROS") {
       _showOtrosModal(context, defecto);
     } else {
@@ -101,7 +101,6 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                   child: GestureDetector(
                 onTap: () {
                   _obFocusNode.unfocus();
-                  _kilometrajeFocusNode.unfocus();
                 },
                 child: Container(
                   padding: EdgeInsets.all(16.0),
@@ -170,20 +169,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                         width: 250,
                         height: 250,
                       ),
-                      SizedBox(height: 16),
-                      TextField(
-                        maxLines: 1,
-                        controller: _kilometrajeC,
-                        focusNode: _kilometrajeFocusNode,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Kilometraje',
-                        ),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                      ),
+              
                       SizedBox(height: 16),
                          Card(
                       // Card para la calificación
@@ -248,8 +234,6 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                             defecto.abreviatura,
                             defecto.descripcion,
                             defecto.codigoAs400,
-                            _kilometrajeC
-                                .text, // Cambiar a _kilometrajeController.text
                             selectedLocations.join(','),
                             selectedCalification, // Agrega la calificación
                           );
@@ -270,6 +254,9 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+       appBar: AppBar(
+        title: Text('Inspección Visual'), // Cambia el título del AppBar
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -419,7 +406,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                                           'Procedimiento', procedure.procedimiento),
                                       _buildProcedureField(
                                           'Descripción Abreviatura',
-                                          procedure.abreviatura),
+                                          procedure.abreviaturaDescripcion),
                                             _buildProcedureField(
                                           'Codigo',
                                           procedure.codigo.toString()),
@@ -495,10 +482,9 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
     int? selectedCalification = null;
     final VisualInspectionController _controller = VisualInspectionController();
     final TextEditingController _ob = TextEditingController();
-    final TextEditingController _kilometrajeController =
-        TextEditingController();
+   
     final FocusNode _obFocusNode = FocusNode();
-    final FocusNode _kilometrajeFocusNode = FocusNode();
+   
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -508,7 +494,6 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                 child: GestureDetector(
               onTap: () {
                 _obFocusNode.unfocus();
-                _kilometrajeFocusNode.unfocus();
               },
               child: Container(
                 padding: EdgeInsets.all(16.0),
@@ -653,7 +638,6 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                           defecto.descripcion,
                           defecto.codigoAs400,
                           _ob.text,
-                          _kilometrajeController.text,
                           selectedLocations.join(','),
                           selectedCalification, // Agrega la calificación
                         );

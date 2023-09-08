@@ -61,7 +61,6 @@ bool isBluetoothOn = false;
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            _connectToDevice(context, scanResults[index].device);
             _showDeviceNameDialog(context, scanResults[index].device.name, scanResults[index].device);
           },
           child: Card(
@@ -78,45 +77,69 @@ bool isBluetoothOn = false;
     );
   }
 
-  void _connectToDevice(BuildContext context, BluetoothDevice device) async {
-    bool connected = await _bluetoothController.connectDevice(context, device);
-    if (connected) {
-      // Realizar acciones adicionales después de la conexión.
-    }
-  }
 
-void _showDeviceNameDialog(BuildContext context, String deviceName, BluetoothDevice device) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-  title: Text('Test de Funcionamiento'),
-  content: Column(
-    mainAxisSize: MainAxisSize.min,
-    children: <Widget>[
-      const SizedBox(height: 16),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          IconButton(
-            icon: Icon(Icons.power_settings_new), // Icono para encender
-            onPressed: () async {
-              await _bluetoothController.sendTrama(TramaType.Enviar);
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.power_off), // Icono para apagar
-            onPressed: () async {
-              await _bluetoothController.sendTrama(TramaType.Apagar);
-            },
-          ),
+
+void _showDeviceNameDialog(BuildContext context, String deviceName, BluetoothDevice device) async {
+  bool connected = await _bluetoothController.connectDevice(context, device);
+
+  if (connected) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Conectado al dispositivo $deviceName.'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.power_settings_new), // Icono para encender
+                    onPressed: () async {
+                      await _bluetoothController.sendTrama(TramaType.Encender);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.power_off), // Icono para apagar
+                    onPressed: () async {
+                      await _bluetoothController.disconnectDevice(device);
+                      Navigator.pop(context);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.power_off), // Icono para apagar
+                    onPressed: () async {
+                      await _bluetoothController.sendTrama(TramaType.Apagar);
+                    },
+                  ),
+                ],
+              ),
             ],
-      ),
-    ],
-  ),
-);
-    },
-  );
+          ),
+        );
+      },
+    );
+  } else {
+    // Mostrar mensaje de error
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error de conexión'),
+          content: Text('No se pudo conectar al dispositivo $deviceName.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cerrar'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
-
 }

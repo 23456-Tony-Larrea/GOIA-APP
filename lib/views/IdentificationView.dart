@@ -11,32 +11,48 @@ class IdentificationView extends StatefulWidget {
 
 class _IdentificationViewState extends State<IdentificationView> {
   final IdentificationController _controller = IdentificationController();
-  List<ListProcedure> _procedures = [];
-  List<ListProcedure> _procedures0 = []; // Agrega esta línea
-  List<ListProcedure> _procedures1 = []; // Agrega esta línea
+  List<List<ListProcedure>> _procedures = [];
+
   Defecto? selectedDefecto;
   DefectoEncontrado? defectoEncontrado;
-bool _isDataFound = false;
-
 
   @override
   void initState() {
     super.initState();
     clearCodeTVFromSharedPreferences();
   }
+ Future<void> _getProcedures() async {
+    
+    try {
+      List<ListProcedure> procedures = await _controller.lisProcedure();
 
+      if (procedures.isNotEmpty) {
+        for (int i = 0; i < 265; i++) {
+          _procedures.add(procedures
+              .where((procedure) => procedure.numero == i)
+              .toList());
+        }
+        setState(() {});
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
   void clearCodeTVFromSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove(
         'codeTV'); // Esto eliminará el valor 'codeTV' de SharedPreferences
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Scrollbar(
+      appBar: AppBar(
+        title: Text('Identificación'), // Cambia el título del AppBar
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -58,21 +74,18 @@ bool _isDataFound = false;
                 ),
               ),
               SizedBox(height: 16.0),
-             ElevatedButton(
-  onPressed: () async {
-    await _controller.searchVehicle(
-        context, _controller.placaController.text);
-    await _getProcedures();
-    
-    // Verifica si se encontró información antes de cambiar el estado
-    setState(() {
-      _isDataFound = (_controller.carData != null);
-    });
-  },
-  child: Text('Buscar'),
-),
+              ElevatedButton(
+                onPressed: () async {
+                  await _controller.searchVehicle(
+                      context, _controller.placaController.text);
+                  await _getProcedures();
+                  setState(
+                      () {}); // Actualiza la vista después de obtener los datos
+                },
+                child: Text('Buscar'),
+              ),
               SizedBox(height: 16.0),
-              if (_isDataFound)
+              if (_controller.carData != null)
                 Card(
                   elevation: 4,
                   child: Column(
@@ -105,8 +118,8 @@ bool _isDataFound = false;
                     ],
                   ),
                 )
-            else
-                                Card(
+              else
+                Card(
                   elevation: 4,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -130,96 +143,104 @@ bool _isDataFound = false;
                     ),
                   ),
                 ),
-              if (_procedures0.isNotEmpty)
-                SingleChildScrollView(
+            if (_procedures.isNotEmpty)
+                Card(
+                  elevation: 4,
                   child: Column(
-                    children: _procedures0.asMap().entries.map((entry) {
-                      final procedure = entry.value;
-                      return GestureDetector(
-                        onTap: () {
-                          _showDefectsModal(context, procedure.defectos);
-                        },
-                        child: Card(
-                          elevation: 4,
-                          child: Column(
-                            children: [
-                              ListTile(
-                                leading: Icon(Icons.list),
-                                title: Text(
-                                  'Items',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
-                                ),
-                              ),
-                              Padding(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var procedures in _procedures)
+                        for (var procedure in procedures)
+                          GestureDetector(
+                            onTap: () {
+                              _showDefectsModal(context, procedure.defectos);
+                            },
+                            child: Card(
+                              elevation: 4,
+                              child: Padding(
                                 padding: const EdgeInsets.all(16.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _buildProcedureField('Procedimiento',
-                                        procedure.procedimiento),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Flexible(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Procedimiento : ${procedure.procedimiento}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  height:
+                                                      4), // Espacio entre el título y el subtítulo
+                                              Text(
+                                                "Descripción: ${procedure.abreviaturaDescripcion}", // Agrega el subtítulo aquí
+                                                overflow: TextOverflow
+                                                    .ellipsis, // Manejo del desbordamiento
+                                                maxLines:
+                                                    2, // Número máximo de líneas antes de mostrar el desbordamiento
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors
+                                                      .grey, // Puedes personalizar el color y estilo según tus necesidades
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_forward,
+                                          size: 24,
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 8),
                                     _buildProcedureField(
-                                        'Abreviatura', procedure.abreviatura),
-                                    _buildProcedureField(
-                                        'Descripción Abreviatura',
-                                        procedure.abreviaturaDescripcion),
-                                    // ...agrega los campos restantes aquí
+                                        'Codigo', procedure.codigo.toString()),
                                   ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-               if (_procedures1.isNotEmpty)
-  SingleChildScrollView(
-    child: Column(
-      children: _procedures1.asMap().entries.map((entry) {
-        final procedure = entry.value;
-
-        return GestureDetector(
-          onTap: () {
-            _showDefectsModal(context, procedure.defectos);
-          },
-          child: Card(
-            elevation: 4,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildProcedureField(
-                        'Procedimiento',
-                        procedure.procedimiento,
-                      ),
-                      _buildProcedureField(
-                        'Abreviatura',
-                        procedure.abreviatura,
-                      ),
-                      _buildProcedureField(
-                        'Descripción Abreviatura',
-                        procedure.abreviaturaDescripcion,
-                      ),
-                      // ...agrega los campos restantes aquí
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    ),
-                ),
+                )
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildProcedureField(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -248,26 +269,8 @@ bool _isDataFound = false;
       ),
     );
   }
-
-  Future<void> _getProcedures() async {
-    try {
-      if (_controller.carData != null) {
-        List<ListProcedure> procedures = await _controller.lisProcedure();
-        setState(() {
-          _procedures = procedures;
-          if (_procedures.isNotEmpty) {
-            _procedures0.add(_procedures[0]);
-            if (_procedures.length > 1) {
-              _procedures1.add(_procedures[1]);
-            }
-          }
-        });
-      }
-    } catch (error) {
-      print(error);
-    }
   }
-}
+
 
 Widget _buildProcedureField(String label, String value) {
   return Padding(
@@ -294,33 +297,6 @@ Widget _buildProcedureField(String label, String value) {
   );
 }
 
-Widget _buildProcedureCard(ListProcedure procedure) {
-  return Card(
-    elevation: 4,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ListTile(
-          title: Text(
-            'Procedimiento: ${procedure.procedimiento}',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Abreviatura: ${procedure.abreviatura}'),
-              Text('subfamilia: ${procedure.subfamilia}'),
-              // Aquí puedes mostrar más detalles si lo necesitas
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
 
 void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
   showModalBottomSheet(
@@ -339,9 +315,11 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
               ),
             ),
             SizedBox(height: 8),
+            // Usar un ListView con physics para permitir el desplazamiento
             ListView.builder(
               shrinkWrap: true,
               itemCount: defectos.length,
+              physics: BouncingScrollPhysics(), // O AlwaysScrollableScrollPhysics()
               itemBuilder: (context, index) {
                 final defecto = defectos[index];
                 return ListTile(
@@ -472,49 +450,49 @@ void _showDefectoModal(BuildContext context, Defecto defecto) {
                           ListTile(
                             title: Text('Calificación'),
                           ),
-                            RadioListTile<int>(
-                title: Text('1'),
-                value: 1,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('2'),
-                value: 2,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('3'),
-                value: 3,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-               RadioListTile<int>(
-                title: Text('Cancelar'),
-                value: 4,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
+                          RadioListTile<int>(
+                            title: Text('1'),
+                            value: 1,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                          RadioListTile<int>(
+                            title: Text('2'),
+                            value: 2,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                          RadioListTile<int>(
+                            title: Text('3'),
+                            value: 3,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                          RadioListTile<int>(
+                            title: Text('Cancelar'),
+                            value: 4,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                     SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
@@ -655,59 +633,60 @@ void _showOtrosModal(BuildContext context, Defecto defecto) {
                     ],
                   ),
                   SizedBox(height: 16),
-                    Card(
-                      // Card para la calificación
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: Text('Calificación'),
-                          ),
-                           ListTile(
-                title: Text('Calificación:${selectedCalification ?? 'Sin calificación'}'),
-              ),
-                            RadioListTile<int>(
-                title: Text('1'),
-                value: 1,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('2'),
-                value: 2,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('3'),
-                value: 3,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-               RadioListTile<int>(
-                title: Text('Cancelar'),
-                value: 4,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
+                  Card(
+                    // Card para la calificación
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: Text('Calificación'),
+                        ),
+                        ListTile(
+                          title: Text(
+                              'Calificación:${selectedCalification ?? 'Sin calificación'}'),
+                        ),
+                        RadioListTile<int>(
+                          title: Text('1'),
+                          value: 1,
+                          groupValue: selectedCalification,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedCalification = value!;
+                            });
+                          },
+                        ),
+                        RadioListTile<int>(
+                          title: Text('2'),
+                          value: 2,
+                          groupValue: selectedCalification,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedCalification = value!;
+                            });
+                          },
+                        ),
+                        RadioListTile<int>(
+                          title: Text('3'),
+                          value: 3,
+                          groupValue: selectedCalification,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedCalification = value!;
+                            });
+                          },
+                        ),
+                        RadioListTile<int>(
+                          title: Text('Cancelar'),
+                          value: 4,
+                          groupValue: selectedCalification,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedCalification = value!;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                   SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {

@@ -43,9 +43,23 @@ class _HolgurasViewState extends State<HolgurasView> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
+       appBar: AppBar(
+    title: Text('Holguras'),
+    actions: [
+      Align(
+        alignment: Alignment.topRight,
+        child: FloatingActionButton(
+          onPressed: () {
+                         Navigator.pushNamed(context, '/bluetooh');
+          },
+          child: Icon(Icons.bluetooth),
+          mini: true,
+        ),
+      ),
+    ],
+  ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -219,18 +233,6 @@ class _HolgurasViewState extends State<HolgurasView> {
           ),
         ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(top: 2.0, right: 2.0),
-        child: Align(
-          alignment: Alignment.topRight,
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/bluetooh');
-            },
-            child: Icon(Icons.bluetooth),
-          ),
-        ),
-      ),
     );
   }
 
@@ -290,7 +292,6 @@ class _HolgurasViewState extends State<HolgurasView> {
     final HolgurasController _controller = HolgurasController();
     final TextEditingController _ob = TextEditingController();
     final FocusNode _obFocusNode = FocusNode();
-    final FocusNode _kilometrajeFocusNode = FocusNode();
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -300,7 +301,6 @@ class _HolgurasViewState extends State<HolgurasView> {
                 child: GestureDetector(
               onTap: () {
                 _obFocusNode.unfocus();
-                _kilometrajeFocusNode.unfocus();
               },
               child: Container(
                 padding: EdgeInsets.all(16.0),

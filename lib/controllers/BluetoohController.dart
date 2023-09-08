@@ -3,14 +3,16 @@ import 'package:flutter_blue/flutter_blue.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 enum TramaType {
-  Enviar,
-  Apagar,
+  Encender,
+  Apagar
 }
+
 
 class BluetoohController {
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   List<ScanResult> scanResults = [];
   List<BluetoothService>? _services;
+  bool isDeviceOn = false;
 
   Stream<List<ScanResult>> getScanResultsStream() {
     return flutterBlue.scanResults;
@@ -27,6 +29,10 @@ class BluetoohController {
       }
     } else {
       print("Permiso de ubicación denegado");
+    }
+    if (await Permission.bluetoothScan.request().isGranted) {
+      print("Bluetooh otorgado");
+      scanResults.clear(); // Limpiar resultados anteriores
     }
   }
 
@@ -46,39 +52,49 @@ class BluetoohController {
     }
   }
 
-  Future<void> sendTrama(TramaType type) async {
-    try {
-      if (_services == null) {
-        print('Error: No se han descubierto los servicios del dispositivo.');
+Future<void> sendTrama(TramaType type) async {
+  
+  try {
+    if (_services == null) {
+      print('Error: No se han descubierto los servicios del dispositivo.');
+      return;
+    }
+
+    List<int> tramaOn;
+    List<int> tramaOff;
+    
+    switch (type) {
+      case TramaType.Encender:
+        tramaOn = [36, 49, 49, 49, 49, 49, 35];
+        tramaOff = []; // Inicializa tramaOff como una lista vacía en esta rama
+        break;
+      case TramaType.Apagar:
+        tramaOn = []; // Inicializa tramaOn como una lista vacía en esta rama
+        
+        tramaOff = [36, 48, 48, 48, 48, 48, 35];
+        break;
+      default:
+        print('Tipo de trama no válido');
         return;
-      }
+    }
 
-      List<int> trama;
-
-      switch (type) {
-        case TramaType.Enviar:
-          trama = [36, 49, 49, 49, 49, 49, 35];
-          break;
-        case TramaType.Apagar:
-          trama = [36, 48, 48, 48, 48, 48, 35];
-          break;
-        default:
-          print('Tipo de trama no válido');
-          return;
-      }
-
-      for (BluetoothService service in _services!) {
-        var characteristics = service.characteristics;
-        for (BluetoothCharacteristic c in characteristics) {
-          if (c.properties.write) {
-            await c.write(trama);
+    for (BluetoothService service in _services!) {
+      var characteristics = service.characteristics;
+      for (BluetoothCharacteristic c in characteristics) {
+        if (c.properties.write) {
+          if (type == TramaType.Encender) {
+            await c.write(tramaOn);
+          } else if (type == TramaType.Apagar) {
+            await c.write(tramaOff);
           }
         }
       }
-    } catch (e) {
-      print('Error al enviar la trama: $e');
     }
+  } catch (e) {
+    print('Error al enviar la trama: $e');
   }
+}
+  
 
   Future<List<BluetoothDevice>> getBondedDevices() async {
     try {

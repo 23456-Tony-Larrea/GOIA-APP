@@ -33,6 +33,9 @@ class _RolesViewState extends State<RolesView> {
 @override
 Widget build(BuildContext context) {
   return Scaffold(
+     appBar: AppBar(
+        title: Text('Roles y Permisos'), // Cambia el título del AppBar
+      ),
     body: Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(

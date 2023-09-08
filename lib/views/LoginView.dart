@@ -139,7 +139,7 @@ Center(
           ),
           const SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: TextField(
               controller: _loginController.emailController,
               decoration: InputDecoration(
@@ -150,7 +150,7 @@ Center(
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: TextField(
               controller: _loginController.passwordController,
               obscureText: true,
