@@ -28,6 +28,27 @@ class _BluetoothViewState extends State<BluetoothView> {
 
     if (isBluetoothOn) {
       await _bluetoothController.startScan();
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Bluetooh Apagado"),
+            content: Text(
+                "Asegurate que el Bluetooh este encendido. ¿Escanear nuevamente?"),
+            actions: <Widget>[
+      
+              TextButton(
+                child: Text('Refrescar'),
+                onPressed: () {
+                  Navigator.pop(context); // Cierra el diálogo actual
+                  _bluetoothController.startScan();
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -45,12 +66,6 @@ class _BluetoothViewState extends State<BluetoothView> {
               initialData: [],
               builder: (c, snapshot) => _buildDeviceList(snapshot.data!),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _bluetoothController.startScan();
-            },
-            child: const Text('Escanear'),
           ),
         ],
       ),
@@ -140,8 +155,7 @@ class _BluetoothViewState extends State<BluetoothView> {
                               value: 'manual',
                               groupValue: 'modo',
                               onChanged: (value) {
-                                // Acción al seleccionar el modo manual
-                                // Puedes agregar tu lógica aquí
+                            
                               },
                             ),
                             Text('Manual',
@@ -152,8 +166,7 @@ class _BluetoothViewState extends State<BluetoothView> {
                               value: 'automatico',
                               groupValue: 'modo',
                               onChanged: (value) {
-                                // Acción al seleccionar el modo automático
-                                // Puedes agregar tu lógica aquí
+
                               },
                             ),
                             Text('Automático',
@@ -169,8 +182,7 @@ class _BluetoothViewState extends State<BluetoothView> {
                               value: 'izquierda',
                               groupValue: 'direcciones',
                               onChanged: (value) {
-                                // Acción al seleccionar el modo manual
-                                // Puedes agregar tu lógica aquí
+                             
                               },
                             ),
                             Text('Izquierdo',
@@ -181,8 +193,7 @@ class _BluetoothViewState extends State<BluetoothView> {
                               value: 'derecha',
                               groupValue: 'direcciones',
                               onChanged: (value) {
-                                // Acción al seleccionar el modo automático
-                                // Puedes agregar tu lógica aquí
+                               
                               },
                             ),
                             Text('Derecho',

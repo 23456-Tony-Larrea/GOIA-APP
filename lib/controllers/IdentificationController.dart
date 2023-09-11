@@ -6,8 +6,6 @@ import 'package:rtv/class/Cars.dart';
 import 'package:rtv/constants/url2.dart';
 import 'package:rtv/class/ListProcedure.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 class IdentificationController {
   int? vehiCodigo;
@@ -18,8 +16,6 @@ class IdentificationController {
   Cars? carData;
   int? savedRtvCode;
   final TextEditingController observationController = TextEditingController();
-  int? _userRoleId; // Declaración de la variable global para almacenar el userRoleId
-
   Future<void> searchVehicle(BuildContext context, String placa) async {
     final response = await http.post(
       Uri.parse('${url}/GetCodVehiculo'),
@@ -124,7 +120,6 @@ class IdentificationController {
 
   Future<List<ListProcedure>> lisProcedure() async {
     try {
-      
       if (codeRTV != 0) {
         final response = await http.post(
           Uri.parse('${url}/listarProcedimientos'),
@@ -139,9 +134,8 @@ class IdentificationController {
 
         if (response.statusCode == 200) {
           final List<dynamic> jsonResponse = jsonDecode(response.body);
-          final List<ListProcedure> inspection = jsonResponse
-              .map((data) => ListProcedure.fromJson(data))
-              .toList();
+          final List<ListProcedure> inspection =
+              jsonResponse.map((data) => ListProcedure.fromJson(data)).toList();
           print("Lista de Procedimientos: $inspection");
 
           if (inspection.isNotEmpty) {
@@ -152,7 +146,7 @@ class IdentificationController {
         } else {
           throw Exception('Failed to load procedures');
         }
-       } else {
+      } else {
         Fluttertoast.showToast(
           msg: "el vehiculo no tiene RTV",
           toastLength: Toast.LENGTH_SHORT,
@@ -164,7 +158,7 @@ class IdentificationController {
           webPosition: "center",
         );
         throw Exception('Vehicle has no RTV');
-      } 
+      }
     } catch (e) {
       print(e);
       throw Exception('An error occurred');
@@ -197,10 +191,10 @@ class IdentificationController {
     String? estaHost = prefs.getString('esta_host');
     DateTime now = DateTime.now();
     String formattedDate = now.toLocal().toString().split('.')[0];
-    await getUserRoleAndPermissions();
     SharedPreferences prefs2 = await SharedPreferences.getInstance();
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
+    int? userId = prefs2.getInt('usua_codigo');
     try {
       final response = await http.post(
         Uri.parse('${url}/GuardarIdentificacion1'),
@@ -329,7 +323,7 @@ class IdentificationController {
             {"f": "", "filename": "", "filepath": ""}
           ]),
           "fecha_inicio": formattedDate,
-          "usua_codigo": _userRoleId,
+          "usua_codigo": userId,
           "esta_host": estaHost
         }),
       );
@@ -361,20 +355,6 @@ class IdentificationController {
     }
   }
 
-  Future<void> getUserRoleAndPermissions() async {
-    final storage = FlutterSecureStorage();
-    String? token = await storage.read(key: 'helllo_token');
-
-    if (token != null) {
-      try {
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        _userRoleId = decodedToken['role_id']; // Almacena el role_id
-      } catch (error) {
-        print('Error decoding token: $error');
-      }
-    }
-  }
-
   Future<void> saveIdentification(
     BuildContext build,
     int codigoIdentification,
@@ -390,139 +370,142 @@ class IdentificationController {
     String? estaHost = prefs.getString('esta_host');
     DateTime now = DateTime.now();
     String formattedDate = now.toLocal().toString().split('.')[0];
-    await getUserRoleAndPermissions();
+
     SharedPreferences prefs2 = await SharedPreferences.getInstance();
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
-  try {
+    int? userId = prefs2.getInt('usua_codigo');
+
+    try {
       final response = await http.post(
         Uri.parse('${url}/GuardarIdentificacion1'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-                  "rete_codigo": codeRTVexample,
-        "vehi_codigo": vehiCodigo2,
-        "kilometraje": kmIdentification,
-        "dato":jsonEncode([
-          {
-            "codigo": 1,
-            "numero": 1,
-            "familia": 1,
-            "subfamilia": "1",
-            "abreviatura": "IDENTIFICACION",
-            "abreviatura_descripcion": "IDENTIFICACION DEL VEHICULO",
-            "subfamilia_descripcion": "NUMERO DE PLACA",
-            "categoria": "01",
-            "categoria_abreviatura": "NUMERO DE PLACA",
-            "categoria_descripcion": "NUMERO DE PLACA",
-            "procedimiento":
-                "COMPROBAR EL ESTADO, FIJACION Y UBICACION DE LAS PLACAS. CONSTATAR QUE EL NUMERO DE PLACA CORRESPONDE A LA DOCUMENTACION.",
-            "defectos": [
-              {
-                "codigo": 10,
-                "abreviatura": "OTROS",
-                "descripcion": "OTROS(A INTRODUCIR POR EL INSPECTOR DE LINEA)",
-                "numero": "01",
-                "codigo_as400": "010101"
-              },
-              {
-                "codigo": 11,
-                "abreviatura": "CORRESPONDE",
-                "descripcion":
-                    "NÚMERO DE PLACA NO COINCIDE CON LA DOCUMENTACIÓN",
-                "numero": "02",
-                "codigo_as400": "010102"
-              },
-              {
-                "codigo": 12,
-                "abreviatura": "EXIST/DETERIORO",
-                "descripcion": "PLACAS INEXISTENTES O DETERIORADAS.",
-                "numero": "03",
-                "codigo_as400": "010103"
-              },
-              {
-                "codigo": 13,
-                "abreviatura": "ILEGIBLE",
-                "descripcion": "PLACAS ILEGIBLES",
-                "numero": "04",
-                "codigo_as400": "010104"
-              },
-              {
-                "codigo": 14,
-                "abreviatura": "POSICIÓN",
-                "descripcion":
-                    "PLACAS SITUADAS EN POSICIÓN O LUGAR INCORRECTO.",
-                "numero": "05",
-                "codigo_as400": "010105"
-              },
-              {
-                "codigo": 15,
-                "abreviatura": "SUJECIÓN",
-                "descripcion": "DEFECTOS DE SUJECIÓN EN LAS PLACAS",
-                "numero": "06",
-                "codigo_as400": "010106"
+          "rete_codigo": codeRTVexample,
+          "vehi_codigo": vehiCodigo2,
+          "kilometraje": kmIdentification,
+          "dato": jsonEncode([
+            {
+              "codigo": 1,
+              "numero": 1,
+              "familia": 1,
+              "subfamilia": "1",
+              "abreviatura": "IDENTIFICACION",
+              "abreviatura_descripcion": "IDENTIFICACION DEL VEHICULO",
+              "subfamilia_descripcion": "NUMERO DE PLACA",
+              "categoria": "01",
+              "categoria_abreviatura": "NUMERO DE PLACA",
+              "categoria_descripcion": "NUMERO DE PLACA",
+              "procedimiento":
+                  "COMPROBAR EL ESTADO, FIJACION Y UBICACION DE LAS PLACAS. CONSTATAR QUE EL NUMERO DE PLACA CORRESPONDE A LA DOCUMENTACION.",
+              "defectos": [
+                {
+                  "codigo": 10,
+                  "abreviatura": "OTROS",
+                  "descripcion":
+                      "OTROS(A INTRODUCIR POR EL INSPECTOR DE LINEA)",
+                  "numero": "01",
+                  "codigo_as400": "010101"
+                },
+                {
+                  "codigo": 11,
+                  "abreviatura": "CORRESPONDE",
+                  "descripcion":
+                      "NÚMERO DE PLACA NO COINCIDE CON LA DOCUMENTACIÓN",
+                  "numero": "02",
+                  "codigo_as400": "010102"
+                },
+                {
+                  "codigo": 12,
+                  "abreviatura": "EXIST/DETERIORO",
+                  "descripcion": "PLACAS INEXISTENTES O DETERIORADAS.",
+                  "numero": "03",
+                  "codigo_as400": "010103"
+                },
+                {
+                  "codigo": 13,
+                  "abreviatura": "ILEGIBLE",
+                  "descripcion": "PLACAS ILEGIBLES",
+                  "numero": "04",
+                  "codigo_as400": "010104"
+                },
+                {
+                  "codigo": 14,
+                  "abreviatura": "POSICIÓN",
+                  "descripcion":
+                      "PLACAS SITUADAS EN POSICIÓN O LUGAR INCORRECTO.",
+                  "numero": "05",
+                  "codigo_as400": "010105"
+                },
+                {
+                  "codigo": 15,
+                  "abreviatura": "SUJECIÓN",
+                  "descripcion": "DEFECTOS DE SUJECIÓN EN LAS PLACAS",
+                  "numero": "06",
+                  "codigo_as400": "010106"
+                }
+              ],
+              "defectoEncontrado": {
+                "numero": "",
+                "abreviatura": "",
+                "descripcion": "",
+                "codigo_as400": "",
+                "ubicacion": "",
+                "calificacion": "",
+                "observacion": ""
               }
-            ],
-            "defectoEncontrado": {
-             "numero": "",
-              "abreviatura": "",
-              "descripcion": "",
-              "codigo_as400": "",
-              "ubicacion": "",
-              "calificacion": "",
-              "observacion": ""
-            }
-          },
-          {
-            "codigo": 2,
-            "numero": 2,
-            "familia": 1,
-            "subfamilia": "2",
-            "abreviatura": "IDENTIFICACION",
-            "abreviatura_descripcion": "IDENTIFICACION DEL VEHICULO",
-            "subfamilia_descripcion": "NUMERO DE CHASIS O VIN",
-            "categoria": "01",
-            "categoria_abreviatura": "NUMERO DE CHASIS O VIN",
-            "categoria_descripcion": "NUMERO DE CHASIS O VIN",
-            "procedimiento":
-                "COMPROBAR LA COINCIDENCIA DEL NÚMERO VISUALIZADO EN EL VEHICULO CON LA DOCUMENTACION (PARTE DEL TRABAJO)",
-            "defectos": [
-              {
-                "codigo": 16,
-                "abreviatura": "OTROS",
-                "descripcion":
-                    "OTROS (A INTRODUCIR POR EL INSPECTOR DE LÍNEA )",
-                "numero": "01",
-                "codigo_as400": "010201"
-              },
-              {
-                "codigo": 17,
-                "abreviatura": "NO CORRESPONDE",
-                "descripcion":
-                    "NÚMERO DE CHASIS NO COINCIDE CON LA DOCUMENTACIÓN.",
-                "numero": "02",
-                "codigo_as400": "010202"
+            },
+            {
+              "codigo": 2,
+              "numero": 2,
+              "familia": 1,
+              "subfamilia": "2",
+              "abreviatura": "IDENTIFICACION",
+              "abreviatura_descripcion": "IDENTIFICACION DEL VEHICULO",
+              "subfamilia_descripcion": "NUMERO DE CHASIS O VIN",
+              "categoria": "01",
+              "categoria_abreviatura": "NUMERO DE CHASIS O VIN",
+              "categoria_descripcion": "NUMERO DE CHASIS O VIN",
+              "procedimiento":
+                  "COMPROBAR LA COINCIDENCIA DEL NÚMERO VISUALIZADO EN EL VEHICULO CON LA DOCUMENTACION (PARTE DEL TRABAJO)",
+              "defectos": [
+                {
+                  "codigo": 16,
+                  "abreviatura": "OTROS",
+                  "descripcion":
+                      "OTROS (A INTRODUCIR POR EL INSPECTOR DE LÍNEA )",
+                  "numero": "01",
+                  "codigo_as400": "010201"
+                },
+                {
+                  "codigo": 17,
+                  "abreviatura": "NO CORRESPONDE",
+                  "descripcion":
+                      "NÚMERO DE CHASIS NO COINCIDE CON LA DOCUMENTACIÓN.",
+                  "numero": "02",
+                  "codigo_as400": "010202"
+                }
+              ],
+              "defectoEncontrado": {
+                "numero": numeroIdentification,
+                "abreviatura": abreviaturaIdentification,
+                "descripcion": descripcionIdentification,
+                "codigo_as400": Codigo_as400Identification,
+                "ubicacion": ubicacionesIdentification,
+                "calificacion": calificacionIdentification,
+                "observacion": ""
               }
-            ],
-            "defectoEncontrado": {
-                  "numero": numeroIdentification,
-              "abreviatura": abreviaturaIdentification,
-              "descripcion": descripcionIdentification,
-              "codigo_as400": Codigo_as400Identification,
-              "ubicacion": ubicacionesIdentification,
-              "calificacion": calificacionIdentification,
-              "observacion":""
             }
-          }
-        ]),
-        "fotos": jsonEncode([
-          {"f": "", "filename": "", "filepath": ""},
-          {"f": "", "filename": "", "filepath": ""}
-         ]),
-        "fecha_inicio": formattedDate,
-        "usua_codigo": _userRoleId,
-           "esta_host":estaHost
+          ]),
+          "fotos": jsonEncode([
+            {"f": "", "filename": "", "filepath": ""},
+            {"f": "", "filename": "", "filepath": ""}
+          ]),
+          "fecha_inicio": formattedDate,
+          "usua_codigo": userId,
+          "esta_host": estaHost
         }),
       );
       if (response.statusCode == 200) {
@@ -550,6 +533,6 @@ class IdentificationController {
     } catch (e) {
       print(e);
       throw Exception('An error occurred');
-    } 
+    }
   }
 }

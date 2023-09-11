@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import "package:http/http.dart" as http;
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
+
 import 'package:rtv/class/ListProcedureHolguras.dart';
 import 'package:rtv/constants/url2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +11,6 @@ import '../class/Cars.dart';
 
 class HolgurasController {
   int? savedRtvCode;
-   int? _userRoleId;
     int? vehiCodigo;
      Cars? carData;
        bool codeRTV = true;
@@ -182,19 +180,7 @@ class HolgurasController {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt(key, value);
   }
- Future<void> getUserRoleAndPermissions() async {
-    final storage = FlutterSecureStorage();
-    String? token = await storage.read(key: 'helllo_token');
 
-    if (token != null) {
-      try {
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        _userRoleId = decodedToken['role_id']; // Almacena el role_id
-      } catch (error) {
-        print('Error decoding token: $error');
-      }
-    }
-  }
    Future<void> savesaveInspectionHolgurasObservation(
     BuildContext build,
     int codigo,
@@ -210,10 +196,11 @@ class HolgurasController {
     String? estaHost = prefs.getString('esta_host');
     DateTime now = DateTime.now();
     String formattedDate = now.toLocal().toString().split('.')[0];
-    await getUserRoleAndPermissions();
     SharedPreferences prefs2 = await SharedPreferences.getInstance();
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
+     int? userId = prefs2.getInt('usua_codigo');
+   
     try {
       final response = await http.post(
         Uri.parse('${url}/GuardarHolguras'),
@@ -341,7 +328,7 @@ class HolgurasController {
             {"f": "", "filename": "", "filepath": ""}
           ]),
           "fecha_inicio": formattedDate,
-          "usua_codigo": _userRoleId,
+          "usua_codigo": userId,
           "esta_host": estaHost
         }),
       );
@@ -387,10 +374,10 @@ class HolgurasController {
     String? estaHost = prefs.getString('esta_host');
     DateTime now = DateTime.now();
     String formattedDate = now.toLocal().toString().split('.')[0];
-    await getUserRoleAndPermissions();
     SharedPreferences prefs2 = await SharedPreferences.getInstance();
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
+     int? userId = prefs2.getInt('usua_codigo');
   try {
       final response = await http.post(
         Uri.parse('${url}/GuardarHolguras'),
@@ -517,7 +504,7 @@ class HolgurasController {
           {"f": "", "filename": "", "filepath": ""}
          ]),
         "fecha_inicio": formattedDate,
-        "usua_codigo": _userRoleId,
+        "usua_codigo": userId,
            "esta_host":estaHost
         }),
       );

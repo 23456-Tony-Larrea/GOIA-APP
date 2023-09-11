@@ -5,6 +5,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rtv/class/ListProcedureVisualInspection.dart';
 import 'package:rtv/constants/url2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import '../class/Cars.dart';
 
 
@@ -13,6 +15,7 @@ class VisualInspectionController {
   bool codeRTV = true;
   Cars? carData;
   int? savedRtvCode;
+  int? _userRoleId;
   int? vehiCodigo;
 
 final TextEditingController observationController = TextEditingController();
@@ -180,7 +183,19 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt(key, value);
   }
+ Future<void> getUserRoleAndPermissions() async {
+    final storage = FlutterSecureStorage();
+    String? token = await storage.read(key: 'helllo_token');
 
+    if (token != null) {
+      try {
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+        _userRoleId = decodedToken['role_id']; // Almacena el role_id
+      } catch (error) {
+        print('Error decoding token: $error');
+      }
+    }
+  }
   Future<void> saveIdentificationVisualInspectionObservation(
     BuildContext build,
     int codigo,
@@ -196,11 +211,10 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     String? estaHost = prefs.getString('esta_host');
     DateTime now = DateTime.now();
     String formattedDate = now.toLocal().toString().split('.')[0];
+    await getUserRoleAndPermissions();
     SharedPreferences prefs2 = await SharedPreferences.getInstance();
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
-     int? userId = prefs2.getInt('usua_codigo');
-   
     try {
       final response = await http.post(
         Uri.parse('${url}/GuardarInspeccionVisual'),
@@ -328,7 +342,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
             {"f": "", "filename": "", "filepath": ""}
           ]),
           "fecha_inicio": formattedDate,
-          "usua_codigo": userId,
+          "usua_codigo": _userRoleId,
           "esta_host": estaHost
         }),
       );
@@ -374,11 +388,10 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     String? estaHost = prefs.getString('esta_host');
     DateTime now = DateTime.now();
     String formattedDate = now.toLocal().toString().split('.')[0];
+    await getUserRoleAndPermissions();
     SharedPreferences prefs2 = await SharedPreferences.getInstance();
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
-     int? userId = prefs2.getInt('usua_codigo');
-   
   try {
       final response = await http.post(
         Uri.parse('${url}/GuardarInspeccionVisual'),
@@ -505,7 +518,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
           {"f": "", "filename": "", "filepath": ""}
          ]),
         "fecha_inicio": formattedDate,
-        "usua_codigo": userId,
+        "usua_codigo": _userRoleId,
            "esta_host":estaHost
         }),
       );

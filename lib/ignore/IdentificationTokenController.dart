@@ -1,21 +1,24 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import "package:http/http.dart" as http;
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:rtv/class/ListProcedureVisualInspection.dart';
+import 'package:rtv/class/Cars.dart';
 import 'package:rtv/constants/url2.dart';
+import 'package:rtv/class/ListProcedure.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../class/Cars.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
-
-class VisualInspectionController {
-   final TextEditingController placaController = TextEditingController();
+class IdentificationController {
+  int? vehiCodigo;
+  List<dynamic> listProcedure = [];
+  List<dynamic> listDefects = [];
+  final TextEditingController placaController = TextEditingController();
   bool codeRTV = true;
   Cars? carData;
   int? savedRtvCode;
-  int? vehiCodigo;
-
-final TextEditingController observationController = TextEditingController();
+  final TextEditingController observationController = TextEditingController();
+  int? _userRoleId; // Declaración de la variable global para almacenar el userRoleId
 
   Future<void> searchVehicle(BuildContext context, String placa) async {
     final response = await http.post(
@@ -59,7 +62,8 @@ final TextEditingController observationController = TextEditingController();
       );
     }
   }
-Future<Cars> getInformationCar(int vehiCodigo) async {
+
+  Future<Cars> getInformationCar(int vehiCodigo) async {
     final response = await http.post(
       Uri.parse('${url}/GetDatoVehiculo'),
       headers: <String, String>{
@@ -97,7 +101,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
           int rtvCode = carsRTV[0]['codigo'];
           savedRtvCode = rtvCode;
           await saveCodeRTV('codeTV', rtvCode);
-          await listInspectionProcedure();
+          await lisProcedure();
         } else {
           codeRTV = false;
           Fluttertoast.showToast(
@@ -117,41 +121,48 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
       print(error);
     }
   }
-  Future<List<ListProcedureInspection>> listInspectionProcedure() async {
+
+  Future<List<ListProcedure>> lisProcedure() async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      int codeRTV = prefs.getInt('codeTV') ?? 0;
-      if (codeRTV != 0) { 
+      
+      if (codeRTV != 0) {
         final response = await http.post(
           Uri.parse('${url}/listarProcedimientos'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode({
-            'tipo': 2,
+            'tipo': 1,
             'estado': 1,
           }),
         );
 
         if (response.statusCode == 200) {
           final List<dynamic> jsonResponse = jsonDecode(response.body);
-          final List<ListProcedureInspection> visualInspection =
-              jsonResponse.map((data) => ListProcedureInspection.fromJson(data)).toList();
+          final List<ListProcedure> inspection = jsonResponse
+              .map((data) => ListProcedure.fromJson(data))
+              .toList();
+          print("Lista de Procedimientos: $inspection");
 
-          print("Lista de Procedimientos: $visualInspection");
-          
-          if (visualInspection.isNotEmpty) {
-            return visualInspection;
+          if (inspection.isNotEmpty) {
+            return inspection;
           } else {
-            _showToast("Failed to load procedures");
             throw Exception('Failed to load procedures');
           }
         } else {
-          _showToast("Failed to load procedures");
           throw Exception('Failed to load procedures');
         }
-     } else {
-        _showToast("el vehiculo no tiene RTV");
+       } else {
+        Fluttertoast.showToast(
+          msg: "el vehiculo no tiene RTV",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+          webPosition: "center",
+        );
         throw Exception('Vehicle has no RTV');
       } 
     } catch (e) {
@@ -160,17 +171,6 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     }
   }
 
-  void _showToast(String message) {
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.redAccent,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  }
   Future<void> saveCodeRTV(String key, int value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt(key, value);
@@ -181,7 +181,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     await prefs.setInt(key, value);
   }
 
-  Future<void> saveIdentificationVisualInspectionObservation(
+  Future<void> saveIdentificationObservation(
     BuildContext build,
     int codigo,
     String numero,
@@ -189,6 +189,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     String descripcion,
     String Codigo_as400,
     String observation,
+    String KM,
     String ubicaciones,
     int? calificacion, // Agrega la calificación
   ) async {
@@ -196,20 +197,20 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     String? estaHost = prefs.getString('esta_host');
     DateTime now = DateTime.now();
     String formattedDate = now.toLocal().toString().split('.')[0];
+    await getUserRoleAndPermissions();
     SharedPreferences prefs2 = await SharedPreferences.getInstance();
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
-     int? userId = prefs2.getInt('usua_codigo');
-   
     try {
       final response = await http.post(
-        Uri.parse('${url}/GuardarInspeccionVisual'),
+        Uri.parse('${url}/GuardarIdentificacion1'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
           "rete_codigo": codeRTVexample,
           "vehi_codigo": vehiCodigo2,
+          "kilometraje": KM,
           "dato": jsonEncode([
             {
               "codigo": 1,
@@ -328,7 +329,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
             {"f": "", "filename": "", "filepath": ""}
           ]),
           "fecha_inicio": formattedDate,
-          "usua_codigo": userId,
+          "usua_codigo": _userRoleId,
           "esta_host": estaHost
         }),
       );
@@ -360,13 +361,28 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     }
   }
 
-  Future<void> saveVisualInspection(
+  Future<void> getUserRoleAndPermissions() async {
+    final storage = FlutterSecureStorage();
+    String? token = await storage.read(key: 'helllo_token');
+
+    if (token != null) {
+      try {
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+        _userRoleId = decodedToken['role_id']; // Almacena el role_id
+      } catch (error) {
+        print('Error decoding token: $error');
+      }
+    }
+  }
+
+  Future<void> saveIdentification(
     BuildContext build,
     int codigoIdentification,
     String numeroIdentification,
     String abreviaturaIdentification,
     String descripcionIdentification,
     String Codigo_as400Identification,
+    String kmIdentification,
     String ubicacionesIdentification,
     int? calificacionIdentification, // Agrega la calificación
   ) async {
@@ -374,20 +390,20 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     String? estaHost = prefs.getString('esta_host');
     DateTime now = DateTime.now();
     String formattedDate = now.toLocal().toString().split('.')[0];
+    await getUserRoleAndPermissions();
     SharedPreferences prefs2 = await SharedPreferences.getInstance();
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
-     int? userId = prefs2.getInt('usua_codigo');
-   
   try {
       final response = await http.post(
-        Uri.parse('${url}/GuardarInspeccionVisual'),
+        Uri.parse('${url}/GuardarIdentificacion1'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
                   "rete_codigo": codeRTVexample,
         "vehi_codigo": vehiCodigo2,
+        "kilometraje": kmIdentification,
         "dato":jsonEncode([
           {
             "codigo": 1,
@@ -505,7 +521,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
           {"f": "", "filename": "", "filepath": ""}
          ]),
         "fecha_inicio": formattedDate,
-        "usua_codigo": userId,
+        "usua_codigo": _userRoleId,
            "esta_host":estaHost
         }),
       );
@@ -536,5 +552,4 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
       throw Exception('An error occurred');
     } 
   }
-
 }
