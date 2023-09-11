@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:rtv/controllers/BluetoohController.dart';
+import 'package:rtv/class/Trama.dart';
 
 class BluetoothView extends StatefulWidget {
   const BluetoothView({Key? key}) : super(key: key);
@@ -11,7 +12,7 @@ class BluetoothView extends StatefulWidget {
 
 class _BluetoothViewState extends State<BluetoothView> {
   final BluetoohController _bluetoothController = BluetoohController();
-bool isBluetoothOn = false;
+  bool isBluetoothOn = false;
 
   @override
   void initState() {
@@ -21,13 +22,13 @@ bool isBluetoothOn = false;
 
   void _startScanning() async {
     final bluetoothState = await FlutterBlue.instance.state;
-  setState(() {
-    isBluetoothOn = bluetoothState == BluetoothState.on;
-  });
+    setState(() {
+      isBluetoothOn = bluetoothState == BluetoothState.on;
+    });
 
-  if (isBluetoothOn) {
-    await _bluetoothController.startScan();
-  }
+    if (isBluetoothOn) {
+      await _bluetoothController.startScan();
+    }
   }
 
   @override
@@ -44,13 +45,14 @@ bool isBluetoothOn = false;
               initialData: [],
               builder: (c, snapshot) => _buildDeviceList(snapshot.data!),
             ),
-          ),ElevatedButton(
-  onPressed: () {
-    _bluetoothController.startScan();
-  },
-  child: const Text('Escanear'),
-),
-],
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _bluetoothController.startScan();
+            },
+            child: const Text('Escanear'),
+          ),
+        ],
       ),
     );
   }
@@ -61,7 +63,8 @@ bool isBluetoothOn = false;
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            _showDeviceNameDialog(context, scanResults[index].device.name, scanResults[index].device);
+            _showDeviceNameDialog(context, scanResults[index].device.name,
+                scanResults[index].device);
           },
           child: Card(
             elevation: 2.0,
@@ -77,69 +80,221 @@ bool isBluetoothOn = false;
     );
   }
 
+  void _showDeviceNameDialog(
+      BuildContext context, String deviceName, BluetoothDevice device) async {
+    bool connected = await _bluetoothController.connectDevice(context, device);
 
+    if (connected) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Conectado al dispositivo $deviceName.'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const SizedBox(height: 16),
+                Card(
+                  elevation: 4, // Agrega sombra al card
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      // Usar una columna para organizar elementos verticalmente
+                      children: [
+                        Text(
+                          'Items a Considerar',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        //implemntanto un toggle de encender y apagar
+                        const SizedBox(height: 16),
+                        ToggleButtons(
+                          children: [
+                            Icon(Icons.lightbulb_outline),
+                            Icon(Icons.lightbulb),
+                          ],
+                          onPressed: (int index) {
+                            // Acción al presionar el botón
+                            // Puedes agregar tu lógica aquí
+                            if (index == 0) {
+                              // Presionó el botón de encender
+                              _bluetoothController
+                                  .sendTrama(TramaType.Encender);
+                            } else if (index == 1) {
+                              // Presionó el botón de apagar
+                              _bluetoothController.sendTrama(TramaType.Apagar);
+                            }
+                          },
+                          isSelected: [
+                            true,
+                            false
+                          ], // Indica qué botón está seleccionado
+                        ),
 
-void _showDeviceNameDialog(BuildContext context, String deviceName, BluetoothDevice device) async {
-  bool connected = await _bluetoothController.connectDevice(context, device);
-
-  if (connected) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Conectado al dispositivo $deviceName.'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  IconButton(
-                    icon: Icon(Icons.power_settings_new), // Icono para encender
-                    onPressed: () async {
-                      await _bluetoothController.sendTrama(TramaType.Encender);
-                    },
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Radio(
+                              value: 'manual',
+                              groupValue: 'modo',
+                              onChanged: (value) {
+                                // Acción al seleccionar el modo manual
+                                // Puedes agregar tu lógica aquí
+                              },
+                            ),
+                            Text('Manual',
+                                style: TextStyle(
+                                    fontSize:
+                                        16)), // Cambia el tamaño de la fuente
+                            Radio(
+                              value: 'automatico',
+                              groupValue: 'modo',
+                              onChanged: (value) {
+                                // Acción al seleccionar el modo automático
+                                // Puedes agregar tu lógica aquí
+                              },
+                            ),
+                            Text('Automático',
+                                style: TextStyle(
+                                    fontSize:
+                                        16)), // Cambia el tamaño de la fuente
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Radio(
+                              value: 'izquierda',
+                              groupValue: 'direcciones',
+                              onChanged: (value) {
+                                // Acción al seleccionar el modo manual
+                                // Puedes agregar tu lógica aquí
+                              },
+                            ),
+                            Text('Izquierdo',
+                                style: TextStyle(
+                                    fontSize:
+                                        16)), // Cambia el tamaño de la fuente
+                            Radio(
+                              value: 'derecha',
+                              groupValue: 'direcciones',
+                              onChanged: (value) {
+                                // Acción al seleccionar el modo automático
+                                // Puedes agregar tu lógica aquí
+                              },
+                            ),
+                            Text('Derecho',
+                                style: TextStyle(
+                                    fontSize:
+                                        16)), // Cambia el tamaño de la fuente
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.power_off), // Icono para apagar
-                    onPressed: () async {
-                      await _bluetoothController.disconnectDevice(device);
-                      Navigator.pop(context);
-                    },
+                ),
+                const SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.arrow_upward),
+                              onPressed: () {
+                                // Acción al presionar flecha arriba
+                              },
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.arrow_back),
+                              onPressed: () {
+                                // Acción al presionar flecha izquierda
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.arrow_forward),
+                              onPressed: () {
+                                // Acción al presionar flecha derecha
+                              },
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.arrow_downward),
+                              onPressed: () {
+                                // Acción al presionar flecha abajo
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.power_off), // Icono para apagar
-                    onPressed: () async {
-                      await _bluetoothController.sendTrama(TramaType.Apagar);
-                    },
-                  ),
-                ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.swap_vertical_circle),
+                      onPressed: () {
+                        // Acción al presionar flecha arriba (movimiento de atrás)
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.swap_horiz),
+                      onPressed: () {
+                        // Acción al presionar flecha abajo (movimiento de adelante)
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.stop),
+                      onPressed: () {
+                        // Acción al presionar el botón de detener
+                        _bluetoothController.disconnectDevice(
+                            device, TramaType.Apagar);
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } else {
+      // Mostrar mensaje de error
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error de conexión'),
+            content: Text('No se pudo conectar al dispositivo $deviceName.'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Cerrar'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
             ],
-          ),
-        );
-      },
-    );
-  } else {
-    // Mostrar mensaje de error
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Error de conexión'),
-          content: Text('No se pudo conectar al dispositivo $deviceName.'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cerrar'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
+          );
+        },
+      );
+    }
   }
-}
 }

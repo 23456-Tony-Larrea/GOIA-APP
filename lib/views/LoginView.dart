@@ -80,6 +80,7 @@ class _LoginPageState extends State<LoginView> {
                                     border: OutlineInputBorder(),
                                     labelText: 'Host',
                                   ),
+                                  
                                 ),
                                 actions: <Widget>[
                                   TextButton(

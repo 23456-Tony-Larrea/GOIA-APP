@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfigHostController {
   final TextEditingController configController = TextEditingController();
+  final TextEditingController hostControler = TextEditingController();
 
   Future<void> addConfig(BuildContext context) async {
     final response = await http.post(
@@ -16,6 +17,7 @@ class ConfigHostController {
       },
       body: jsonEncode(<String, dynamic>{
         'host': configController.text,
+        "esta_ip":hostControler.text
       }),
     );
 
@@ -26,7 +28,6 @@ class ConfigHostController {
       print(jsonResponse);
       if (jsonResponse is List && jsonResponse.isNotEmpty) {
         final firstObject = jsonResponse[0];
-        
 
         if (firstObject.containsKey('esta_ip') &&
             firstObject.containsKey('esta_host') &&
@@ -34,13 +35,11 @@ class ConfigHostController {
           final estaIp = firstObject['esta_ip'];
           final estaHost = firstObject['esta_host'];
           final estaCodigo = firstObject['esta_codigo'];
-          print(estaCodigo);
           final host = "http://192.168.2.68:8080";
           await saveHostToSharedPreferences('esta_ip', estaIp);
           await saveHostToSharedPreferences('esta_host', estaHost);
           await saveHostToSharedPreferences('host', host);
           await saveEstaCodeToSharedPreferences('esta_codigo', estaCodigo);
-
         }
       }
       Fluttertoast.showToast(
@@ -73,11 +72,10 @@ class ConfigHostController {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('esta_ip');
   }
+
   //usa int para guardar esta_codigo en SharedPreferences
   Future<void> saveEstaCodeToSharedPreferences(String key, int value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt(key, value);
   }
-
- 
 }

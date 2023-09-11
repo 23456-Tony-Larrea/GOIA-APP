@@ -1,12 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-enum TramaType {
-  Encender,
-  Apagar
-}
-
+import 'package:rtv/class/Trama.dart';
 
 class BluetoohController {
   final FlutterBlue flutterBlue = FlutterBlue.instance;
@@ -52,49 +47,81 @@ class BluetoohController {
     }
   }
 
-Future<void> sendTrama(TramaType type) async {
-  
-  try {
-    if (_services == null) {
-      print('Error: No se han descubierto los servicios del dispositivo.');
-      return;
-    }
-
-    List<int> tramaOn;
-    List<int> tramaOff;
-    
-    switch (type) {
-      case TramaType.Encender:
-        tramaOn = [36, 49, 49, 49, 49, 49, 35];
-        tramaOff = []; // Inicializa tramaOff como una lista vacía en esta rama
-        break;
-      case TramaType.Apagar:
-        tramaOn = []; // Inicializa tramaOn como una lista vacía en esta rama
-        
-        tramaOff = [36, 48, 48, 48, 48, 48, 35];
-        break;
-      default:
-        print('Tipo de trama no válido');
+  Future<void> sendTrama(TramaType type) async {
+    try {
+      if (_services == null) {
+        print('Error: No se han descubierto los servicios del dispositivo.');
         return;
-    }
+      }
+      List<int> trama;
 
-    for (BluetoothService service in _services!) {
-      var characteristics = service.characteristics;
-      for (BluetoothCharacteristic c in characteristics) {
-        if (c.properties.write) {
-          if (type == TramaType.Encender) {
-            await c.write(tramaOn);
-          } else if (type == TramaType.Apagar) {
-            await c.write(tramaOff);
+      switch (type) {
+        case TramaType.Encender:
+          trama = [36,49,49,49,49,49,35];
+          break;
+        case TramaType.Apagar:
+          trama = [36,48,48,48,48,48,35];
+          break;
+        case TramaType.STOP:
+          trama = [36,49,120,49,120,84,35];
+          break;
+        case TramaType.MANUALIZ:
+          trama = [36,49,77,49,49,49,120,35];
+          break;
+        case TramaType.SUBIDA:
+          trama = [36,49,77,120,49,83,35];
+          break;
+        case TramaType.BAJADA:
+          trama = [36,49,77,120,49,66,35];
+          break;
+        case TramaType.IZQUIERDA:
+          trama = [36,49,77,120,49,73,35];
+          break;
+        case TramaType.DERECHA:
+          trama = [36,49,77,120,49,68,35];
+          break;
+        case TramaType.MANUALDE:
+          trama = [36,49,77,49,50,120,35];
+          break;
+        case TramaType.SUBIDAD:
+          trama = [36,49,77,120,50,83,35];
+          break;
+        case TramaType.BAJADAD:
+          trama = [36,49,77,120,50,66,35];
+          break;
+          case  TramaType.IZQUIERDAD:
+          trama = [36,49,77,120,50,73,35];
+          break;
+        case TramaType.DERECHAD:
+          trama = [36,49,77,120,50,68,35];
+          break;
+        case TramaType.AUTOMATICO:
+          trama = [36,49,65,49,120,120,35];
+          break;
+        case TramaType.HORIZONTAL:
+          trama = [36,49,65,72,120,120,35];
+          break;
+        case TramaType.VERTICAL:
+          trama = [36,49,65,86,120,120,35];
+          break;
+        default:
+
+          print('Tipo de trama no válido');
+          return;
+      }
+
+      for (BluetoothService service in _services!) {
+        var characteristics = service.characteristics;
+        for (BluetoothCharacteristic c in characteristics) {
+          if (c.properties.write) {
+            await c.write(trama);
           }
         }
       }
+    } catch (e) {
+      print('Error al enviar la trama: $e');
     }
-  } catch (e) {
-    print('Error al enviar la trama: $e');
   }
-}
-  
 
   Future<List<BluetoothDevice>> getBondedDevices() async {
     try {
@@ -107,8 +134,23 @@ Future<void> sendTrama(TramaType type) async {
   }
 
   // Desconectar dispositivo
-  Future<void> disconnectDevice(BluetoothDevice device) async {
+  Future<void> disconnectDevice(BluetoothDevice device, TramaType type) async {
+    List<int> tramaOff;
     try {
+      if (type == TramaType.Apagar) {
+        await sendTrama(TramaType.Apagar);
+        for (BluetoothService service in _services!) {
+          var characteristics = service.characteristics;
+          for (BluetoothCharacteristic c in characteristics) {
+            if (c.properties.write) {
+              if (type == TramaType.Apagar) {
+                tramaOff = [36, 48, 48, 48, 48, 48, 35];
+                await c.write(tramaOff);
+              }
+            }
+          }
+        }
+      }
       await device.disconnect();
     } catch (e) {
       print('Error al desconectar el dispositivo: $e');
