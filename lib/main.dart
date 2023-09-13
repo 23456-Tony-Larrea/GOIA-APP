@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-/* import 'package:rtv/views/LoginView.dart'; */
 import 'package:rtv/views/LoginView.dart';
 import 'package:rtv/views/BluetoohView.dart';
-import 'package:rtv/ignore/MenuView.dart';
 import 'package:rtv/views/UsersView.dart';
 import 'package:rtv/views/IdentificationView.dart';
 import 'package:rtv/views/VisualInspectionView.dart';
@@ -19,7 +17,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: _title, home: LoginView(), routes: {
+    return MaterialApp(title: _title, home: TabBarViewNoRolesExample(), routes: {
       '/login': (context) => const LoginView(),
       '/bluetooh': (context) => BluetoothView(),
       '/menu': (context) => TabBarViewNoRolesExample(),

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -7,7 +9,7 @@ class BluetoohController {
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   List<ScanResult> scanResults = [];
   List<BluetoothService>? _services;
-  bool isDeviceOn = false;
+  BluetoothDevice? _connectedDevice; // Agrega esta variable a tu clase
 
   Stream<List<ScanResult>> getScanResultsStream() {
     return flutterBlue.scanResults;
@@ -40,7 +42,8 @@ class BluetoohController {
     try {
       await device.connect();
       _services = await device.discoverServices();
-      return true; // Indica que el dispositivo se ha conectado correctamente
+    _connectedDevice = device;
+      return true;
     } catch (e) {
       print("Error al conectar el dispositivo: $e");
       return false; // Indica que ha ocurrido un error al conectar el dispositivo
@@ -53,71 +56,70 @@ class BluetoohController {
         print('Error: No se han descubierto los servicios del dispositivo.');
         return;
       }
-      List<int> trama;
+      List<int> trama = [];
+        switch (type) {
+          case TramaType.Encender:
+            trama = [36, 49, 49, 49, 49, 49, 35];
+            break;
+          case TramaType.Apagar:
+            trama = [36, 48, 48, 48, 48, 48, 35];
+            break;
+          case TramaType.STOP:
+            trama = [36, 49, 120, 49, 120, 84, 35];
+            break;
+          case TramaType.MANUALIZ:
+            trama = [36, 49, 77, 49, 49, 49, 120, 35];
+            break;
+          case TramaType.SUBIDA:
+            trama = [36, 49, 77, 120, 49, 83, 35];
+            break;
+          case TramaType.BAJADA:
+            trama = [36, 49, 77, 120, 49, 66, 35];
+            break;
+          case TramaType.IZQUIERDA:
+            trama = [36, 49, 77, 120, 49, 73, 35];
+            break;
+          case TramaType.DERECHA:
+            trama = [36, 49, 77, 120, 49, 68, 35];
+            break;
+          case TramaType.MANUALDE:
+            trama = [36, 49, 77, 49, 50, 120, 35];
+            break;
+          case TramaType.SUBIDAD:
+            trama = [36, 49, 77, 120, 50, 83, 35];
+            break;
+          case TramaType.BAJADAD:
+            trama = [36, 49, 77, 120, 50, 66, 35];
+            break;
+          case TramaType.IZQUIERDAD:
+            trama = [36, 49, 77, 120, 50, 73, 35];
+            break;
+          case TramaType.DERECHAD:
+            trama = [36, 49, 77, 120, 50, 68, 35];
+            break;
+          case TramaType.AUTOMATICO:
+            trama = [36, 49, 65, 49, 120, 120, 35];
+            break;
+          case TramaType.HORIZONTAL:
+            trama = [36, 49, 65, 72, 120, 120, 35];
+            break;
+          case TramaType.VERTICAL:
+            trama = [36, 49, 65, 86, 120, 120, 35];
+            break;
+          default:
+            print('Tipo de trama no válido');
+            return;
+        }
 
-      switch (type) {
-        case TramaType.Encender:
-          trama = [36,49,49,49,49,49,35];
-          break;
-        case TramaType.Apagar:
-          trama = [36,48,48,48,48,48,35];
-          break;
-        case TramaType.STOP:
-          trama = [36,49,120,49,120,84,35];
-          break;
-        case TramaType.MANUALIZ:
-          trama = [36,49,77,49,49,49,120,35];
-          break;
-        case TramaType.SUBIDA:
-          trama = [36,49,77,120,49,83,35];
-          break;
-        case TramaType.BAJADA:
-          trama = [36,49,77,120,49,66,35];
-          break;
-        case TramaType.IZQUIERDA:
-          trama = [36,49,77,120,49,73,35];
-          break;
-        case TramaType.DERECHA:
-          trama = [36,49,77,120,49,68,35];
-          break;
-        case TramaType.MANUALDE:
-          trama = [36,49,77,49,50,120,35];
-          break;
-        case TramaType.SUBIDAD:
-          trama = [36,49,77,120,50,83,35];
-          break;
-        case TramaType.BAJADAD:
-          trama = [36,49,77,120,50,66,35];
-          break;
-          case  TramaType.IZQUIERDAD:
-          trama = [36,49,77,120,50,73,35];
-          break;
-        case TramaType.DERECHAD:
-          trama = [36,49,77,120,50,68,35];
-          break;
-        case TramaType.AUTOMATICO:
-          trama = [36,49,65,49,120,120,35];
-          break;
-        case TramaType.HORIZONTAL:
-          trama = [36,49,65,72,120,120,35];
-          break;
-        case TramaType.VERTICAL:
-          trama = [36,49,65,86,120,120,35];
-          break;
-        default:
-
-          print('Tipo de trama no válido');
-          return;
-      }
-
-      for (BluetoothService service in _services!) {
-        var characteristics = service.characteristics;
-        for (BluetoothCharacteristic c in characteristics) {
-          if (c.properties.write) {
-            await c.write(trama);
+        for (BluetoothService service in _services!) {
+          var characteristics = service.characteristics;
+          for (BluetoothCharacteristic c in characteristics) {
+            if (c.properties.write) {
+              await c.write(Uint8List.fromList(trama));
+            }
           }
         }
-      }
+    
     } catch (e) {
       print('Error al enviar la trama: $e');
     }
@@ -151,7 +153,10 @@ class BluetoohController {
           }
         }
       }
-      await device.disconnect();
+      if (_connectedDevice != null) {
+      await _connectedDevice!.disconnect(); // Desconecta el dispositivo almacenado
+      _connectedDevice = null; // Establece _connectedDevice como null
+    }
     } catch (e) {
       print('Error al desconectar el dispositivo: $e');
     }

@@ -12,11 +12,14 @@ class HolgurasView extends StatefulWidget {
 class _HolgurasViewState extends State<HolgurasView> {
   final HolgurasController _controller = HolgurasController();
   List<List<ListProcedureHolguras>> _holgurasLists = [];
+  int codeRTV = 0;
   @override
   void initState() {
     super.initState();
     clearCodeTVFromSharedPreferences();
   }
+  
+
 
   void clearCodeTVFromSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -233,6 +236,34 @@ class _HolgurasViewState extends State<HolgurasView> {
           ),
         ),
       ),
+       floatingActionButton: Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        FloatingActionButton(
+          onPressed: () {
+            // Acción para el primer botón flotante
+          },
+          child: Icon(Icons.stop),
+          backgroundColor: Colors.red,
+        ),
+        SizedBox(height: 4.0), // Espacio entre los botones
+        FloatingActionButton(
+          onPressed: () {
+            // Acción para el segundo botón flotante
+          },
+          child: Icon(Icons.swap_horiz),
+          backgroundColor: Colors.red,
+        ),
+        SizedBox(height: 4.0), // Espacio entre los botones
+        FloatingActionButton(
+          onPressed: () {
+            // Acción para el tercer botón flotante
+          },
+          child: Icon(Icons.swap_vertical_circle),
+          backgroundColor: Colors.red,
+        ),
+      ],
+    ),
     );
   }
 

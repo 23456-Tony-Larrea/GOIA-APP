@@ -13,6 +13,7 @@ class BluetoothView extends StatefulWidget {
 class _BluetoothViewState extends State<BluetoothView> {
   final BluetoohController _bluetoothController = BluetoohController();
   bool isBluetoothOn = false;
+  String? modoSeleccionado = 'manual';
 
   @override
   void initState() {
@@ -37,7 +38,6 @@ class _BluetoothViewState extends State<BluetoothView> {
             content: Text(
                 "Asegurate que el Bluetooh este encendido. ¿Escanear nuevamente?"),
             actions: <Widget>[
-      
               TextButton(
                 child: Text('Refrescar'),
                 onPressed: () {
@@ -100,195 +100,287 @@ class _BluetoothViewState extends State<BluetoothView> {
     bool connected = await _bluetoothController.connectDevice(context, device);
 
     if (connected) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Conectado al dispositivo $deviceName.'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                const SizedBox(height: 16),
-                Card(
-                  elevation: 4, // Agrega sombra al card
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      // Usar una columna para organizar elementos verticalmente
-                      children: [
-                        Text(
-                          'Items a Considerar',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        //implemntanto un toggle de encender y apagar
-                        const SizedBox(height: 16),
-                        ToggleButtons(
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return Scaffold(
+              appBar: AppBar(
+                title: Text('Conectado al dispositivo $deviceName'),
+              ),
+              body: SingleChildScrollView(
+                child: Card(
+                  elevation: 4,
+                  margin: EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
                           children: [
-                            Icon(Icons.lightbulb_outline),
-                            Icon(Icons.lightbulb),
-                          ],
-                          onPressed: (int index) {
-                            // Acción al presionar el botón
-                            // Puedes agregar tu lógica aquí
-                            if (index == 0) {
-                              // Presionó el botón de encender
-                              _bluetoothController
-                                  .sendTrama(TramaType.Encender);
-                            } else if (index == 1) {
-                              // Presionó el botón de apagar
-                              _bluetoothController.sendTrama(TramaType.Apagar);
-                            }
-                          },
-                          isSelected: [
-                            true,
-                            false
-                          ], // Indica qué botón está seleccionado
-                        ),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Radio(
-                              value: 'manual',
-                              groupValue: 'modo',
-                              onChanged: (value) {
-                            
-                              },
+                            Text(
+                              'Items a Considerar',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            Text('Manual',
-                                style: TextStyle(
-                                    fontSize:
-                                        16)), // Cambia el tamaño de la fuente
-                            Radio(
-                              value: 'automatico',
-                              groupValue: 'modo',
-                              onChanged: (value) {
-
+                            const SizedBox(height: 16),
+                            ToggleButtons(
+                              children: [
+                                Icon(Icons.lightbulb_outline),
+                                Icon(Icons.lightbulb),
+                              ],
+                              onPressed: (int index) {
+                                if (index == 0) {
+                                  enviarTramaAsync(TramaType.Encender);
+                                } else if (index == 1) {
+                                  enviarTramaAsync(TramaType.Apagar);
+                                }
                               },
+                              isSelected: [true, false],
                             ),
-                            Text('Automático',
-                                style: TextStyle(
-                                    fontSize:
-                                        16)), // Cambia el tamaño de la fuente
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Radio(
-                              value: 'izquierda',
-                              groupValue: 'direcciones',
-                              onChanged: (value) {
-                             
-                              },
-                            ),
-                            Text('Izquierdo',
-                                style: TextStyle(
-                                    fontSize:
-                                        16)), // Cambia el tamaño de la fuente
-                            Radio(
-                              value: 'derecha',
-                              groupValue: 'direcciones',
-                              onChanged: (value) {
-                               
-                              },
-                            ),
-                            Text('Derecho',
-                                style: TextStyle(
-                                    fontSize:
-                                        16)), // Cambia el tamaño de la fuente
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.arrow_upward),
-                              onPressed: () {
-                                // Acción al presionar flecha arriba
-                              },
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.arrow_back),
-                              onPressed: () {
-                                // Acción al presionar flecha izquierda
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.arrow_forward),
-                              onPressed: () {
-                                // Acción al presionar flecha derecha
-                              },
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.arrow_downward),
-                              onPressed: () {
-                                // Acción al presionar flecha abajo
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.swap_vertical_circle),
-                      onPressed: () {
-                        // Acción al presionar flecha arriba (movimiento de atrás)
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.swap_horiz),
-                      onPressed: () {
-                        // Acción al presionar flecha abajo (movimiento de adelante)
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.stop),
-                      onPressed: () {
-                        // Acción al presionar el botón de detener
-                        _bluetoothController.disconnectDevice(
-                            device, TramaType.Apagar);
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                ),
-              ],
+                          Card(
+  elevation: 4, // Puedes ajustar la elevación según tus preferencias
+  margin: EdgeInsets.all(16), // Ajusta el margen según tus preferencias
+  child: Column(
+    children: [
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: Text(
+          'Modo',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Radio(
+            value: 'manual',
+            groupValue: 'modo',
+            onChanged: (value) {
+              setState(() {
+                modoSeleccionado = value;
+              });
+            },
+          ),
+          Text(
+            'Manual',
+            style: TextStyle(
+              fontSize: 16,
             ),
-          );
-        },
+          ),
+          Radio(
+            value: 'automatico',
+            groupValue: 'modo',
+            onChanged: (value) {
+              enviarTramaAsync(TramaType.AUTOMATICO);
+            },
+          ),
+          Text(
+            'Automático',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+const SizedBox(height: 4),
+Card(
+  elevation: 4, // Ajusta la elevación según tus preferencias
+  margin: EdgeInsets.all(16), // Ajusta el margen según tus preferencias
+  child: Column(
+    children: [
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: Text(
+          'Lados',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Radio(
+            value: 'izquierda',
+            groupValue: modoSeleccionado,
+            onChanged: (value) {
+              enviarTramaAsync(TramaType.MANUALIZ);
+            },
+          ),
+          Text(
+            'Izquierdo',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+          Radio(
+            value: 'derecha',
+            groupValue: modoSeleccionado,
+            onChanged: (value) {
+              enviarTramaAsync(TramaType.MANUALDE);
+            },
+          ),
+          Text(
+            'Derecho',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height:4),
+Card(
+  elevation: 4, // Ajusta la elevación según tus preferencias
+  margin: EdgeInsets.all(16), // Ajusta el margen según tus preferencias
+  child: Column(
+    children: [
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: Text(
+          'Direcciones',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_upward),
+            onPressed: () {
+              _bluetoothController.sendTrama(TramaType.SUBIDA);
+              _bluetoothController.sendTrama(TramaType.SUBIDAD);
+            },
+          ),
+        ],
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              _bluetoothController.sendTrama(TramaType.IZQUIERDA);
+              _bluetoothController.sendTrama(TramaType.IZQUIERDAD);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.arrow_forward),
+            onPressed: () {
+              _bluetoothController.sendTrama(TramaType.DERECHA);
+              _bluetoothController.sendTrama(TramaType.DERECHAD);
+            },
+          ),
+        ],
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_downward),
+            onPressed: () {
+              _bluetoothController.sendTrama(TramaType.BAJADA);
+              _bluetoothController.sendTrama(TramaType.BAJADAD);
+            },
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+                      const SizedBox(height: 4),
+                      
+                    Card(
+  elevation: 4, // Ajusta la elevación según tus preferencias
+  margin: EdgeInsets.all(16), // Ajusta el margen según tus preferencias
+  child: Column(
+    children: [
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: Text(
+          'Direcciones Automáticas',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          IconButton(
+            icon: Icon(Icons.swap_vertical_circle),
+            onPressed: () {
+              _bluetoothController.sendTrama(TramaType.VERTICAL);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.swap_horiz),
+            onPressed: () {
+              _bluetoothController.sendTrama(TramaType.HORIZONTAL);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.stop),
+            onPressed: () {
+              _bluetoothController.sendTrama(TramaType.STOP);
+            },
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+Center(
+  child: ElevatedButton.icon(
+    onPressed: () {
+      // Coloca aquí la lógica para desconectar el dispositivo Bluetooth
+      _bluetoothController.disconnectDevice(
+                            device, TramaType.Apagar);
+      Navigator.pop(context); // Cierra la pantalla actual
+    },
+    icon: Icon(
+      Icons.bluetooth_disabled, // Icono de Bluetooth desconectado
+      color: Colors.white, // Color del icono
+    ),
+    label: Text(
+      'Desconectar Bluetooth',
+      style: TextStyle(
+        color: Colors.white, // Color del texto
+      ),
+    ),
+    style: ElevatedButton.styleFrom(
+      primary: Colors.red, // Color de fondo rojo
+    ),
+  ),
+),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       );
     } else {
-      // Mostrar mensaje de error
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -306,6 +398,17 @@ class _BluetoothViewState extends State<BluetoothView> {
           );
         },
       );
+    }
+  }
+
+  Future<void> enviarTramaAsync(TramaType type) async {
+    try {
+      await _bluetoothController
+          .sendTrama(type); // Llama a tu función sendTrama
+
+      // Puedes realizar otras acciones aquí después de enviar la trama
+    } catch (e) {
+      print('Error al enviar la trama: $e');
     }
   }
 }
