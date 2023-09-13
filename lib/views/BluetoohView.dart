@@ -97,9 +97,9 @@ class _BluetoothViewState extends State<BluetoothView> {
 
   void _showDeviceNameDialog(
       BuildContext context, String deviceName, BluetoothDevice device) async {
-    bool connected = await _bluetoothController.connectDevice(context, device);
-
-    if (connected) {
+   BluetoothDevice? connectedDevice = await _bluetoothController.connectDevice2(device);
+  bool connected = connectedDevice != null;
+     if (connected) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
@@ -132,9 +132,9 @@ class _BluetoothViewState extends State<BluetoothView> {
                               ],
                               onPressed: (int index) {
                                 if (index == 0) {
-                                  enviarTramaAsync(TramaType.Encender);
+                                  _bluetoothController.writeDataToDevice(device,[36, 49, 49, 49, 49, 49, 35]);
                                 } else if (index == 1) {
-                                  enviarTramaAsync(TramaType.Apagar);
+                                  _bluetoothController.writeDataToDevice(device,[36, 48, 48, 48, 48, 48, 35]);
                                 }
                               },
                               isSelected: [true, false],

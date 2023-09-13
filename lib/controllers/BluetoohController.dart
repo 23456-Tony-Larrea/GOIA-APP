@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -9,7 +7,7 @@ class BluetoohController {
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   List<ScanResult> scanResults = [];
   List<BluetoothService>? _services;
-  BluetoothDevice? _connectedDevice; // Agrega esta variable a tu clase
+  BluetoothDevice? _connectedDevice;
 
   Stream<List<ScanResult>> getScanResultsStream() {
     return flutterBlue.scanResults;
@@ -29,26 +27,28 @@ class BluetoohController {
     }
     if (await Permission.bluetoothScan.request().isGranted) {
       print("Bluetooh otorgado");
-      scanResults.clear(); // Limpiar resultados anteriores
+      scanResults.clear(); 
     }
   }
 
   Future<void> stop() async {
     flutterBlue.stopScan();
   }
-
-  Future<bool> connectDevice(
-      BuildContext context, BluetoothDevice device) async {
-    try {
-      await device.connect();
-      _services = await device.discoverServices();
-    _connectedDevice = device;
-      return true;
-    } catch (e) {
-      print("Error al conectar el dispositivo: $e");
-      return false; // Indica que ha ocurrido un error al conectar el dispositivo
+Future<BluetoothDevice?> connectDevice2(BluetoothDevice device) async {
+  try {
+    if (device.state == BluetoothDeviceState.connected) {
+      return device;
     }
+
+    await device.connect(autoConnect: false); // Desactivar la reconexión automática
+    List<BluetoothService> services = await device.discoverServices();
+    return device;
+  } catch (e) {
+    print("Error al conectar el dispositivo: $e");
+    // Implementar lógica de reconexión aquí
+    return null;
   }
+}
 
   Future<void> sendTrama(TramaType type) async {
     try {
@@ -111,19 +111,36 @@ class BluetoohController {
             return;
         }
 
-        for (BluetoothService service in _services!) {
-          var characteristics = service.characteristics;
-          for (BluetoothCharacteristic c in characteristics) {
-            if (c.properties.write) {
-              await c.write(Uint8List.fromList(trama));
-            }
-          }
-        }
-    
-    } catch (e) {
-      print('Error al enviar la trama: $e');
+       for (BluetoothService service in _services!) {
+  var characteristics = service.characteristics;
+  for (BluetoothCharacteristic c in characteristics) {
+  
+        await c.write(trama);
+     
     }
+}
+  } catch (e) {
+    print('Error al enviar la trama: $e');
   }
+  }
+
+Future<void> writeDataToDevice(BluetoothDevice device, List<int> data) async {
+  try {
+    List<BluetoothService> services = await device.discoverServices();
+    for (BluetoothService service in services) {
+      for (BluetoothCharacteristic characteristic in service.characteristics) {
+        if (characteristic.properties.write) {
+          await characteristic.write(data);
+          print('Trama escrita con éxito en el dispositivo');
+          return;
+        }
+      }
+    }
+    print('No se encontró una característica de escritura en el dispositivo');
+  } catch (e) {
+    print('Error al escribir en el dispositivo: $e');
+  }
+}
 
   Future<List<BluetoothDevice>> getBondedDevices() async {
     try {
