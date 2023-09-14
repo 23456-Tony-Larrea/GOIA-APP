@@ -65,9 +65,11 @@ class _IdentificationViewState extends State<IdentificationView> {
                     icon: Icon(Icons.clear),
                     onPressed: () {
                       _controller.placaController.clear();
+
                       setState(() {
                         _controller.carData =
                             null; // Limpiamos la información del vehículo
+                             _controller.searchCompleted = false;
                       });
                     },
                   ),
@@ -118,7 +120,7 @@ class _IdentificationViewState extends State<IdentificationView> {
                     ],
                   ),
                 )
-              else
+              else if (_controller.searchCompleted) 
                 Card(
                   elevation: 4,
                   child: Padding(
@@ -135,6 +137,8 @@ class _IdentificationViewState extends State<IdentificationView> {
                             setState(() {
                               _controller.carData =
                                   null; // Limpiamos la información del vehículo
+                                                            _controller.searchCompleted = false;
+   
                             });
                           },
                           child: Text('Realizar una nueva consulta'),

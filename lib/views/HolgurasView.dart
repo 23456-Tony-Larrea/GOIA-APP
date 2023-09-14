@@ -81,6 +81,8 @@ class _HolgurasViewState extends State<HolgurasView> {
                       setState(() {
                         _controller.carData =
                             null; // Limpiamos la información del vehículo
+                                                         _controller.searchCompleted = false;
+
                       });
                     },
                   ),
@@ -131,7 +133,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                     ],
                   ),
                 )
-              else
+              else if (_controller.searchCompleted)
                 Card(
                   elevation: 4,
                   child: Padding(
@@ -147,7 +149,8 @@ class _HolgurasViewState extends State<HolgurasView> {
                             _controller.placaController.clear();
                             setState(() {
                               _controller.carData =
-                                  null; // Limpiamos la información del vehículo
+                            null;
+                                                               _controller.searchCompleted = false;
                             });
                           },
                           child: Text('Realizar una nueva consulta'),

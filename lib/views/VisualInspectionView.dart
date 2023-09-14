@@ -275,6 +275,7 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
                       setState(() {
                         _controller.carData =
                             null; // Limpiamos la información del vehículo
+                             _controller.searchCompleted = false; 
                       });
                     },
                   ),
@@ -325,7 +326,7 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
                     ],
                   ),
                 )
-              else
+                     else if (_controller.searchCompleted) 
                 Card(
                   elevation: 4,
                   child: Padding(
@@ -342,6 +343,7 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
                             setState(() {
                               _controller.carData =
                                   null; // Limpiamos la información del vehículo
+                                   _controller.searchCompleted = false; 
                             });
                           },
                           child: Text('Realizar una nueva consulta'),

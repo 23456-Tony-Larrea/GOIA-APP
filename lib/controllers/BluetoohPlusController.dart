@@ -58,7 +58,7 @@ class BluetoothPlusController {
   }
 
   //send trama
-  Future<void> sendTrama(BluetoothDevice device, TramaType type) async {
+  Future<void> sendTrama(TramaType type) async {
     try {
       if (_services == null) {
         print('Error: No se han descubierto los servicios del dispositivo.');
@@ -68,22 +68,16 @@ class BluetoothPlusController {
         print('Error: No hay dispositivo conectado.');
         return;
       }
-      if (_connectedDevice != device) {
-        print(
-            'Error: El dispositivo conectado no es el mismo que se desea desconectar.');
-        return;
-      }
-      await device.connect(autoConnect: false);
 
       List<int> trama = [];
       switch (type) {
         case TramaType.Encender:
           trama = [36, 49, 49, 49, 49, 49, 35];
+
           //mantener el dispositivo activo
           break;
         case TramaType.Apagar:
           trama = [36, 48, 48, 48, 48, 48, 35];
-                    await device.connect(autoConnect: true);
           break;
         case TramaType.STOP:
           trama = [36, 49, 120, 49, 120, 84, 35];
@@ -137,6 +131,7 @@ class BluetoothPlusController {
           if (c.properties.write) {
             try {
               await c.write(trama);
+              print('Trama enviada correctamente: $trama');
             } catch (e) {
               print('Error al escribir en la característica: $e');
             }
@@ -145,29 +140,10 @@ class BluetoothPlusController {
       }
     } catch (e) {
       print('Error al enviar la trama: $e');
+    } finally {
+      print('Trama enviada correctamente');
     }
   }
-
-Future<void> writeDataToDevice(BluetoothDevice device, List<int> data) async {
-  await device.connect(autoConnect: false);
-  try {
-    List<BluetoothService> services = await device.discoverServices();
-    for (BluetoothService service in services) {
-      for (BluetoothCharacteristic characteristic in service.characteristics) {
-        if (characteristic.properties.write) {
-          await characteristic.write(data);
-          print('Trama escrita con éxito en el dispositivo');
-          return;
-        }
-      }
-    }
-    print('No se encontró una característica de escritura en el dispositivo');
-  } catch (e) {
-    print('Error al escribir en el dispositivo: $e');
-  }
-}
-
-
 
   Future<List<BluetoothDevice>> getBondedDevices() async {
     try {
@@ -182,8 +158,6 @@ Future<void> writeDataToDevice(BluetoothDevice device, List<int> data) async {
 
   Future<void> disconnectDevice(BluetoothDevice device, TramaType type) async {
     List<int> tramaOff;
-    //conectar el dipositivo
-    await device.connect(autoConnect: false);
     try {
       if (type == TramaType.Apagar) {
         for (BluetoothService service in _services!) {
@@ -206,5 +180,10 @@ Future<void> writeDataToDevice(BluetoothDevice device, List<int> data) async {
     } catch (e) {
       print('Error al enviar la trama: $e');
     }
+  }
+
+  Future<bool> isBluetoothAvailable() async {
+    bool isAvailable = await FlutterBluePlus.isAvailable;
+    return isAvailable;
   }
 }

@@ -1,12 +1,12 @@
   import 'package:flutter/material.dart';
-  import 'package:rtv/views/RolePermissionView.dart';
-  import 'package:rtv/views/UsersView.dart';
+  import 'package:rtv/ignore/RolePermissionView.dart';
+  import 'package:rtv/ignore/UsersView.dart';
   import 'package:rtv/views/IdentificationView.dart';
   import 'package:rtv/views/VisualInspectionView.dart';
   import 'package:rtv/views/HolgurasView.dart';
-  import 'package:rtv/views/LlantasView.dart';
+  import 'package:rtv/ignore/LlantasView.dart';
   import 'package:rtv/views/ExitView.dart';
-  import 'package:rtv/controllers/PermissionViewController.dart';
+  import 'package:rtv/ignore/controllers/PermissionViewController.dart';
 
   class TabBarViewExample extends StatefulWidget {
     @override

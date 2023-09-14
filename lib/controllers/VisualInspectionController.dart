@@ -14,7 +14,7 @@ class VisualInspectionController {
   Cars? carData;
   int? savedRtvCode;
   int? vehiCodigo;
-
+  bool searchCompleted = false; // Agregar esta propiedad
 final TextEditingController observationController = TextEditingController();
 
   Future<void> searchVehicle(BuildContext context, String placa) async {
@@ -30,26 +30,39 @@ final TextEditingController observationController = TextEditingController();
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonResponse = jsonDecode(response.body);
-      final Map<String, dynamic> firstElement = jsonResponse[0];
-      this.vehiCodigo = firstElement['vehi_codigo'];
-      await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
 
-      Fluttertoast.showToast(
-        msg: "El carro ha sido buscado con éxito",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.greenAccent,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      if (jsonResponse.isEmpty) {
+        Fluttertoast.showToast(
+          msg: "El vehículo no se pudo encontrar",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        searchCompleted = true;
+      } else {
+        final Map<String, dynamic> firstElement = jsonResponse[0];
+        this.vehiCodigo = firstElement['vehi_codigo'];
+        await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
 
-      carData = await getInformationCar(this.vehiCodigo ?? 0);
-      await getRegisterRTV(this.vehiCodigo ?? 0);
+        Fluttertoast.showToast(
+          msg: "El carro ha sido buscado con éxito",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.greenAccent,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+
+        carData = await getInformationCar(this.vehiCodigo ?? 0);
+        await getRegisterRTV(this.vehiCodigo ?? 0);
+      }
     } else {
-      // Alert que no se pudo encontrar el vehículo
       Fluttertoast.showToast(
-        msg: "El vehículo no se pudo encontrar",
+        msg: "El servidor esta apagado",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.CENTER,
         timeInSecForIosWeb: 5,
