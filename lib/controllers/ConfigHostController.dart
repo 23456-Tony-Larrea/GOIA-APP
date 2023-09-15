@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfigHostController {
   final TextEditingController configController = TextEditingController();
-  final TextEditingController hostControler = TextEditingController();
+  final TextEditingController hostController = TextEditingController();
 
   Future<void> addConfig(BuildContext context) async {
     final response = await http.post(
@@ -17,7 +17,6 @@ class ConfigHostController {
       },
       body: jsonEncode(<String, dynamic>{
         'host': configController.text,
-        "esta_ip":hostControler.text
       }),
     );
 
@@ -35,10 +34,10 @@ class ConfigHostController {
           final estaIp = firstObject['esta_ip'];
           final estaHost = firstObject['esta_host'];
           final estaCodigo = firstObject['esta_codigo'];
-          final host = "http://192.168.2.68:8080";
+          final hostIp = "http://${hostController.text}";
           await saveHostToSharedPreferences('esta_ip', estaIp);
           await saveHostToSharedPreferences('esta_host', estaHost);
-          await saveHostToSharedPreferences('host', host);
+          await saveHostToSharedPreferences('host_ip', hostIp);
           await saveEstaCodeToSharedPreferences('esta_codigo', estaCodigo);
         }
       }

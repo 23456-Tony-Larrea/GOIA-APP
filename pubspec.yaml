@@ -43,6 +43,8 @@ dependencies:
   draggable_fab: ^0.1.4
   flutter_blue_plus: ^1.15.5
   url_launcher: ^6.1.14
+  flutter_speed_dial: ^7.0.0
+
 
 
 

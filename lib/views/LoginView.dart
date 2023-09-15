@@ -66,42 +66,53 @@ class _LoginPageState extends State<LoginView> {
                         fontSize: 16.0,
                         timeInSecForIosWeb: 5, // display duration for web
                       );
-                      return GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Configura tu host'),
-                                content: TextField(
-                                  controller:
-                                      _configHostController.configController,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    labelText: 'Host',
-                                  ),
-                                  
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      _configHostController.addConfig(context);
-                                    },
-                                    child: const Text('Guardar'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Cerrar'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: const Icon(Icons.settings),
-                      );
+return GestureDetector(
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Configura tu host'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _configHostController.configController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Host',
+                ),
+              ),
+              const SizedBox(height: 16.0), // Espacio entre los campos de texto
+              TextField(
+                controller: _configHostController.hostController, // Nuevo controlador para la dirección IP
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Dirección IP',
+                ),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                _configHostController.addConfig(context);
+              },
+              child: const Text('Guardar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    );
+  },
+  child: const Icon(Icons.settings),
+);
                     }
                   },
                 ),

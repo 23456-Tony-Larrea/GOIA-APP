@@ -89,13 +89,6 @@ class _TabBarViewNoRolesExampleState extends State<TabBarViewNoRolesExample> {
         selectedLabelStyle: TextStyle(color: Colors.black),
         unselectedLabelStyle: TextStyle(color: Colors.black),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Lógica para el botón flotante de acción (FAB)
-        },
-        child: Icon(Icons.add, color: Colors.black),
-        backgroundColor: Colors.white,
-      ),
     );
   }
 }

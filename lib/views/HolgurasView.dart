@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:rtv/class/ListProcedureHolguras.dart';
 import 'package:rtv/controllers/HolgurasController.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:rtv/controllers/BluetoohPlusController.dart';
+import 'package:rtv/class/Trama.dart';
 
 class HolgurasView extends StatefulWidget {
   @override
@@ -11,6 +14,9 @@ class HolgurasView extends StatefulWidget {
 
 class _HolgurasViewState extends State<HolgurasView> {
   final HolgurasController _controller = HolgurasController();
+  final BluetoothPlusController _bluetoothPlusController =
+      BluetoothPlusController();
+
   List<List<ListProcedureHolguras>> _holgurasLists = [];
   int codeRTV = 0;
   @override
@@ -18,13 +24,23 @@ class _HolgurasViewState extends State<HolgurasView> {
     super.initState();
     clearCodeTVFromSharedPreferences();
   }
-  
-
 
   void clearCodeTVFromSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove(
         'codeTV'); // Esto eliminará el valor 'codeTV' de SharedPreferences
+  }
+
+  Future<String> getDeviceName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('deviceName') ?? 'Sin nombre de dispositivo';
+  }
+
+  Future<void> disconnectDevice() async {
+    // Aquí debes agregar la lógica para desconectar el dispositivo Bluetooth
+    // Luego, elimina el nombre del dispositivo de SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('deviceName');
   }
 
   Future<void> _loadProcedures() async {
@@ -48,21 +64,44 @@ class _HolgurasViewState extends State<HolgurasView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
-    title: Text('Holguras'),
-    actions: [
-      Align(
-        alignment: Alignment.topRight,
-        child: FloatingActionButton(
-          onPressed: () {
-                         Navigator.pushNamed(context, '/bluetooh');
-          },
-          child: Icon(Icons.bluetooth),
-          mini: true,
-        ),
+      appBar: AppBar(
+        title: Text('Holguras'),
+        actions: [
+          Align(
+            alignment: Alignment.topRight,
+            child: FutureBuilder<String>(
+              future: getDeviceName(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(); // Mostrar un indicador de carga mientras se obtiene el nombre.
+                } else {
+                  String deviceName =
+                      snapshot.data ?? 'Sin nombre de dispositivo';
+                  return Column(
+                    children: [
+                      Text('Conectado a:'),
+                      Text(
+                        deviceName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              },
+            ),
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/bluetooh_plus');
+            },
+            child: Icon(Icons.bluetooth),
+            mini: true,
+          ),
+        ],
       ),
-    ],
-  ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -81,8 +120,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                       setState(() {
                         _controller.carData =
                             null; // Limpiamos la información del vehículo
-                                                         _controller.searchCompleted = false;
-
+                        _controller.searchCompleted = false;
                       });
                     },
                   ),
@@ -148,9 +186,8 @@ class _HolgurasViewState extends State<HolgurasView> {
                           onPressed: () {
                             _controller.placaController.clear();
                             setState(() {
-                              _controller.carData =
-                            null;
-                                                               _controller.searchCompleted = false;
+                              _controller.carData = null;
+                              _controller.searchCompleted = false;
                             });
                           },
                           child: Text('Realizar una nueva consulta'),
@@ -239,34 +276,45 @@ class _HolgurasViewState extends State<HolgurasView> {
           ),
         ),
       ),
-       floatingActionButton: Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        FloatingActionButton(
-          onPressed: () {
-            // Acción para el primer botón flotante
-          },
-          child: Icon(Icons.stop),
-          backgroundColor: Colors.red,
-        ),
-        SizedBox(height: 4.0), // Espacio entre los botones
-        FloatingActionButton(
-          onPressed: () {
-            // Acción para el segundo botón flotante
-          },
-          child: Icon(Icons.swap_horiz),
-          backgroundColor: Colors.red,
-        ),
-        SizedBox(height: 4.0), // Espacio entre los botones
-        FloatingActionButton(
-          onPressed: () {
-            // Acción para el tercer botón flotante
-          },
-          child: Icon(Icons.swap_vertical_circle),
-          backgroundColor: Colors.red,
-        ),
-      ],
-    ),
+      floatingActionButton: SpeedDial(
+        icon: Icons.menu_outlined,
+        backgroundColor: Colors.blueAccent,
+        children: [
+          SpeedDialChild(
+            label: 'Detener',
+            child: Icon(Icons.stop),
+            backgroundColor: Colors.blueAccent,
+            onTap: () {
+              // Acción para la opción 1
+            },
+          ),
+          SpeedDialChild(
+            label: 'Dirección Horizontal',
+            child: Icon(Icons.swap_horiz),
+            backgroundColor: Colors.blueAccent,
+            onTap: () {
+              // Acción para la opción 2
+            },
+          ),
+          SpeedDialChild(
+            label: 'Direccion vertical',
+            child: Icon(Icons.swap_vertical_circle),
+            backgroundColor: Colors.blueAccent,
+            onTap: () {
+              // Acción para la opción 3
+            },
+          ),
+          SpeedDialChild(
+            label: 'Apagar',
+            child: Icon(Icons.lightbulb),
+            backgroundColor: Colors.blueAccent,
+            onTap: () async {
+              await _bluetoothPlusController.sendTrama(TramaType.Apagar);
+              await disconnectDevice();
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -414,59 +462,60 @@ class _HolgurasViewState extends State<HolgurasView> {
                       ),
                     ),
                     SizedBox(height: 16),
-                     Card(
+                    Card(
                       // Card para la calificación
                       child: Column(
                         children: [
                           ListTile(
                             title: Text('Calificación'),
                           ),
-                           ListTile(
-                title: Text('Calificación: ${selectedCalification ?? 'Sin calificación'}'),
-              ),
-                            RadioListTile<int>(
-                title: Text('1'),
-                value: 1,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('2'),
-                value: 2,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('3'),
-                value: 3,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-               RadioListTile<int>(
-                title: Text('Cancelar'),
-                value: 4,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
+                          ListTile(
+                            title: Text(
+                                'Calificación: ${selectedCalification ?? 'Sin calificación'}'),
+                          ),
+                          RadioListTile<int>(
+                            title: Text('1'),
+                            value: 1,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                          RadioListTile<int>(
+                            title: Text('2'),
+                            value: 2,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                          RadioListTile<int>(
+                            title: Text('3'),
+                            value: 3,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                          RadioListTile<int>(
+                            title: Text('Cancelar'),
+                            value: 4,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                     SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
@@ -536,7 +585,7 @@ class _HolgurasViewState extends State<HolgurasView> {
 
   void _showDefectoModal(BuildContext context, Defecto defecto) {
     List<int> selectedLocations = [];
-    int ?selectedCalification = null;
+    int? selectedCalification = null;
     final HolgurasController _controller = HolgurasController();
     final FocusNode _obFocusNode = FocusNode();
     if (defecto.abreviatura == "OTROS") {
@@ -619,61 +668,61 @@ class _HolgurasViewState extends State<HolgurasView> {
                         width: 250,
                         height: 250,
                       ),
-            
                       SizedBox(height: 16),
-                       Card(
-                      // Card para la calificación
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: Text('Calificación'),
-                          ),
-                          ListTile(
-                title: Text('Calificación: ${selectedCalification ?? 'Sin calificación'}'),
-              ),
+                      Card(
+                        // Card para la calificación
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: Text('Calificación'),
+                            ),
+                            ListTile(
+                              title: Text(
+                                  'Calificación: ${selectedCalification ?? 'Sin calificación'}'),
+                            ),
                             RadioListTile<int>(
-                title: Text('1'),
-                value: 1,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('2'),
-                value: 2,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('3'),
-                value: 3,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-               RadioListTile<int>(
-                title: Text('Cancelar'),
-                value: 4,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
+                              title: Text('1'),
+                              value: 1,
+                              groupValue: selectedCalification,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCalification = value!;
+                                });
+                              },
+                            ),
+                            RadioListTile<int>(
+                              title: Text('2'),
+                              value: 2,
+                              groupValue: selectedCalification,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCalification = value!;
+                                });
+                              },
+                            ),
+                            RadioListTile<int>(
+                              title: Text('3'),
+                              value: 3,
+                              groupValue: selectedCalification,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCalification = value!;
+                                });
+                              },
+                            ),
+                            RadioListTile<int>(
+                              title: Text('Cancelar'),
+                              value: 4,
+                              groupValue: selectedCalification,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCalification = value!;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                       SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () {
