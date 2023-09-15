@@ -433,19 +433,7 @@ void _showDefectoModal(BuildContext context, Defecto defecto) {
                       height: 250,
                     ),
                     SizedBox(height: 16),
-                    TextField(
-                      maxLines: 1,
-                      controller: _kilometrajeC,
-                      focusNode: _kilometrajeFocusNode,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Kilometraje',
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
-                    ),
+
                     SizedBox(height: 16),
                     Card(
                       // Card para la calificación

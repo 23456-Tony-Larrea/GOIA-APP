@@ -44,6 +44,8 @@ dependencies:
   flutter_blue_plus: ^1.15.5
   url_launcher: ^6.1.14
   flutter_speed_dial: ^7.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 
 

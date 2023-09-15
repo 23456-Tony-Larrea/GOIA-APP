@@ -3,7 +3,6 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rtv/class/Trama.dart';
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
 
 
 class BluetoothPlusController {
@@ -11,15 +10,11 @@ class BluetoothPlusController {
   List<ScanResult> scanResults = [];
   List<BluetoothService>? _services;
   BluetoothDevice? _connectedDevice;
-  Timer? reconnectionTimer;
-  String? selectedDeviceName;
 
   Stream<List<ScanResult>>? getScanResultsStream() {
     return FlutterBluePlus.scanResults;
   }
-  String? getSelectedDeviceName() {
-    return selectedDeviceName;
-  }
+
   Future<void> startScan() async {
     if (await Permission.location.request().isGranted) {
       print("Permiso de ubicación otorgado");
@@ -54,8 +49,6 @@ class BluetoothPlusController {
           autoConnect: true); // Desactivar la reconexión automática
       _services = await device.discoverServices();
       _connectedDevice = device;
-       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('deviceName', device.localName);
       return true;
     } catch (e) {
       print("Error al conectar el dispositivo: $e");

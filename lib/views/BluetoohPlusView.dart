@@ -24,7 +24,7 @@ class _BluetoohPlusViewState extends State<BluetoohPlusView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Bluetooth Plus"),
+        title: Text("Bluetooth"),
       ),
       body: StreamBuilder<List<ScanResult>>(
         stream: _bluetoothController.getScanResultsStream(),
@@ -140,7 +140,8 @@ class _BluetoohPlusViewState extends State<BluetoohPlusView> {
                                         value: 'manual',
                                         groupValue: 'modo',
                                         onChanged: (value) {
-                                          setState(() {});
+                                          setState(() {
+                                          });
                                         },
                                       ),
                                       Text(
@@ -154,8 +155,7 @@ class _BluetoohPlusViewState extends State<BluetoohPlusView> {
                                         groupValue: 'modo',
                                         onChanged: (value) {
                                           setState(() {
-                                            _bluetoothController.sendTrama(
-                                                TramaType.AUTOMATICO);
+                                            _bluetoothController.sendTrama(TramaType.AUTOMATICO);
                                           });
                                         },
                                       ),
@@ -211,8 +211,8 @@ class _BluetoohPlusViewState extends State<BluetoohPlusView> {
                                         groupValue: "modoSeleccionado",
                                         onChanged: (value) {
                                           setState(() {
-                                            _bluetoothController
-                                                .sendTrama(TramaType.MANUALDE);
+                                            _bluetoothController.sendTrama(
+                                                TramaType.MANUALDE);
                                           });
                                         },
                                       ),

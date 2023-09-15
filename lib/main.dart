@@ -8,7 +8,7 @@ import 'package:rtv/views/HolgurasView.dart';
 import 'package:rtv/views/MenuNotRolesView.dart';
 import 'package:rtv/views/BluetoohPlusView.dart';
 
-void main() {
+void main() async {
   runApp(const MyApp());
 }
 
