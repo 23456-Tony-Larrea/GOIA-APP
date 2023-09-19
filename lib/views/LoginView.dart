@@ -86,6 +86,14 @@ Container(
                               labelText: 'Dirección IP',
                             ),
                           ),
+                          const SizedBox(height: 16.0), // Espacio entre los campos de texto
+                          TextField(
+                            controller: _configHostController.portController, // Nuevo controlador para la dirección IP
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Puerto',
+                            ),
+                          ),
                         ],
                       ),
                       actions: <Widget>[

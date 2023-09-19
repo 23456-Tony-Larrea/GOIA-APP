@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: _title,
-        home: LoginView(),
+        home: BluetoohPlusView(),
         routes: {
           '/login': (context) => const LoginView(),
          '/bluetooh_plus': (context) => BluetoohPlusView(),
