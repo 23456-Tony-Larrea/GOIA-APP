@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/* import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:rtv/controllers/BluetoohController.dart';
 import 'package:rtv/class/Trama.dart';
@@ -14,6 +14,7 @@ class _BluetoothViewState extends State<BluetoothView> {
   final BluetoohController _bluetoothController = BluetoohController();
   bool isBluetoothOn = false;
   String? modoSeleccionado = 'manual';
+  bool isModalOpen = false;
 
   @override
   void initState() {
@@ -412,3 +413,4 @@ Center(
     }
   }
 }
+ */

@@ -1,9 +1,3 @@
-class Trama {
-  final List<int> tramaData;
-
-  Trama(this.tramaData);
-}
-
 enum TramaType {
   Encender,
   Apagar,
@@ -23,3 +17,27 @@ enum TramaType {
   VERTICAL,
 }
 
+class Trama {
+  final List<int> trama;
+
+  Trama(TramaType type) : trama = _tramas[type] ?? [];
+
+  static final Map<TramaType, List<int>> _tramas = {
+    TramaType.Encender: [36, 49, 49, 49, 49, 49, 35],
+    TramaType.Apagar: [36, 48, 48, 48, 48, 48, 35],
+    TramaType.STOP: [36, 49, 120, 49, 120, 84, 35],
+    TramaType.MANUALIZ: [36, 49, 77, 49, 49, 49, 120, 35],
+    TramaType.SUBIDA: [36, 49, 77, 120, 49, 83, 35],
+    TramaType.BAJADA: [36, 49, 77, 120, 49, 66, 35],
+    TramaType.IZQUIERDA: [36, 49, 77, 120, 49, 73, 35],
+    TramaType.DERECHA: [36, 49, 77, 120, 49, 68, 35],
+    TramaType.MANUALDE: [36, 49, 77, 49, 50, 120, 35],
+    TramaType.SUBIDAD: [36, 49, 77, 120, 50, 83, 35],
+    TramaType.BAJADAD: [36, 49, 77, 120, 50, 66, 35],
+    TramaType.IZQUIERDAD: [36, 49, 77, 120, 50, 73, 35],
+    TramaType.DERECHAD: [36, 49, 77, 120, 50, 68, 35],
+    TramaType.AUTOMATICO: [36, 49, 65, 49, 120, 120, 35],
+    TramaType.HORIZONTAL: [36, 49, 65, 72, 120, 120, 35],
+    TramaType.VERTICAL: [36, 49, 65, 86, 120, 120, 35],
+  };
+}

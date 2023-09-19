@@ -18,107 +18,102 @@ class _LoginPageState extends State<LoginView> {
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Container(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                FutureBuilder<String?>(
-                  future: _configHostController.getHostFromSharedPreferences(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && snapshot.data != null) {
-                      Fluttertoast.showToast(
-                        msg: "el host ha sido guardado con éxito",
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.BOTTOM_LEFT,
-                        backgroundColor: Colors.greenAccent,
-                        textColor: Colors.white,
-                        fontSize: 16.0,
-                        timeInSecForIosWeb: 5, // display duration for web
-                      );
-                      //traer estaHost
-                      _configHostController
-                          .getHostFromSharedPreferences()
-                          .then((estaIp) {
-                        if (estaIp != null) {
-                          // Mostrar un mensaje Toast con el valor de esta_host
-                          print(estaIp);
-                          Fluttertoast.showToast(
-                            msg: 'Tu host es: $estaIp',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM_LEFT,
-                            backgroundColor: Colors.greenAccent,
-                            textColor: Colors.white,
-                            fontSize: 16.0,
-                          );
-                          ;
-                        }
-                      });
-
-                      return Container();
-                    } else {
-                      Fluttertoast.showToast(
-                        msg: "el host no se pudo guardar",
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.CENTER,
-                        backgroundColor: Colors.redAccent,
-                        textColor: Colors.white,
-                        fontSize: 16.0,
-                        timeInSecForIosWeb: 5, // display duration for web
-                      );
-return GestureDetector(
-  onTap: () {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Configura tu host'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _configHostController.configController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Host',
-                ),
-              ),
-              const SizedBox(height: 16.0), // Espacio entre los campos de texto
-              TextField(
-                controller: _configHostController.hostController, // Nuevo controlador para la dirección IP
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Dirección IP',
-                ),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                _configHostController.addConfig(context);
-              },
-              child: const Text('Guardar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cerrar'),
-            ),
-          ],
-        );
-      },
-    );
-  },
-  child: const Icon(Icons.settings),
-);
-                    }
+Container(
+  padding: const EdgeInsets.all(20.0),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: <Widget>[
+      FutureBuilder<String?>(
+        future: _configHostController.getHostFromSharedPreferences(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container();
+          } else {
+            Fluttertoast.showToast(
+              msg: snapshot.hasData && snapshot.data != null
+                  ? "el host ha sido guardado con éxito"
+                  : "el host no se pudo guardar",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              backgroundColor: snapshot.hasData && snapshot.data != null
+                  ? Colors.greenAccent
+                  : Colors.redAccent,
+              textColor: Colors.white,
+              fontSize: 16.0,
+              timeInSecForIosWeb: 5, // display duration for web
+            );
+            if (snapshot.hasData && snapshot.data != null) {
+              //traer estaHost
+              _configHostController
+                  .getHostFromSharedPreferences()
+                  .then((estaIp) {
+                if (estaIp != null) {
+                  // Mostrar un mensaje Toast con el valor de esta_host
+                  print(estaIp);
+                  Fluttertoast.showToast(
+                    msg: 'Tu host es: $estaIp',
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM_LEFT,
+                    backgroundColor: Colors.greenAccent,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                }
+              });
+            }
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Configura tu host'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextField(
+                            controller: _configHostController.configController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Host',
+                            ),
+                          ),
+                          const SizedBox(height: 16.0), // Espacio entre los campos de texto
+                          TextField(
+                            controller: _configHostController.hostController, // Nuevo controlador para la dirección IP
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Dirección IP',
+                            ),
+                          ),
+                        ],
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            _configHostController.addConfig(context);
+                          },
+                          child: const Text('Guardar'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Cerrar'),
+                        ),
+                      ],
+                    );
                   },
-                ),
-              ],
-            ),
-          ),
+                );
+              },
+              child: const Icon(Icons.settings),
+            );
+          }
+        },
+      ),
+    ],
+  ),
+),
         Expanded(
   child: Stack(
     children: [

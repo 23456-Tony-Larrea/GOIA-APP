@@ -1,9 +1,9 @@
   import 'package:flutter/material.dart';
   import 'package:rtv/ignore/RolePermissionView.dart';
   import 'package:rtv/ignore/UsersView.dart';
-  import 'package:rtv/views/IdentificationView.dart';
-  import 'package:rtv/views/VisualInspectionView.dart';
-  import 'package:rtv/views/HolgurasView.dart';
+  import 'package:rtv/views/identification/IdentificationView.dart';
+  import 'package:rtv/views/VisualInspection/VisualInspectionView.dart';
+  import 'package:rtv/views/Holguras/HolgurasView.dart';
   import 'package:rtv/ignore/LlantasView.dart';
   import 'package:rtv/views/ExitView.dart';
   import 'package:rtv/ignore/controllers/PermissionViewController.dart';

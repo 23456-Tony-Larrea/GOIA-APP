@@ -49,6 +49,15 @@ class ConfigHostController {
           backgroundColor: Colors.greenAccent,
           textColor: Colors.white,
           fontSize: 16.0);
+      Navigator.pushNamed(context, '/login');
+  Fluttertoast.showToast(
+          msg: "Cierra la aplicacion y se guardara",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.greenAccent,
+          textColor: Colors.white,
+          fontSize: 16.0);
     } else {
       Fluttertoast.showToast(
           msg: "el host no se pudo guardar",

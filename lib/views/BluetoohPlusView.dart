@@ -71,10 +71,9 @@ class _BluetoohPlusViewState extends State<BluetoohPlusView> {
 
   void _showDeviceNameDialog(
       BuildContext context, String deviceName, BluetoothDevice device) async {
-    bool isConnected =
-        await _bluetoothController.connectDevice(context, device);
-
-    if (isConnected) {
+         BluetoothDevice? connectedDevice = await _bluetoothController.connectDevice(context,device);
+  bool connected = connectedDevice != null;
+    if (connected) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) {

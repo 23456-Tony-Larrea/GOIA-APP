@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:rtv/class/ListProcedureVisualInspection.dart';
 import 'package:rtv/controllers/VisualInspectionController.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'CalificationVisualInspection.dart';
+import 'CalificationOtrosVisualInspection.dart';
 
 class VisualInspectionView extends StatefulWidget {
   @override
@@ -42,219 +44,67 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
         'codeTV'); // Esto eliminará el valor 'codeTV' de SharedPreferences
   }
 
-void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
-  showModalBottomSheet(
-    context: context,
-    builder: (BuildContext context) {
-      return Container(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Defectos',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+  void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Defectos',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
-            ),
-            SizedBox(height: 8),
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: defectos.length,
-                itemBuilder: (context, index) {
-                  final defecto = defectos[index];
-                  return ListTile(
-                    title: Text(defecto.abreviatura),
-                    subtitle: Text(defecto.descripcion),
-                    trailing: Text('Código AS400: ${defecto.codigoAs400}'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showDefectoModal(context, defecto);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-
-  void _showDefectoModal(BuildContext context, Defecto defecto) {
-    List<int> selectedLocations = [];
-    int? selectedCalification = null;
-    final VisualInspectionController _controller = VisualInspectionController();
-    final FocusNode _obFocusNode = FocusNode();
-    if (defecto.abreviatura == "OTROS") {
-      _showOtrosModal(context, defecto);
-    } else {
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
-            builder: (BuildContext context, setState) {
-              return SingleChildScrollView(
-                  child: GestureDetector(
-                onTap: () {
-                  _obFocusNode.unfocus();
-                },
-                child: Container(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Defecto: ${defecto.abreviatura}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text('Descripción: ${defecto.descripcion}'),
-                      SizedBox(height: 16),
-                      DropdownButtonFormField<int>(
-                        decoration: InputDecoration(
-                          labelText: 'Elige las ubicaciones',
-                          border: OutlineInputBorder(),
-                        ),
-                        value: 9, // Establece el valor inicial aquí
-                        onChanged: (int? newValue) {
-                          setState(() {
-                            if (newValue != null) {
-                              selectedLocations.add(newValue);
-                            }
-                          });
-                        },
-                        items: List.generate(
-                          9,
-                          (index) => DropdownMenuItem<int>(
-                            value: index + 9,
-                            child: Text((index + 9).toString()),
-                          ),
-                        ),
-                      ),
-                      if (selectedLocations.isNotEmpty)
-                        Card(
-                          child: Column(
-                            children: [
-                              ListTile(
-                                title: Text('Ubicaciones seleccionadas:'),
-                              ),
-                              Column(
-                                children: selectedLocations.map((location) {
-                                  return ListTile(
-                                    title: Text(location.toString()),
-                                    trailing: IconButton(
-                                      icon: Icon(Icons.delete),
-                                      onPressed: () {
-                                        setState(() {
-                                          selectedLocations.remove(location);
-                                        });
-                                      },
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      SizedBox(height: 16),
-                      Image.asset(
-                        'assets/images/carrito.png',
-                        width: 250,
-                        height: 250,
-                      ),
-              
-                      SizedBox(height: 16),
-                         Card(
-                      // Card para la calificación
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: Text('Calificación'),
-                          ),
-                           ListTile(
-                title: Text('Calificación: ${selectedCalification ?? 'Sin calificación'}'),
-              ),
-                            RadioListTile<int>(
-                title: Text('1'),
-                value: 1,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('2'),
-                value: 2,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('3'),
-                value: 3,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-               RadioListTile<int>(
-                title: Text('Cancelar'),
-                value: 4,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
+              SizedBox(height: 8),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: defectos.length,
+                  itemBuilder: (context, index) {
+                    final defecto = defectos[index];
+                    return ListTile(
+                      title: Text(defecto.abreviatura),
+                      subtitle: Text(defecto.descripcion),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _showDefectoModal(context, defecto);
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),
-        ),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          _controller.saveVisualInspection(
-                            context,
-                            defecto.codigo,
-                            defecto.numero,
-                            defecto.abreviatura,
-                            defecto.descripcion,
-                            defecto.codigoAs400,
-                            selectedLocations.join(','),
-                            selectedCalification, // Agrega la calificación
-                          );
-                        },
-                        child: Text('Guardar'),
-                      ),
-                    ],
-                  ),
-                ),
-              ));
-            },
-          );
-        },
-      );
-    }
+        );
+      },
+    );
   }
 
+void _showDefectoModal(BuildContext context, Defecto defecto) {
+  if (defecto.abreviatura == "OTROS") {
+  Navigator.of(context).push(
+  MaterialPageRoute(
+    builder: (context) => OtrosHolgurasWidget(defecto: defecto),
+  ),
+);
+  } else {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CalificationVisualWidget(defecto: defecto),
+      ),
+    );
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         title: Text('Inspección Visual'), // Cambia el título del AppBar
       ),
       body: SingleChildScrollView(
@@ -275,7 +125,7 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
                       setState(() {
                         _controller.carData =
                             null; // Limpiamos la información del vehículo
-                             _controller.searchCompleted = false; 
+                        _controller.searchCompleted = false;
                       });
                     },
                   ),
@@ -326,7 +176,7 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
                     ],
                   ),
                 )
-                     else if (_controller.searchCompleted) 
+              else if (_controller.searchCompleted)
                 Card(
                   elevation: 4,
                   child: Padding(
@@ -343,7 +193,7 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
                             setState(() {
                               _controller.carData =
                                   null; // Limpiamos la información del vehículo
-                                   _controller.searchCompleted = false; 
+                              _controller.searchCompleted = false;
                             });
                           },
                           child: Text('Realizar una nueva consulta'),
@@ -385,16 +235,17 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                            FittedBox(
-  fit: BoxFit.scaleDown, // Puedes ajustar el fit según tus necesidades
-  child: Text(
-    'Abreviatura: ${procedure.abreviaturaDescripcion}', // Agrega el mensaje aquí
-    style: TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 18,
-    ),
-  ),
-),
+                                          FittedBox(
+                                            fit: BoxFit
+                                                .scaleDown, // Puedes ajustar el fit según tus necesidades
+                                            child: Text(
+                                              '${procedure.abreviaturaDescripcion}', // Agrega el mensaje aquí
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ),
                                           Icon(
                                             Icons
                                                 .arrow_forward, // Agrega el icono aquí
@@ -403,16 +254,8 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
                                         ],
                                       ),
                                       SizedBox(height: 8),
-
-                                      _buildProcedureField(
-                                          'Procedimiento', procedure.procedimiento),
-                                      _buildProcedureField(
-                                          'Descripción Abreviatura',
-                                          procedure.abreviaturaDescripcion),
-                                            _buildProcedureField(
-                                          'Codigo',
-                                          procedure.codigo.toString()),
-                                      // ...agrega los campos restantes aquí
+                                      _buildProcedureField('Abreviatura',
+                                          procedure.procedimiento),
                                     ],
                                   ),
                                 ),
@@ -484,9 +327,9 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
     int? selectedCalification = null;
     final VisualInspectionController _controller = VisualInspectionController();
     final TextEditingController _ob = TextEditingController();
-   
+
     final FocusNode _obFocusNode = FocusNode();
-   
+
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -575,59 +418,60 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
                       ),
                     ),
                     SizedBox(height: 16),
-                       Card(
+                    Card(
                       // Card para la calificación
                       child: Column(
                         children: [
                           ListTile(
                             title: Text('Calificación'),
                           ),
-                           ListTile(
-                title: Text('Calificación: ${selectedCalification ?? 'Sin calificación'}'),
-              ),
-                            RadioListTile<int>(
-                title: Text('1'),
-                value: 1,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('2'),
-                value: 2,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-              RadioListTile<int>(
-                title: Text('3'),
-                value: 3,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-               RadioListTile<int>(
-                title: Text('Cancelar'),
-                value: 4,
-                groupValue: selectedCalification,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCalification = value!;
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
+                          ListTile(
+                            title: Text(
+                                'Calificación: ${selectedCalification ?? 'Sin calificación'}'),
+                          ),
+                          RadioListTile<int>(
+                            title: Text('1'),
+                            value: 1,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                          RadioListTile<int>(
+                            title: Text('2'),
+                            value: 2,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                          RadioListTile<int>(
+                            title: Text('3'),
+                            value: 3,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                          RadioListTile<int>(
+                            title: Text('Cancelar'),
+                            value: 4,
+                            groupValue: selectedCalification,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCalification = value!;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                     SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {

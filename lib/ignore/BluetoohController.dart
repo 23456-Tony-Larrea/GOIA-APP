@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+/* import 'package:flutter/cupertino.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rtv/class/Trama.dart';
@@ -184,3 +184,4 @@ Future<void> writeDataToDevice(BluetoothDevice device, List<int> data) async {
     return device.state == BluetoothDeviceState.connected;
   }
 }
+ */

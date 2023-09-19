@@ -30,7 +30,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_blue: ^0.8.0
   permission_handler: ^10.4.3
   http: ^0.13.3
   fluttertoast: ^8.2.2
@@ -41,7 +40,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   provider: ^6.0.5
   draggable_fab: ^0.1.4
-  flutter_blue_plus: ^1.15.5
+  flutter_blue_plus: ^1.15.7
   url_launcher: ^6.1.14
   flutter_speed_dial: ^7.0.0
   hive: ^2.2.3
