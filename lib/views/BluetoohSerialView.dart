@@ -88,21 +88,26 @@ BluetoothDiscoveryResult? connectedDevice = await _bluetoothController.connectTo
                               ),
                             ),
                             const SizedBox(height: 16),
-ToggleButtons(
+Column(
   children: [
-    isSelected[0] ? Icon(Icons.lightbulb) : Icon(Icons.lightbulb_outline),
+    Text('Encender/Apagar'),
+    ToggleButtons(
+      children: [
+        isSelected[0] ? Icon(Icons.lightbulb) : Icon(Icons.lightbulb_outline),
+      ],
+      isSelected: [true],
+      onPressed: (index) {
+        setState(() {
+          isSelected[0] = !isSelected[0];
+          if (isSelected[0]) {
+            _bluetoothController.sendTrama(Trama(TramaType.Encender));
+          } else {
+            _bluetoothController.sendTrama(Trama(TramaType.Apagar));
+          }
+        });
+      },
+    ),
   ],
-  isSelected: [true],
-  onPressed: (index) {
-    setState(() {
-      isSelected[0] = !isSelected[0];
-      if (isSelected[0]) {
-        _bluetoothController.sendTrama(Trama(TramaType.Encender));
-      } else {
-        _bluetoothController.sendTrama(Trama(TramaType.Apagar));
-      }
-    });
-  },
 ),
                             Card(
                               elevation: 4,
