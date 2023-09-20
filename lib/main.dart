@@ -5,7 +5,7 @@ import 'package:rtv/views/identification/IdentificationView.dart';
 import 'package:rtv/views/VisualInspection/VisualInspectionView.dart';
 import 'package:rtv/views/Holguras/HolgurasView.dart';
 import 'package:rtv/views/MenuNotRolesView.dart';
-import 'package:rtv/views/BluetoohPlusView.dart';
+import 'package:rtv/ignore/BluetoohPlusView.dart';
 import 'package:rtv/views/BluetoohSerialView.dart';
 
 void main() async {

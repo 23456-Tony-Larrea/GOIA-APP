@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:rtv/controllers/BluetoohPlusController.dart';
+import 'package:rtv/ignore/controllers/BluetoohPlusController.dart';
 import 'package:rtv/class/Trama.dart';
 
 class BluetoohPlusView extends StatefulWidget {
