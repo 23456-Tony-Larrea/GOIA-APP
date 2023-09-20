@@ -187,8 +187,8 @@ Column(
                                         groupValue: "modoSeleccionado",
                                         onChanged: (value) {
                                           setState(() {
-                                           /*  _bluetoothController
-                                                .sendTrama(TramaType.MANUALIZ); */
+                                            _bluetoothController
+                                                .sendTrama(Trama(TramaType.MANUALIZ));
                                           });
                                         },
                                       ),
@@ -203,8 +203,8 @@ Column(
                                         groupValue: "modoSeleccionado",
                                         onChanged: (value) {
                                           setState(() {
-                                           /*  _bluetoothController.sendTrama(
-                                                TramaType.MANUALDE); */
+                                            _bluetoothController.sendTrama(
+                                                Trama(TramaType.MANUALDE));
                                           });
                                         },
                                       ),
@@ -250,9 +250,9 @@ Column(
                                                       Icon(Icons.arrow_upward),
                                                   onPressed: () {
                                                     // Maneja la acción para la flecha hacia arriba en el lado izquierdo.
-                                                  /*   _bluetoothController
+                                                    _bluetoothController
                                                         .sendTrama(
-                                                            TramaType.SUBIDA); */
+                                                            Trama(TramaType.SUBIDA));
                                                   },
                                                 ),
                                                 Text('Arriba'),
@@ -264,9 +264,9 @@ Column(
                                                   icon: Icon(Icons.arrow_back),
                                                   onPressed: () {
                                                     // Maneja la acción para la flecha hacia la izquierda en el lado izquierdo.
-                                                   /*  _bluetoothController
-                                                        .sendTrama(TramaType
-                                                            .IZQUIERDA); */
+                                                    _bluetoothController
+                                                        .sendTrama(Trama(TramaType
+                                                            .IZQUIERDA));
                                                   },
                                                 ),
                                                 Text('Izquierda'),
@@ -279,9 +279,9 @@ Column(
                                                       Icons.arrow_downward),
                                                   onPressed: () {
                                                     // Maneja la acción para la flecha hacia abajo en el lado izquierdo.
-                                                   /*  _bluetoothController
+                                                    _bluetoothController
                                                         .sendTrama(
-                                                            TramaType.BAJADA); */
+                                                            Trama(TramaType.BAJADA));
                                                   },
                                                 ),
                                                 Text('Abajo'),
@@ -294,9 +294,9 @@ Column(
                                                       Icon(Icons.arrow_forward),
                                                   onPressed: () {
                                                     // Maneja la acción para la flecha hacia la derecha en el lado izquierdo.
-                                                  /*   _bluetoothController
+                                                    _bluetoothController
                                                         .sendTrama(
-                                                            TramaType.DERECHA); */
+                                                            Trama(TramaType.DERECHA));
                                                   },
                                                 ),
                                                 Text('Derecha'),
@@ -335,9 +335,9 @@ Column(
                                                   icon:
                                                       Icon(Icons.arrow_upward),
                                                   onPressed: () {
-                                                   /*  _bluetoothController
+                                                    _bluetoothController
                                                         .sendTrama(
-                                                            TramaType.SUBIDAD); */
+                                                            Trama(TramaType.SUBIDAD));
                                                   },
                                                 ),
                                                 Text('Arriba'),
@@ -349,9 +349,9 @@ Column(
                                                   icon: Icon(Icons.arrow_back),
                                                   onPressed: () {
                                                     // Maneja la acción para la flecha hacia la izquierda en el lado derecho.
-                                                   /*  _bluetoothController
-                                                        .sendTrama(TramaType
-                                                            .IZQUIERDAD); */
+                                                    _bluetoothController
+                                                        .sendTrama(Trama(TramaType
+                                                            .IZQUIERDAD));
                                                   },
                                                 ),
                                                 Text('Izquierda'),
@@ -364,9 +364,9 @@ Column(
                                                       Icons.arrow_downward),
                                                   onPressed: () {
                                                     // Maneja la acción para la flecha hacia abajo en el lado derecho.
-                                                /*     _bluetoothController
+                                                    _bluetoothController
                                                         .sendTrama(
-                                                            TramaType.BAJADAD); */
+                                                            Trama(TramaType.BAJADAD));
                                                   },
                                                 ),
                                                 Text('Abajo'),
@@ -379,9 +379,9 @@ Column(
                                                       Icon(Icons.arrow_forward),
                                                   onPressed: () {
                                                     // Maneja la acción para la flecha hacia la derecha en el lado derecho.
-                                                   /*  _bluetoothController
+                                                    _bluetoothController
                                                         .sendTrama(
-                                                            TramaType.DERECHAD); */
+                                                            Trama(TramaType.DERECHAD));
                                                   },
                                                 ),
                                                 Text('Derecha'),
@@ -418,22 +418,22 @@ Column(
                                       IconButton(
                                         icon: Icon(Icons.swap_vertical_circle),
                                         onPressed: () {
-                                         /*  _bluetoothController
-                                              .sendTrama(TramaType.VERTICAL); */
+                                          _bluetoothController
+                                              .sendTrama(Trama(TramaType.VERTICAL));
                                         },
                                       ),
                                       IconButton(
                                         icon: Icon(Icons.swap_horiz),
                                         onPressed: () {
-                                         /*  _bluetoothController
-                                              .sendTrama(TramaType.HORIZONTAL); */
+                                          _bluetoothController
+                                              .sendTrama(Trama(TramaType.HORIZONTAL));
                                         },
                                       ),
                                       IconButton(
                                         icon: Icon(Icons.stop),
                                         onPressed: () {
-                                        /*   _bluetoothController
-                                              .sendTrama(TramaType.STOP); */
+                                          _bluetoothController
+                                              .sendTrama(Trama(TramaType.STOP));
                                         },
                                       ),
                                     ],
