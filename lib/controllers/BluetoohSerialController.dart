@@ -41,7 +41,7 @@ Future<void> initBluetooth() async {
       return device;
   }
 
-  Future<void> disconnect() async {
+  Future<void> disconnect(Trama trma ) async {
     await _connection?.close();
   }
 

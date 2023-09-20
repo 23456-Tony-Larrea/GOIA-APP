@@ -11,6 +11,7 @@ class BluetoothScreen extends StatefulWidget {
 class _BluetoothScreenState extends State<BluetoothScreen> {
   final _bluetoothController = BluetoothSerialController();
   List<bool> isSelected = [true, false];
+  bool _isConnected = false;
 
   @override
   void initState() {
@@ -60,9 +61,11 @@ Widget build(BuildContext context) {
   );
 }
 void _connectToDevice(BuildContext context, BluetoothDiscoveryResult device, String deviceName) async {
-BluetoothDiscoveryResult? connectedDevice = await _bluetoothController.connectToDevice(context,device);
- bool connected = connectedDevice != null;
-    if (connected) {
+await _bluetoothController.connectToDevice(context,device);
+setState(() {
+    _isConnected = true;
+  });
+    if (_isConnected) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
@@ -129,8 +132,8 @@ Column(
                                         MainAxisAlignment.spaceAround,
                                     children: [
                                       Radio(
-                                        value: 'manual',
-                                        groupValue: 'modo',
+                                        value:'',
+                                        groupValue: '',
                                         onChanged: (value) {
                                           setState(() {
                                           });
@@ -143,11 +146,11 @@ Column(
                                         ),
                                       ),
                                       Radio(
-                                        value: 'automatico',
-                                        groupValue: 'modo',
+                                        value: '',
+                                        groupValue: '',
                                         onChanged: (value) {
                                           setState(() {
-                                           // _bluetoothController.sendTrama(TramaType.AUTOMATICO);
+                                            _bluetoothController.sendTrama(Trama(TramaType.AUTOMATICO));
                                           });
                                         },
                                       ),
@@ -445,7 +448,7 @@ Column(
                               child: ElevatedButton.icon(
                                 onPressed: () {
                                   // Coloca aquí la lógica para desconectar el dispositivo Bluetooth
-                                  _bluetoothController.disconnect();
+                                  _bluetoothController.disconnect(Trama(TramaType.Encender));
                                   Navigator.pop(
                                       context); // Cierra la pantalla actual
                                 },
