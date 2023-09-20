@@ -6,6 +6,7 @@ import 'package:rtv/views/VisualInspection/VisualInspectionView.dart';
 import 'package:rtv/views/Holguras/HolgurasView.dart';
 import 'package:rtv/views/MenuNotRolesView.dart';
 import 'package:rtv/views/BluetoohPlusView.dart';
+import 'package:rtv/views/BluetoohSerialView.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: _title,
-        home: BluetoohPlusView(),
+        home: BluetoothScreen(),
         routes: {
           '/login': (context) => const LoginView(),
          '/bluetooh_plus': (context) => BluetoohPlusView(),
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
           '/identification': (context) => IdentificationView(),
           '/visual_inspection': (context) => VisualInspectionView(),
           '/holguras': (context) => HolgurasView(),
+          '/bluetooh_serial': (context) => BluetoothScreen(),
         });
   }
 }

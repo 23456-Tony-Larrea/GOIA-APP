@@ -7,7 +7,7 @@ import 'package:rtv/constants/url2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import '../class/Cars.dart';
+import '../../class/Cars.dart';
 
 
 class VisualInspectionController {

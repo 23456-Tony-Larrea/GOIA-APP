@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 enum TramaType {
   Encender,
   Apagar,
@@ -21,6 +23,10 @@ class Trama {
   final List<int> trama;
 
   Trama(TramaType type) : trama = _tramas[type] ?? [];
+
+  Uint8List toBytes() {
+    return Uint8List.fromList(trama);
+  }
 
   static final Map<TramaType, List<int>> _tramas = {
     TramaType.Encender: [36, 49, 49, 49, 49, 49, 35],

@@ -84,17 +84,6 @@ class BluetoothPlusController {
     }
   }
 
-  Future<List<BluetoothDevice>> getBondedDevices() async {
-    try {
-      List<BluetoothDevice> bondedDevices =
-          await FlutterBluePlus.connectedSystemDevices;
-      return bondedDevices;
-    } catch (e) {
-      print('Error al obtener dispositivos vinculados: $e');
-      return [];
-    }
-  }
-
   Future<void> disconnectDevice(BluetoothDevice device, TramaType type) async {
     List<int> tramaOff;
     try {
@@ -115,10 +104,5 @@ class BluetoothPlusController {
     } catch (e) {
       print('Error al enviar la trama: $e');
     }
-  }
-
-  Future<bool> isBluetoothAvailable() async {
-    bool isAvailable = await FlutterBluePlus.isAvailable;
-    return isAvailable;
   }
 }
