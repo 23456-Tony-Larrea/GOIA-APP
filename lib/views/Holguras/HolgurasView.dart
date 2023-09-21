@@ -29,17 +29,6 @@ class _HolgurasViewState extends State<HolgurasView> {
         'codeTV'); // Esto eliminará el valor 'codeTV' de SharedPreferences
   }
 
-  Future<String> getDeviceName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('deviceName') ?? 'Sin nombre de dispositivo';
-  }
-
-  Future<void> disconnectDevice() async {
-    // Aquí debes agregar la lógica para desconectar el dispositivo Bluetooth
-    // Luego, elimina el nombre del dispositivo de SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove('deviceName');
-  }
 
   Future<void> _loadProcedures() async {
     try {
@@ -63,39 +52,12 @@ class _HolgurasViewState extends State<HolgurasView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-
         title: Text('Holguras'),
         automaticallyImplyLeading: false,
         actions: [
-          Align(
-            alignment: Alignment.topRight,
-            child: FutureBuilder<String>(
-              future: getDeviceName(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(); // Mostrar un indicador de carga mientras se obtiene el nombre.
-                } else {
-                  String deviceName =
-                      snapshot.data ?? 'Sin nombre de dispositivo';
-                  return Column(
-                    children: [
-                      Text('Conectado a:'),
-                      Text(
-                        deviceName,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              },
-            ),
-          ),
           FloatingActionButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/bluetooh_plus');
+              Navigator.pushNamed(context, '/bluetooh_serial');
             },
             child: Icon(Icons.bluetooth),
             mini: true,
@@ -294,9 +256,7 @@ class _HolgurasViewState extends State<HolgurasView> {
             label: 'Apagar',
             child: Icon(Icons.lightbulb),
             backgroundColor: Colors.blueAccent,
-            onTap: () async {/* 
-              await _bluetoothPlusController.sendTrama(TramaType.Apagar,device);
-              await disconnectDevice(); */
+            onTap: () async {
             },
           ),
         ],

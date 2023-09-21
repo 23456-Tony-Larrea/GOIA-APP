@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rtv/views/LoginView.dart';
-import 'package:rtv/ignore/UsersView.dart';
 import 'package:rtv/views/identification/IdentificationView.dart';
 import 'package:rtv/views/VisualInspection/VisualInspectionView.dart';
 import 'package:rtv/views/Holguras/HolgurasView.dart';
 import 'package:rtv/views/MenuNotRolesView.dart';
-import 'package:rtv/ignore/BluetoohPlusView.dart';
 import 'package:rtv/views/BluetoohSerialView.dart';
 
 void main() async {
@@ -23,9 +21,7 @@ class MyApp extends StatelessWidget {
         home: LoginView(),
         routes: {
           '/login': (context) => const LoginView(),
-         '/bluetooh_plus': (context) => BluetoohPlusView(),
           '/menu': (context) => TabBarViewNoRolesExample(),
-          '/users': (context) => UsersView(),
           '/identification': (context) => IdentificationView(),
           '/visual_inspection': (context) => VisualInspectionView(),
           '/holguras': (context) => HolgurasView(),
