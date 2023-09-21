@@ -8,7 +8,6 @@ class BluetoothSerialController {
   final FlutterBluetoothSerial bluetooth = FlutterBluetoothSerial.instance;
   List<BluetoothDiscoveryResult> scanResults = [];
   StreamSubscription<BluetoothDiscoveryResult>? _scanSubscription;
-  BluetoothConnection? _connection;
 
 Stream<List<BluetoothDiscoveryResult>> getScanResultsStream() async* {
   final results = await bluetooth.startDiscovery().toList();
@@ -41,9 +40,9 @@ Future<void> initBluetooth() async {
   }
 
 
-  Future<void> disconnect() async {
-    await _connection?.close();
-  }
+ Future<void> disconnect(BluetoothConnection connection) async {
+  await connection.close(); // Cierra la conexión pasada como argumento
+}
 
  Future<void> sendTrama(BluetoothConnection connection, Trama trama) async {
     try {

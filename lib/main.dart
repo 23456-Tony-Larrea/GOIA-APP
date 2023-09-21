@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: _title,
-        home: LoginView(),
+        home: BluetoothScreen(),
         routes: {
           '/login': (context) => const LoginView(),
           '/menu': (context) => TabBarViewNoRolesExample(),

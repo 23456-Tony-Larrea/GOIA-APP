@@ -1,20 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+/* import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart'; */
 import 'package:rtv/class/ListProcedureHolguras.dart';
+import 'package:rtv/class/Trama.dart';
+import 'package:rtv/controllers/BluetoohSerialController.dart';
 import 'package:rtv/controllers/HolgurasController.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:rtv/views/Holguras/CalificationHolgurasView.dart';
 import 'package:rtv/views/Holguras/CalificationOtrosHolgurasView.dart';
 
-class HolgurasView extends StatefulWidget {
+class HolgurasConnectView extends StatefulWidget {
+/*   final bool isConnected;
+  final String deviceName;
+
+  final BluetoothConnection connection; */
   
+/* HolgurasConnectView({
+   required this.isConnected,
+    required this.deviceName,
+    required this.connection, 
+}); */
+
   @override
-  _HolgurasViewState createState() => _HolgurasViewState();
+  _HolgurasConnectViewState createState() => _HolgurasConnectViewState();
 }
 
-class _HolgurasViewState extends State<HolgurasView> {
+class _HolgurasConnectViewState extends State<HolgurasConnectView> {
   final HolgurasController _controller = HolgurasController();
+  final _bluetoothController = BluetoothSerialController();
 
   List<List<ListProcedureHolguras>> _holgurasLists = [];
   int codeRTV = 0;
@@ -56,13 +70,7 @@ class _HolgurasViewState extends State<HolgurasView> {
         title: Text('Holguras'),
         automaticallyImplyLeading: false,
         actions: [
-          FloatingActionButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/bluetooh_serial');
-            },
-            child: Icon(Icons.bluetooth),
-            mini: true,
-          ),
+      /*  Text('Conectado a ${widget.deviceName}') */ // Muestra el nombre del dispositivo conectado
         ],
       ),
       body: SingleChildScrollView(
@@ -234,7 +242,9 @@ class _HolgurasViewState extends State<HolgurasView> {
             child: Icon(Icons.stop),
             backgroundColor: Colors.blueAccent,
             onTap: () {
-              // Acción para la opción 1
+            /*   _bluetoothController.sendTrama(
+                                          widget.connection,
+                                          Trama(TramaType.Encender)); */
             },
           ),
           SpeedDialChild(

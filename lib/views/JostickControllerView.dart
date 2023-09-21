@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/BluetoohSerialController.dart';
+import 'package:rtv/views/Holguras/HolgurasConnectView.dart';
 
 class JoystickControllerView extends StatefulWidget {
   final bool isConnected;
@@ -25,6 +26,7 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
   bool _viewContenentAutomatly = false;
   bool _viewRight = false;
   bool _viewLeft = false;
+  bool _mainManualy = false;
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +67,20 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                       _bluetoothController.sendTrama(
                                           widget.connection,
                                           Trama(TramaType.Encender));
+                                      _mainManualy = true;
+                                     _viewContenentManually = false;
+   _viewContenentAutomatly = false;
+  _viewRight = false;
+  _viewLeft = false;
                                     } else {
                                       _bluetoothController.sendTrama(
                                           widget.connection,
                                           Trama(TramaType.Apagar));
+                                            _mainManualy = false;
+                                     _viewContenentManually = false;
+   _viewContenentAutomatly = false;
+  _viewRight = false;
+  _viewLeft = false;
                                     }
                                   });
                                 },
@@ -77,97 +89,98 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                               ),
                             ],
                           ),
-                          Card(
-                            elevation: 4,
-                            margin: EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: Text(
-                                    'Elija el Modo',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                          if (_mainManualy)
+                            Card(
+                              elevation: 4,
+                              margin: EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: Text(
+                                      'Elija el Modo',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _viewContenentManually = true;
-                                          _viewContenentAutomatly = false;
-                                        });
-                                      },
-                                      child: Container(
-                                        width: 24,
-                                        height: 24,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.grey,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            'M',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _viewContenentManually = true;
+                                            _viewContenentAutomatly = false;
+                                          });
+                                        },
+                                        child: Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.grey,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'M',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    Text(
-                                      'Manual',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _viewContenentManually = false;
-                                          _viewContenentAutomatly = true;
-                                          _viewLeft = false;
-                                          _viewRight = false;
-                                          _bluetoothController.sendTrama(
-                                              widget.connection,
-                                              Trama(TramaType.AUTOMATICO));
-                                        });
-                                      },
-                                      child: Container(
-                                        width: 24,
-                                        height: 24,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.grey,
+                                      Text(
+                                        'Manual',
+                                        style: TextStyle(
+                                          fontSize: 16,
                                         ),
-                                        child: Center(
-                                          child: Text(
-                                            'A',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _viewContenentManually = false;
+                                            _viewContenentAutomatly = true;
+                                            _viewLeft = false;
+                                            _viewRight = false;
+                                            _bluetoothController.sendTrama(
+                                                widget.connection,
+                                                Trama(TramaType.AUTOMATICO));
+                                          });
+                                        },
+                                        child: Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.grey,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'A',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    Text(
-                                      'Automatico',
-                                      style: TextStyle(
-                                        fontSize: 16,
+                                      Text(
+                                        'Automatico',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
                           const SizedBox(height: 4),
                           if (_viewContenentManually)
                             Card(
@@ -481,29 +494,60 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                 ],
                               ),
                             ),
-                          Center(
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                _bluetoothController.disconnect();
-                                Navigator.pop(
-                                    context); // Cierra la pantalla actual
-                              },
-                              icon: Icon(
-                                Icons
-                                    .bluetooth_disabled, // Icono de Bluetooth desconectado
-                                color: Colors.white, // Color del icono
-                              ),
-                              label: Text(
-                                'Desconectar Bluetooth',
-                                style: TextStyle(
-                                  color: Colors.white, // Color del texto
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                primary: Colors.red, // Color de fondo rojo
-                              ),
-                            ),
-                          ),
+Center(
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+ElevatedButton.icon(
+  onPressed: () async {
+    /* Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HolgurasConnectView(
+          isConnected: true,
+          deviceName: widget.deviceName,
+          connection: widget.connection,
+        ),
+      ),
+    ); */
+  },
+  icon: Icon(
+    Icons.bluetooth,
+    color: Colors.white,
+  ),
+  label: Text(
+    'Calificar y Evaluar',
+    style: TextStyle(
+      color: Colors.white,
+    ),
+  ),
+  style: ElevatedButton.styleFrom(
+    primary: Colors.blue,
+  ),
+),
+      SizedBox(height: 16),
+      ElevatedButton.icon(
+        onPressed: () {
+          _bluetoothController.disconnect(widget.connection);
+          Navigator.pop(context);
+        },
+        icon: Icon(
+          Icons.bluetooth_disabled,
+          color: Colors.white,
+        ),
+        label: Text(
+          'Desconectar Bluetooth',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          primary: Colors.red,
+        ),
+      ),
+    ],
+  ),
+),
                         ],
                       ),
                     ),
