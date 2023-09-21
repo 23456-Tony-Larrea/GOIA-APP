@@ -9,7 +9,6 @@ class BluetoothSerialController {
   List<BluetoothDiscoveryResult> scanResults = [];
   StreamSubscription<BluetoothDiscoveryResult>? _scanSubscription;
   BluetoothConnection? _connection;
-  
 
 Stream<List<BluetoothDiscoveryResult>> getScanResultsStream() async* {
   final results = await bluetooth.startDiscovery().toList();
@@ -36,22 +35,23 @@ Future<void> initBluetooth() async {
     await _scanSubscription?.cancel();
   }
 
-  Future<BluetoothDiscoveryResult?> connectToDevice( BuildContext context,BluetoothDiscoveryResult device) async {
-    _connection = await BluetoothConnection.toAddress(device.device.address);
-      return device;
+ Future<BluetoothConnection> connectToDevice(BuildContext context, device) async {
+    BluetoothConnection connection = await BluetoothConnection.toAddress(device.device.address);
+    return connection;
   }
 
-  Future<void> disconnect(Trama trma ) async {
+
+  Future<void> disconnect() async {
     await _connection?.close();
   }
 
-  Future<void> sendTrama(Trama trama) async {
-  try {
-    final bytes = trama.toBytes();
-    _connection?.output.add(bytes);
-    await _connection?.output.allSent;
-  } catch (e) {
-    print("Error al enviar la trama: $e");
+ Future<void> sendTrama(BluetoothConnection connection, Trama trama) async {
+    try {
+      final bytes = trama.toBytes();
+      connection.output.add(bytes);
+      await connection.output.allSent;
+    } catch (e) {
+      print("Error al enviar la trama: $e");
+    }
   }
-}
 }
