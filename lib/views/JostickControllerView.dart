@@ -23,6 +23,8 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
   final _bluetoothController = BluetoothSerialController();
   bool _viewContenentManually = false;
   bool _viewContenentAutomatly = false;
+  bool _viewRight = false;
+  bool _viewLeft = false;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +85,7 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                 Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Text(
-                                    'Modo',
+                                    'Elija el Modo',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -98,8 +100,7 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                       onTap: () {
                                         setState(() {
                                           _viewContenentManually = true;
-                                                                                    _viewContenentAutomatly=false;
-
+                                          _viewContenentAutomatly = false;
                                         });
                                       },
                                       child: Container(
@@ -121,7 +122,7 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                       ),
                                     ),
                                     Text(
-                                      'MANUAL',
+                                      'Manual',
                                       style: TextStyle(
                                         fontSize: 16,
                                       ),
@@ -130,7 +131,9 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                       onTap: () {
                                         setState(() {
                                           _viewContenentManually = false;
-                                          _viewContenentAutomatly=true;
+                                          _viewContenentAutomatly = true;
+                                          _viewLeft = false;
+                                          _viewRight = false;
                                           _bluetoothController.sendTrama(
                                               widget.connection,
                                               Trama(TramaType.AUTOMATICO));
@@ -155,7 +158,7 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                       ),
                                     ),
                                     Text(
-                                      'AUTOMATICO',
+                                      'Automatico',
                                       style: TextStyle(
                                         fontSize: 16,
                                       ),
@@ -175,7 +178,7 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                   Padding(
                                     padding: EdgeInsets.all(16),
                                     child: Text(
-                                      'Lados',
+                                      'Modo manual',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -186,16 +189,35 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
-                                      Radio(
-                                        value: 'izquierda',
-                                        groupValue: '',
-                                        onChanged: (value) {
+                                      GestureDetector(
+                                        onTap: () {
                                           setState(() {
                                             _bluetoothController.sendTrama(
                                                 widget.connection,
                                                 Trama(TramaType.MANUALIZ));
+                                            _viewLeft = true;
+                                            _viewRight = false;
+                                            _viewContenentManually = true;
+                                            _viewContenentAutomatly = false;
                                           });
                                         },
+                                        child: Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.grey,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'I',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                       Text(
                                         'Izquierdo',
@@ -203,16 +225,35 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                           fontSize: 16,
                                         ),
                                       ),
-                                      Radio(
-                                        value: 'derecha',
-                                        groupValue: '',
-                                        onChanged: (value) {
+                                      GestureDetector(
+                                        onTap: () {
                                           setState(() {
                                             _bluetoothController.sendTrama(
                                                 widget.connection,
                                                 Trama(TramaType.MANUALDE));
+                                            _viewRight = true;
+                                            _viewLeft = false;
+                                            _viewContenentManually = true;
+                                            _viewContenentAutomatly = false;
                                           });
                                         },
+                                        child: Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.grey,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'D',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                       Text(
                                         'Derecho',
@@ -226,243 +267,220 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                               ),
                             ),
                           const SizedBox(height: 4),
-                          Card(
-                            elevation: 4,
-                            margin: EdgeInsets.all(16),
-                            child: Row(
-                              children: [
-                                // Lado Izquierdo
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Text(
-                                          'Lado Izquierdo',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
+                          if (_viewLeft)
+                            Card(
+                              elevation: 4,
+                              margin: EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: Text(
+                                      'Lado Izquierdo',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Column(
                                         children: [
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(Icons.arrow_upward),
-                                                onPressed: () {
-                                                  // Maneja la acción para la flecha hacia arriba en el lado izquierdo.
-                                                  _bluetoothController
-                                                      .sendTrama(
-                                                          widget.connection,
-                                                          Trama(TramaType
-                                                              .SUBIDA));
-                                                },
-                                              ),
-                                              Text('Arriba'),
-                                            ],
+                                          IconButton(
+                                            icon: Icon(Icons.arrow_upward),
+                                            onPressed: () {
+                                              // Maneja la acción para la flecha hacia arriba en el lado izquierdo.
+                                              _bluetoothController.sendTrama(
+                                                  widget.connection,
+                                                  Trama(TramaType.SUBIDA));
+                                            },
                                           ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(Icons.arrow_back),
-                                                onPressed: () {
-                                                  // Maneja la acción para la flecha hacia la izquierda en el lado izquierdo.
-                                                  _bluetoothController
-                                                      .sendTrama(
-                                                          widget.connection,
-                                                          Trama(TramaType
-                                                              .IZQUIERDA));
-                                                },
-                                              ),
-                                              Text('Izquierda'),
-                                            ],
+                                          Text('Arriba'),
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.arrow_back),
+                                            onPressed: () {
+                                              // Maneja la acción para la flecha hacia la izquierda en el lado izquierdo.
+                                              _bluetoothController.sendTrama(
+                                                  widget.connection,
+                                                  Trama(TramaType.IZQUIERDA));
+                                            },
                                           ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                icon:
-                                                    Icon(Icons.arrow_downward),
-                                                onPressed: () {
-                                                  // Maneja la acción para la flecha hacia abajo en el lado izquierdo.
-                                                  _bluetoothController
-                                                      .sendTrama(
-                                                          widget.connection,
-                                                          Trama(TramaType
-                                                              .BAJADA));
-                                                },
-                                              ),
-                                              Text('Abajo'),
-                                            ],
+                                          Text('Izquierda'),
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.arrow_downward),
+                                            onPressed: () {
+                                              // Maneja la acción para la flecha hacia abajo en el lado izquierdo.
+                                              _bluetoothController.sendTrama(
+                                                  widget.connection,
+                                                  Trama(TramaType.BAJADA));
+                                            },
                                           ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(Icons.arrow_forward),
-                                                onPressed: () {
-                                                  // Maneja la acción para la flecha hacia la derecha en el lado izquierdo.
-                                                  _bluetoothController
-                                                      .sendTrama(
-                                                          widget.connection,
-                                                          Trama(TramaType
-                                                              .DERECHA));
-                                                },
-                                              ),
-                                              Text('Derecha'),
-                                            ],
+                                          Text('Abajo'),
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.arrow_forward),
+                                            onPressed: () {
+                                              // Maneja la acción para la flecha hacia la derecha en el lado izquierdo.
+                                              _bluetoothController.sendTrama(
+                                                  widget.connection,
+                                                  Trama(TramaType.DERECHA));
+                                            },
                                           ),
+                                          Text('Derecha'),
                                         ],
                                       ),
                                     ],
                                   ),
-                                ),
-
-                                // Separador Vertical
-                                VerticalDivider(),
-
-                                // Lado Derecho
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Text(
-                                          'Lado Derecho',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(Icons.arrow_upward),
-                                                onPressed: () {
-                                                  _bluetoothController
-                                                      .sendTrama(
-                                                          widget.connection,
-                                                          Trama(TramaType
-                                                              .SUBIDAD));
-                                                },
-                                              ),
-                                              Text('Arriba'),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(Icons.arrow_back),
-                                                onPressed: () {
-                                                  // Maneja la acción para la flecha hacia la izquierda en el lado derecho.
-                                                  _bluetoothController
-                                                      .sendTrama(
-                                                          widget.connection,
-                                                          Trama(TramaType
-                                                              .IZQUIERDAD));
-                                                },
-                                              ),
-                                              Text('Izquierda'),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                icon:
-                                                    Icon(Icons.arrow_downward),
-                                                onPressed: () {
-                                                  // Maneja la acción para la flecha hacia abajo en el lado derecho.
-                                                  _bluetoothController
-                                                      .sendTrama(
-                                                          widget.connection,
-                                                          Trama(TramaType
-                                                              .BAJADAD));
-                                                },
-                                              ),
-                                              Text('Abajo'),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(Icons.arrow_forward),
-                                                onPressed: () {
-                                                  // Maneja la acción para la flecha hacia la derecha en el lado derecho.
-                                                  _bluetoothController
-                                                      .sendTrama(
-                                                          widget.connection,
-                                                          Trama(TramaType
-                                                              .DERECHAD));
-                                                },
-                                              ),
-                                              Text('Derecha'),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
+
+                          // Separador Vertical
+                          VerticalDivider(),
+                          if (_viewRight)
+                            Card(
+                              elevation: 4,
+                              margin: EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: Text(
+                                      'Lado Derecho',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.arrow_upward),
+                                            onPressed: () {
+                                              _bluetoothController.sendTrama(
+                                                  widget.connection,
+                                                  Trama(TramaType.SUBIDAD));
+                                            },
+                                          ),
+                                          Text('Arriba'),
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.arrow_back),
+                                            onPressed: () {
+                                              // Maneja la acción para la flecha hacia la izquierda en el lado derecho.
+                                              _bluetoothController.sendTrama(
+                                                  widget.connection,
+                                                  Trama(TramaType.IZQUIERDAD));
+                                            },
+                                          ),
+                                          Text('Izquierda'),
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.arrow_downward),
+                                            onPressed: () {
+                                              // Maneja la acción para la flecha hacia abajo en el lado derecho.
+                                              _bluetoothController.sendTrama(
+                                                  widget.connection,
+                                                  Trama(TramaType.BAJADAD));
+                                            },
+                                          ),
+                                          Text('Abajo'),
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.arrow_forward),
+                                            onPressed: () {
+                                              // Maneja la acción para la flecha hacia la derecha en el lado derecho.
+                                              _bluetoothController.sendTrama(
+                                                  widget.connection,
+                                                  Trama(TramaType.DERECHAD));
+                                            },
+                                          ),
+                                          Text('Derecha'),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
                           const SizedBox(height: 4),
                           if (_viewContenentAutomatly)
-                          Card(
-                            elevation: 4,
-                            margin: EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: Text(
-                                    'Direcciones Automáticas',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                            Card(
+                              elevation: 4,
+                              margin: EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: Text(
+                                      'Modo Automático',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.swap_vertical_circle),
-                                      onPressed: () {
-                                        _bluetoothController.sendTrama(
-                                            widget.connection,
-                                            Trama(TramaType.VERTICAL));
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.swap_horiz),
-                                      onPressed: () {
-                                        _bluetoothController.sendTrama(
-                                            widget.connection,
-                                            Trama(TramaType.HORIZONTAL));
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.stop),
-                                      onPressed: () {
-                                        _bluetoothController.sendTrama(
-                                            widget.connection,
-                                            Trama(TramaType.STOP));
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.swap_vertical_circle),
+                                        onPressed: () {
+                                          _bluetoothController.sendTrama(
+                                              widget.connection,
+                                              Trama(TramaType.VERTICAL));
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.swap_horiz),
+                                        onPressed: () {
+                                          _bluetoothController.sendTrama(
+                                              widget.connection,
+                                              Trama(TramaType.HORIZONTAL));
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.stop),
+                                        onPressed: () {
+                                          _bluetoothController.sendTrama(
+                                              widget.connection,
+                                              Trama(TramaType.STOP));
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
                           Center(
                             child: ElevatedButton.icon(
                               onPressed: () {

@@ -51,6 +51,7 @@ class _IdentificationViewState extends State<IdentificationView> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Identificación'), // Cambia el título del AppBar
+                automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(

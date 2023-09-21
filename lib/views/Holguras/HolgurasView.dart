@@ -63,7 +63,9 @@ class _HolgurasViewState extends State<HolgurasView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+
         title: Text('Holguras'),
+        automaticallyImplyLeading: false,
         actions: [
           Align(
             alignment: Alignment.topRight,

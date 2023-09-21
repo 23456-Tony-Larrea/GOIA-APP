@@ -26,7 +26,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
           await _controller.listInspectionProcedure();
 
       if (visualInspection.isNotEmpty) {
-        for (int i = 0; i < 18; i++) {
+        for (int i = 0; i < 256; i++) {
           _procedureLists.add(visualInspection
               .where((procedure) => procedure.numero == i)
               .toList());
@@ -106,6 +106,7 @@ void _showDefectoModal(BuildContext context, Defecto defecto) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Inspección Visual'), // Cambia el título del AppBar
+      automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
