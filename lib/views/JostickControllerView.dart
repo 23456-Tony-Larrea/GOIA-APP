@@ -501,7 +501,7 @@ Center(
     children: [
 ElevatedButton.icon(
   onPressed: () async {
-    Navigator.pushNamed(context, '/menu');
+    Navigator.pushNamed(context, '/holguras');
   },
   icon: Icon(
     Icons.bluetooth,
@@ -522,7 +522,7 @@ ElevatedButton.icon(
         onPressed: () {
           _bluetoothController.disconnect(widget.connection);
           BluetoothManager().disconnect();
-          Navigator.pop(context);
+    Navigator.pushNamed(context, '/menu');
         },
         icon: Icon(
           Icons.bluetooth_disabled,

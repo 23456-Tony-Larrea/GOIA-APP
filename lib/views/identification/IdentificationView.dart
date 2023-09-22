@@ -237,6 +237,37 @@ if (_procedures.isNotEmpty)
           ),
         ),
       ),
+             bottomNavigationBar: BottomNavigationBar(
+        currentIndex:
+            0, // Set the current index to 2 to highlight the Holguras tab
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/identification');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/visual_inspection');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/holguras');
+              break;
+          }
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.car_crash_rounded),
+            label: 'Identificación',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.remove_red_eye),
+            label: 'Inspección Visual',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Holguras',
+          ),
+        ],
+      ),
     );
   }
 

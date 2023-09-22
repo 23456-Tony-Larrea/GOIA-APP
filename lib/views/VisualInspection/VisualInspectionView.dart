@@ -17,13 +17,14 @@ class VisualInspectionView extends StatefulWidget {
 class _VisualInspectionViewState extends State<VisualInspectionView> {
   final VisualInspectionController _controller = VisualInspectionController();
   List<List<ListProcedureInspection>> _procedureLists = [];
-      final HolgurasBluetoothController _sendBluetooh = HolgurasBluetoothController();
+  final HolgurasBluetoothController _sendBluetooh =
+      HolgurasBluetoothController();
 
   @override
   void initState() {
     super.initState();
     clearCodeTVFromSharedPreferences();
-     _sendBluetooh.sendTrama(TramaType.Apagar);
+    _sendBluetooh.sendTrama(TramaType.Apagar);
   }
 
   Future<void> _loadProcedures() async {
@@ -91,22 +92,23 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
     );
   }
 
-void _showDefectoModal(BuildContext context, Defecto defecto) {
-  if (defecto.abreviatura == "OTROS") {
-  Navigator.of(context).push(
-  MaterialPageRoute(
-    builder: (context) => OtrosHolgurasWidget(defecto: defecto),
-  ),
-);
-  } else {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CalificationVisualWidget(defecto: defecto),
-      ),
-    );
+  void _showDefectoModal(BuildContext context, Defecto defecto) {
+    if (defecto.abreviatura == "OTROS") {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => OtrosHolgurasWidget(defecto: defecto),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CalificationVisualWidget(defecto: defecto),
+        ),
+      );
+    }
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -290,6 +292,37 @@ void _showDefectoModal(BuildContext context, Defecto defecto) {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex:
+            1, // Set the current index to 2 to highlight the Holguras tab
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/identification');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/visual_inspection');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/holguras');
+              break;
+          }
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.car_crash_rounded),
+            label: 'Identificación',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.remove_red_eye),
+            label: 'Inspección Visual',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Holguras',
+          ),
+        ],
       ),
     );
   }

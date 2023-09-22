@@ -19,8 +19,8 @@ class HolgurasView extends StatefulWidget {
 
 class _HolgurasViewState extends State<HolgurasView> {
   final HolgurasController _controller = HolgurasController();
-  final HolgurasBluetoothController _sendBluetooh = HolgurasBluetoothController();
-      
+  final HolgurasBluetoothController _sendBluetooh =
+      HolgurasBluetoothController();
 
   List<List<ListProcedureHolguras>> _holgurasLists = [];
   int codeRTV = 0;
@@ -62,56 +62,67 @@ class _HolgurasViewState extends State<HolgurasView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-appBar: AppBar(
-  title: Text('Holguras'),
-  automaticallyImplyLeading: false,
-  actions: [
-    Padding(
-      padding: const EdgeInsets.only(left: 16.0),
-      child: Text(
-        _connectedDeviceName != null
-            ? 'Dispositivo conectado a $_connectedDeviceName'
-            : 'Ningún dispositivo vinculado',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
-    FloatingActionButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BluetoothScreen(),
+      appBar: AppBar(
+        title: Text('Holguras'),
+        automaticallyImplyLeading: false,
+        actions: [
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BluetoothScreen(),
+                ),
+              );
+            },
+            child: Icon(Icons.bluetooth),
+            mini: true,
           ),
-        );
-      },
-      child: Icon(Icons.bluetooth),
-    ),
-     IconButton(
-      icon: Icon(
-        Icons.exit_to_app,
-        color: Colors.white,
+          IconButton(
+            icon: Icon(
+              Icons.exit_to_app,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return ExitView();
+                },
+              );
+            },
+          ),
+        ],
       ),
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return ExitView();
-          },
-        );
-      },
-    ),
-  ],
-),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Card(
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.bluetooth, size: 24),
+                      SizedBox(width: 8),
+                      Text(
+                        _connectedDeviceName != null
+                            ? 'Dispositivo conectado a : $_connectedDeviceName'
+                            : 'Ningun dispositivo conectado',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 16.0),
               TextField(
                 controller: _controller.placaController,
                 decoration: InputDecoration(
@@ -271,7 +282,7 @@ appBar: AppBar(
           ),
         ),
       ),
-    floatingActionButton: BluetoothManager().isConnected
+      floatingActionButton: BluetoothManager().isConnected
           ? SpeedDial(
               icon: Icons.menu_outlined,
               backgroundColor: Colors.blueAccent,
@@ -300,6 +311,37 @@ appBar: AppBar(
               ],
             )
           : null,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex:
+            2, // Set the current index to 2 to highlight the Holguras tab
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/identification');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/visual_inspection');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/holguras');
+              break;
+          }
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.car_crash_rounded),
+            label: 'Identificación',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.remove_red_eye),
+            label: 'Inspección Visual',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Holguras',
+          ),
+        ],
+      ),
     );
   }
 

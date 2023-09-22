@@ -46,7 +46,7 @@ class LoginController {
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/menu');
+                    Navigator.pushNamed(context, '/identification');
                   },
                   child: const Text('OK'),
                 ),
