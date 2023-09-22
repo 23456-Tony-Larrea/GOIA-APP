@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/BluetoohSerialController.dart';
-import 'package:rtv/views/Holguras/HolgurasConnectView.dart';
 
 class JoystickControllerView extends StatefulWidget {
   final bool isConnected;
@@ -498,33 +497,6 @@ Center(
   child: Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-ElevatedButton.icon(
-  onPressed: () async {
-    /* Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HolgurasConnectView(
-          isConnected: true,
-          deviceName: widget.deviceName,
-          connection: widget.connection,
-        ),
-      ),
-    ); */
-  },
-  icon: Icon(
-    Icons.bluetooth,
-    color: Colors.white,
-  ),
-  label: Text(
-    'Calificar y Evaluar',
-    style: TextStyle(
-      color: Colors.white,
-    ),
-  ),
-  style: ElevatedButton.styleFrom(
-    primary: Colors.blue,
-  ),
-),
       SizedBox(height: 16),
       ElevatedButton.icon(
         onPressed: () {

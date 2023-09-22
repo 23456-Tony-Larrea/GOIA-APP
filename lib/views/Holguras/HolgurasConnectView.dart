@@ -70,7 +70,7 @@ class _HolgurasConnectViewState extends State<HolgurasConnectView> {
         title: Text('Holguras'),
         automaticallyImplyLeading: false,
         actions: [
-      /*  Text('Conectado a ${widget.deviceName}') */ // Muestra el nombre del dispositivo conectado
+       /* Text('Conectado a ${widget.deviceName}') */  // Muestra el nombre del dispositivo conectado
         ],
       ),
       body: SingleChildScrollView(

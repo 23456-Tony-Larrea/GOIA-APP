@@ -1,27 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rtv/class/BluetoohConnection.dart';
 import 'package:rtv/class/ListProcedureHolguras.dart';
+import 'package:rtv/class/Trama.dart';
+import 'package:rtv/controllers/HolgurasBluetoohController.dart';
 import 'package:rtv/controllers/HolgurasController.dart';
+import 'package:rtv/views/BluetoohSerialView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:rtv/views/Holguras/CalificationHolgurasView.dart';
 import 'package:rtv/views/Holguras/CalificationOtrosHolgurasView.dart';
 
 class HolgurasView extends StatefulWidget {
-  
   @override
   _HolgurasViewState createState() => _HolgurasViewState();
 }
 
 class _HolgurasViewState extends State<HolgurasView> {
   final HolgurasController _controller = HolgurasController();
+  final HolgurasBluetoothController _sendBluetooh =
+      HolgurasBluetoothController();
 
   List<List<ListProcedureHolguras>> _holgurasLists = [];
   int codeRTV = 0;
+  String? _connectedDeviceName;
+
   @override
   void initState() {
     super.initState();
     clearCodeTVFromSharedPreferences();
+    _connectedDeviceName = BluetoothManager().connectedDeviceName ?? '';
+    BluetoothManager().setConnectedDeviceName('');
   }
 
   void clearCodeTVFromSharedPreferences() async {
@@ -29,7 +38,6 @@ class _HolgurasViewState extends State<HolgurasView> {
     prefs.remove(
         'codeTV'); // Esto eliminará el valor 'codeTV' de SharedPreferences
   }
-
 
   Future<void> _loadProcedures() async {
     try {
@@ -58,10 +66,19 @@ class _HolgurasViewState extends State<HolgurasView> {
         actions: [
           FloatingActionButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/bluetooh_serial');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BluetoothScreen(),
+                ),
+              );
             },
             child: Icon(Icons.bluetooth),
             mini: true,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(_connectedDeviceName ?? 'Sin conexión'),
           ),
         ],
       ),
@@ -178,38 +195,43 @@ class _HolgurasViewState extends State<HolgurasView> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                                         Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${procedure.abreviaturaDescripcion}",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 4,
-                                ), // Espacio entre el título y el subtítulo
-                                Text(
-                                  "${procedure.procedimiento}", // Agrega el subtítulo aquí
-                                  overflow: TextOverflow.ellipsis, // Manejo del desbordamiento
-                                  maxLines: 2, // Número máximo de líneas antes de mostrar el desbordamiento
-                                  style: TextStyle(
-                                    fontSize: 13.5,
-                                    color: Colors.grey, // Puedes personalizar el color y estilo según tus necesidades
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            Icons.arrow_forward,
-                            size: 24,
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "${procedure.abreviaturaDescripcion}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 4,
+                                              ), // Espacio entre el título y el subtítulo
+                                              Text(
+                                                "${procedure.procedimiento}", // Agrega el subtítulo aquí
+                                                overflow: TextOverflow
+                                                    .ellipsis, // Manejo del desbordamiento
+                                                maxLines:
+                                                    2, // Número máximo de líneas antes de mostrar el desbordamiento
+                                                style: TextStyle(
+                                                  fontSize: 13.5,
+                                                  color: Colors
+                                                      .grey, // Puedes personalizar el color y estilo según tus necesidades
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_forward,
+                                          size: 24,
                                         ),
                                       ],
                                     ),
@@ -225,43 +247,51 @@ class _HolgurasViewState extends State<HolgurasView> {
           ),
         ),
       ),
-      floatingActionButton: SpeedDial(
-        icon: Icons.menu_outlined,
-        backgroundColor: Colors.blueAccent,
-        children: [
-          SpeedDialChild(
-            label: 'Detener',
-            child: Icon(Icons.stop),
-            backgroundColor: Colors.blueAccent,
-            onTap: () {
-              // Acción para la opción 1
-            },
-          ),
-          SpeedDialChild(
-            label: 'Dirección Horizontal',
-            child: Icon(Icons.swap_horiz),
-            backgroundColor: Colors.blueAccent,
-            onTap: () {
-              // Acción para la opción 2
-            },
-          ),
-          SpeedDialChild(
-            label: 'Direccion vertical',
-            child: Icon(Icons.swap_vertical_circle),
-            backgroundColor: Colors.blueAccent,
-            onTap: () {
-              // Acción para la opción 3
-            },
-          ),
-          SpeedDialChild(
-            label: 'Apagar',
-            child: Icon(Icons.lightbulb),
-            backgroundColor: Colors.blueAccent,
-            onTap: () async {
-            },
-          ),
-        ],
-      ),
+      floatingActionButton: BluetoothManager().isConnected
+          ? SpeedDial(
+              icon: Icons.menu_outlined,
+              backgroundColor: Colors.blueAccent,
+              children: [
+                SpeedDialChild(
+                  label: 'Detener',
+                  child: Icon(Icons.stop),
+                  backgroundColor: Colors.blueAccent,
+                  onTap: () {
+                    _sendBluetooh.sendTrama(TramaType.STOP);
+                  },
+                ),
+                SpeedDialChild(
+                  label: 'Dirección Horizontal',
+                  child: Icon(Icons.swap_horiz),
+                  backgroundColor: Colors.blueAccent,
+                  onTap: () {
+                    // Acción para la opción 2
+                    _sendBluetooh.sendTrama(TramaType.HORIZONTAL);
+                    
+                  },
+                ),
+                SpeedDialChild(
+                  label: 'Direccion vertical',
+                  child: Icon(Icons.swap_vertical_circle),
+                  backgroundColor: Colors.blueAccent,
+                  onTap: () {
+                    // Acción para la opción 3
+                    _sendBluetooh.sendTrama(TramaType.VERTICAL);
+                  },
+                ),
+                SpeedDialChild(
+                  label: 'Apagar',
+                  child: Icon(Icons.lightbulb),
+                  backgroundColor: Colors.blueAccent,
+                  onTap: () async {
+                    _sendBluetooh.sendTrama(TramaType.Encender);
+                    /* await BluetoothManager().disconnect();
+                    Navigator.pop(context); */
+                  },
+                ),
+              ],
+            )
+          : null,
     );
   }
 
@@ -315,8 +345,6 @@ class _HolgurasViewState extends State<HolgurasView> {
     );
   }
 
-  
-
   void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
     showModalBottomSheet(
       context: context,
@@ -357,21 +385,19 @@ class _HolgurasViewState extends State<HolgurasView> {
   }
 
   void _showDefectoModal(BuildContext context, Defecto defecto) {
-  if (defecto.abreviatura == "OTROS") {
-  Navigator.of(context).push(
-  MaterialPageRoute(
-    builder: (context) => OtrosHolgurasWidget(defecto: defecto),
-  ),
-);
-  } else {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => NewPageHolgurasWidget(defecto: defecto),
-      ),
-    );
+    if (defecto.abreviatura == "OTROS") {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => OtrosHolgurasWidget(defecto: defecto),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => NewPageHolgurasWidget(defecto: defecto),
+        ),
+      );
+    }
   }
 }
-
-}
-

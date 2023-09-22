@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:rtv/controllers/BluetoohSerialController.dart';
-/* import 'package:rtv/views/Holguras/HolgurasConnectView.dart';
- */import 'package:rtv/views/JostickControllerView.dart';
+import 'package:rtv/views/JostickControllerView.dart';
+
+import '../class/BluetoohConnection.dart';
 
 class BluetoothScreen extends StatefulWidget {
   
@@ -48,8 +49,6 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
                             onTap: () {
                               _connectToDevice(
                                   context, results[index], device.name!);
-                                /*  _connectToDevice2(
-                                  context, results[index], device.name!);   */
                             }),
                       );
                     },
@@ -67,10 +66,9 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
     );
   }
 
-  void _connectToDevice(BuildContext context, BluetoothDiscoveryResult device,
+ void _connectToDevice(BuildContext context, BluetoothDiscoveryResult device,
       String deviceName) async {
-    BluetoothConnection connection = await _bluetoothController.connectToDevice(
-        context, device) as BluetoothConnection;
+    await BluetoothManager().connectToDevice(device.device);
 
     Navigator.push(
       context,
@@ -78,25 +76,10 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
         builder: (context) => JoystickControllerView(
           isConnected: true,
           deviceName: deviceName,
-          connection: connection,
+          connection: BluetoothManager().connection!,
         ),
       ),
     );
   }
- /* void _connectToDevice2(BuildContext context, BluetoothDiscoveryResult device,
-      String deviceName) async {
-    BluetoothConnection connection = await _bluetoothController.connectToDevice(
-        context, device) as BluetoothConnection;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HolgurasConnectView(
-          isConnected: true,
-          deviceName: deviceName,
-          connection: connection,
-        ),
-      ),
-    );
-  } */
 }
