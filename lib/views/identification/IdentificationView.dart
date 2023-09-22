@@ -17,8 +17,8 @@ class IdentificationView extends StatefulWidget {
 class _IdentificationViewState extends State<IdentificationView> {
   final IdentificationController _controller = IdentificationController();
   List<List<ListProcedure>> _procedures = [];
-    final HolgurasBluetoothController _sendBluetooh = HolgurasBluetoothController();
-
+  final HolgurasBluetoothController _sendBluetooh =
+      HolgurasBluetoothController();
 
   Defecto? selectedDefecto;
   DefectoEncontrado? defectoEncontrado;
@@ -27,18 +27,17 @@ class _IdentificationViewState extends State<IdentificationView> {
   void initState() {
     super.initState();
     clearCodeTVFromSharedPreferences();
-     _sendBluetooh.sendTrama(TramaType.Apagar);
+    _sendBluetooh.sendTrama(TramaType.Apagar);
   }
- Future<void> _getProcedures() async {
-    
+
+  Future<void> _getProcedures() async {
     try {
       List<ListProcedure> procedures = await _controller.lisProcedure();
 
       if (procedures.isNotEmpty) {
         for (int i = 0; i < 265; i++) {
-          _procedures.add(procedures
-              .where((procedure) => procedure.numero == i)
-              .toList());
+          _procedures.add(
+              procedures.where((procedure) => procedure.numero == i).toList());
         }
         setState(() {});
       }
@@ -46,16 +45,17 @@ class _IdentificationViewState extends State<IdentificationView> {
       print(e);
     }
   }
+
   void clearCodeTVFromSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove(
         'codeTV'); // Esto eliminará el valor 'codeTV' de SharedPreferences
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         title: Text('Identificación'),
         actions: [
           IconButton(
@@ -93,11 +93,12 @@ class _IdentificationViewState extends State<IdentificationView> {
                       setState(() {
                         _controller.carData =
                             null; // Limpiamos la información del vehículo
-                             _controller.searchCompleted = false;
+                        _controller.searchCompleted = false;
                       });
                     },
                   ),
                 ),
+                            textCapitalization: TextCapitalization.characters
               ),
               SizedBox(height: 16.0),
               ElevatedButton(
@@ -144,7 +145,7 @@ class _IdentificationViewState extends State<IdentificationView> {
                     ],
                   ),
                 )
-              else if (_controller.searchCompleted) 
+              else if (_controller.searchCompleted)
                 Card(
                   elevation: 4,
                   child: Padding(
@@ -161,7 +162,7 @@ class _IdentificationViewState extends State<IdentificationView> {
                             setState(() {
                               _controller.carData =
                                   null; // Limpiamos la información del vehículo
-                                                            _controller.searchCompleted = false;
+                              _controller.searchCompleted = false;
                             });
                           },
                           child: Text('Realizar una nueva consulta'),
@@ -170,74 +171,78 @@ class _IdentificationViewState extends State<IdentificationView> {
                     ),
                   ),
                 ),
-if (_procedures.isNotEmpty)
-  Card(
-    elevation: 4,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (var procedures in _procedures)
-          for (var procedure in procedures)
-            GestureDetector(
-              onTap: () {
-                _showDefectsModal(context, procedure.defectos);
-              },
-              child: Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+              if (_procedures.isNotEmpty)
+                Card(
+                  elevation: 4,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${procedure.abreviaturaDescripcion}",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
+                      for (var procedures in _procedures)
+                        for (var procedure in procedures)
+                          GestureDetector(
+                            onTap: () {
+                              _showDefectsModal(context, procedure.defectos);
+                            },
+                            child: Card(
+                              elevation: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "${procedure.abreviaturaDescripcion}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 4,
+                                              ), // Espacio entre el título y el subtítulo
+                                              Text(
+                                                "${procedure.procedimiento}", // Agrega el subtítulo aquí
+                                                overflow: TextOverflow
+                                                    .ellipsis, // Manejo del desbordamiento
+                                                maxLines:
+                                                    2, // Número máximo de líneas antes de mostrar el desbordamiento
+                                                style: TextStyle(
+                                                  fontSize: 13.5,
+                                                  color: Colors
+                                                      .grey, // Puedes personalizar el color y estilo según tus necesidades
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_forward,
+                                          size: 24,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(
-                                  height: 4,
-                                ), // Espacio entre el título y el subtítulo
-                                Text(
-                                  "${procedure.procedimiento}", // Agrega el subtítulo aquí
-                                  overflow: TextOverflow.ellipsis, // Manejo del desbordamiento
-                                  maxLines: 2, // Número máximo de líneas antes de mostrar el desbordamiento
-                                  style: TextStyle(
-                                    fontSize: 13.5,
-                                    color: Colors.grey, // Puedes personalizar el color y estilo según tus necesidades
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
-                          Icon(
-                            Icons.arrow_forward,
-                            size: 24,
-                          ),
-                        ],
-                      ),
                     ],
                   ),
-                ),
-              ),
-            ),
-      ],
-    ),
-  )
-
+                )
             ],
           ),
         ),
       ),
-             bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
         currentIndex:
             0, // Set the current index to 2 to highlight the Holguras tab
         onTap: (index) {
@@ -320,8 +325,7 @@ if (_procedures.isNotEmpty)
       ),
     );
   }
-  }
-
+}
 
 Widget _buildProcedureField(String label, String value) {
   return Padding(
@@ -348,7 +352,6 @@ Widget _buildProcedureField(String label, String value) {
   );
 }
 
-
 void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
   showModalBottomSheet(
     context: context,
@@ -370,7 +373,8 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
             ListView.builder(
               shrinkWrap: true,
               itemCount: defectos.length,
-              physics: BouncingScrollPhysics(), // O AlwaysScrollableScrollPhysics()
+              physics:
+                  BouncingScrollPhysics(), // O AlwaysScrollableScrollPhysics()
               itemBuilder: (context, index) {
                 final defecto = defectos[index];
                 return ListTile(
@@ -392,11 +396,11 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
 
 void _showDefectoModal(BuildContext context, Defecto defecto) {
   if (defecto.abreviatura == "OTROS") {
-  Navigator.of(context).push(
-  MaterialPageRoute(
-    builder: (context) => OtrosWidget(defecto: defecto),
-  ),
-);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => OtrosWidget(defecto: defecto),
+      ),
+    );
   } else {
     Navigator.push(
       context,

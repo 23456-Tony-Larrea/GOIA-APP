@@ -114,6 +114,7 @@ class _OtrosHolgurasWidgetState extends State<OtrosHolgurasWidget> {
                       border: OutlineInputBorder(),
                       labelText: 'Observación',
                     ),
+                    textCapitalization: TextCapitalization.characters
                   ),
                     SizedBox(height: 16),
      Card(

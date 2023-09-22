@@ -20,11 +20,14 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
   final HolgurasBluetoothController _sendBluetooh =
       HolgurasBluetoothController();
 
+
   @override
   void initState() {
     super.initState();
     clearCodeTVFromSharedPreferences();
+
     _sendBluetooh.sendTrama(TramaType.Apagar);
+
   }
 
   Future<void> _loadProcedures() async {
@@ -154,6 +157,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                     },
                   ),
                 ),
+                textCapitalization: TextCapitalization.characters
               ),
               SizedBox(height: 16.0),
               ElevatedButton(
@@ -374,184 +378,6 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showOtrosModal(BuildContext context, Defecto defecto) {
-    List<int> selectedLocations = [];
-    int? selectedCalification = null;
-    final VisualInspectionController _controller = VisualInspectionController();
-    final TextEditingController _ob = TextEditingController();
-
-    final FocusNode _obFocusNode = FocusNode();
-
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, setState) {
-            return SingleChildScrollView(
-                child: GestureDetector(
-              onTap: () {
-                _obFocusNode.unfocus();
-              },
-              child: Container(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Defecto: ${defecto.abreviatura}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text('Descripción: ${defecto.descripcion}'),
-                    SizedBox(height: 16),
-                    DropdownButtonFormField<int>(
-                      decoration: InputDecoration(
-                        labelText: 'Elige las ubicaciones',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: 9, // Establece el valor inicial aquí
-                      onChanged: (int? newValue) {
-                        setState(() {
-                          if (newValue != null) {
-                            selectedLocations.add(newValue);
-                          }
-                        });
-                      },
-                      items: List.generate(
-                        9,
-                        (index) => DropdownMenuItem<int>(
-                          value: index + 9,
-                          child: Text((index + 9).toString()),
-                        ),
-                      ),
-                    ),
-                    if (selectedLocations.isNotEmpty)
-                      Card(
-                        child: Column(
-                          children: [
-                            ListTile(
-                              title: Text('Ubicaciones seleccionadas:'),
-                            ),
-                            Column(
-                              children: selectedLocations.map((location) {
-                                return ListTile(
-                                  title: Text(location.toString()),
-                                  trailing: IconButton(
-                                    icon: Icon(Icons.delete),
-                                    onPressed: () {
-                                      setState(() {
-                                        selectedLocations.remove(location);
-                                      });
-                                    },
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    SizedBox(height: 16),
-                    Image.asset(
-                      'assets/images/carrito.png',
-                      width: 250,
-                      height: 250,
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _ob,
-                      focusNode: _obFocusNode,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Observación',
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Card(
-                      // Card para la calificación
-                      child: Column(
-                        children: [
-                          ListTile(
-                            title: Text('Calificación'),
-                          ),
-                          ListTile(
-                            title: Text(
-                                'Calificación: ${selectedCalification ?? 'Sin calificación'}'),
-                          ),
-                          RadioListTile<int>(
-                            title: Text('1'),
-                            value: 1,
-                            groupValue: selectedCalification,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCalification = value!;
-                              });
-                            },
-                          ),
-                          RadioListTile<int>(
-                            title: Text('2'),
-                            value: 2,
-                            groupValue: selectedCalification,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCalification = value!;
-                              });
-                            },
-                          ),
-                          RadioListTile<int>(
-                            title: Text('3'),
-                            value: 3,
-                            groupValue: selectedCalification,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCalification = value!;
-                              });
-                            },
-                          ),
-                          RadioListTile<int>(
-                            title: Text('Cancelar'),
-                            value: 4,
-                            groupValue: selectedCalification,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCalification = value!;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        _controller
-                            .saveIdentificationVisualInspectionObservation(
-                          context,
-                          defecto.codigo,
-                          defecto.numero,
-                          defecto.abreviatura,
-                          defecto.descripcion,
-                          defecto.codigoAs400,
-                          _ob.text,
-                          selectedLocations.join(','),
-                          selectedCalification, // Agrega la calificación
-                        );
-                      },
-                      child: Text('Guardar'),
-                    ),
-                  ],
-                ),
-              ),
-            ));
-          },
-        );
-      },
     );
   }
 }

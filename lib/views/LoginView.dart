@@ -162,6 +162,7 @@ Center(
                 labelText: 'Usuario',
                 prefixIcon: Icon(Icons.person), // Agrega un ícono de usuario
               ),
+              textCapitalization: TextCapitalization.characters
             ),
           ),
           Padding(

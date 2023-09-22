@@ -20,7 +20,6 @@ class MyApp extends StatelessWidget {
         home: LoginView(),
         routes: {
           '/login': (context) => const LoginView(),
-
           '/identification': (context) => IdentificationView(),
           '/visual_inspection': (context) => VisualInspectionView(),
           '/holguras': (context) => HolgurasView(),

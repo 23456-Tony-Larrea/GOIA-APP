@@ -522,7 +522,7 @@ ElevatedButton.icon(
         onPressed: () {
           _bluetoothController.disconnect(widget.connection);
           BluetoothManager().disconnect();
-    Navigator.pushNamed(context, '/menu');
+    Navigator.pushNamed(context, '/bluetooh_serial');
         },
         icon: Icon(
           Icons.bluetooth_disabled,

@@ -118,6 +118,7 @@ class _OtrosWidgetState extends State<OtrosWidget> {
                       border: OutlineInputBorder(),
                       labelText: 'Observación',
                     ),
+                    textCapitalization: TextCapitalization.characters
                   ),
                     SizedBox(height: 16),
      Card(
