@@ -76,13 +76,6 @@ class _TabBarViewNoRolesExampleState extends State<TabBarViewNoRolesExample> {
             ),
             label: 'Holguras',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.exit_to_app,
-              color: Colors.black,
-            ),
-            label: 'Salir',
-          ),
         ],
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,

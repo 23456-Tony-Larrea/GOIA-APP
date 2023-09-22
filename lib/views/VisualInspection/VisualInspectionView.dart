@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:rtv/class/ListProcedureVisualInspection.dart';
 import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/VisualInspectionController.dart';
+import 'package:rtv/views/ExitView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../controllers/HolgurasBluetoohController.dart';
 import 'CalificationVisualInspection.dart';
@@ -110,8 +111,23 @@ void _showDefectoModal(BuildContext context, Defecto defecto) {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Inspección Visual'), // Cambia el título del AppBar
-      automaticallyImplyLeading: false,
+        title: Text('Inspección Visual'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.exit_to_app,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return ExitView();
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(

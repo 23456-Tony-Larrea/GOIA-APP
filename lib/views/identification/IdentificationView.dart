@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rtv/controllers/IdentificationController.dart';
+import 'package:rtv/views/ExitView.dart';
 import 'package:rtv/views/identification/CalificationIdentificationView.dart';
 import 'package:rtv/views/identification/CalificationOtrosIdentificationView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,9 +55,24 @@ class _IdentificationViewState extends State<IdentificationView> {
    @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Identificación'), // Cambia el título del AppBar
-                automaticallyImplyLeading: false,
+     appBar: AppBar(
+        title: Text('Identificación'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.exit_to_app,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return ExitView();
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(

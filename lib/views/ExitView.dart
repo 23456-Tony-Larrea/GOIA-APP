@@ -12,16 +12,14 @@ class ExitView extends StatelessWidget {
             Navigator.pop(context); // Cierra el diálogo
             final prefs = await SharedPreferences.getInstance();
             prefs.remove('vehi_codigo');
-            prefs.remove('hello_token');
             prefs.remove('codeTV');
-  
             Navigator.pushNamed(context, '/login');
           },
           child: Text('Aceptar'),
         ),
         TextButton(
           onPressed: () {
-            Navigator.pop(context,'/exit');
+            Navigator.pop(context,'/menu');
           },
           child: Text('Cancelar'),
         ),

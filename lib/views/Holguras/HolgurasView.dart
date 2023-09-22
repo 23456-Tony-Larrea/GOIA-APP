@@ -6,6 +6,7 @@ import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/HolgurasBluetoohController.dart';
 import 'package:rtv/controllers/HolgurasController.dart';
 import 'package:rtv/views/BluetoohSerialView.dart';
+import 'package:rtv/views/ExitView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:rtv/views/Holguras/CalificationHolgurasView.dart';
@@ -61,32 +62,50 @@ class _HolgurasViewState extends State<HolgurasView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Holguras'),
-        automaticallyImplyLeading: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: Text(
-              _connectedDeviceName != null
-                  ? 'Dispositivo conectado a $_connectedDeviceName'
-                  : 'Ningún dispositivo vinculado',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-          ),
-          FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BluetoothScreen(),
-                ),
-              );
-            },
-            child: Icon(Icons.bluetooth),
-          ),
-        ],
+appBar: AppBar(
+  title: Text('Holguras'),
+  automaticallyImplyLeading: false,
+  actions: [
+    Padding(
+      padding: const EdgeInsets.only(left: 16.0),
+      child: Text(
+        _connectedDeviceName != null
+            ? 'Dispositivo conectado a $_connectedDeviceName'
+            : 'Ningún dispositivo vinculado',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
       ),
+    ),
+    FloatingActionButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BluetoothScreen(),
+          ),
+        );
+      },
+      child: Icon(Icons.bluetooth),
+    ),
+     IconButton(
+      icon: Icon(
+        Icons.exit_to_app,
+        color: Colors.white,
+      ),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ExitView();
+          },
+        );
+      },
+    ),
+  ],
+),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -258,7 +277,6 @@ class _HolgurasViewState extends State<HolgurasView> {
               backgroundColor: Colors.blueAccent,
               children: [
                 SpeedDialChild(
-                  label: 'Detener',
                   child: Icon(Icons.stop),
                   backgroundColor: Colors.blueAccent,
                   onTap: () {
@@ -266,7 +284,6 @@ class _HolgurasViewState extends State<HolgurasView> {
                   },
                 ),
                 SpeedDialChild(
-                  label: 'Dirección Horizontal',
                   child: Icon(Icons.swap_horiz),
                   backgroundColor: Colors.blueAccent,
                   onTap: () {
@@ -274,7 +291,6 @@ class _HolgurasViewState extends State<HolgurasView> {
                   },
                 ),
                 SpeedDialChild(
-                  label: 'Direccion vertical',
                   child: Icon(Icons.swap_vertical_circle),
                   backgroundColor: Colors.blueAccent,
                   onTap: () {
