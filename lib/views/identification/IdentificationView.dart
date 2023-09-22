@@ -19,7 +19,6 @@ class _IdentificationViewState extends State<IdentificationView> {
   List<List<ListProcedure>> _procedures = [];
   final HolgurasBluetoothController _sendBluetooh =
       HolgurasBluetoothController();
-
   Defecto? selectedDefecto;
   DefectoEncontrado? defectoEncontrado;
 
@@ -113,6 +112,7 @@ class _IdentificationViewState extends State<IdentificationView> {
               ),
               SizedBox(height: 16.0),
               if (_controller.carData != null)
+              
                 Card(
                   elevation: 4,
                   child: Column(
