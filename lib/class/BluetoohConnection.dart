@@ -20,7 +20,7 @@ class BluetoothManager {
     }
     _connection = await BluetoothConnection.toAddress(device.address);
     _connectedDeviceName = device.name;
-    _isConnected = true;
+    _isConnected = true; 
   }
 
   BluetoothConnection? get connection => _connection;
@@ -50,4 +50,5 @@ class BluetoothManager {
       print("Error al enviar la trama: $e");
     }
   }
+  
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:rtv/class/BluetoohConnection.dart';
 import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/BluetoohSerialController.dart';
 
@@ -26,6 +27,7 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
   bool _viewRight = false;
   bool _viewLeft = false;
   bool _mainManualy = false;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -497,10 +499,29 @@ Center(
   child: Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
+ElevatedButton.icon(
+  onPressed: () async {
+    Navigator.pushNamed(context, '/menu');
+  },
+  icon: Icon(
+    Icons.bluetooth,
+    color: Colors.white,
+  ),
+  label: Text(
+    'Calificar y Evaluar',
+    style: TextStyle(
+      color: Colors.white,
+    ),
+  ),
+  style: ElevatedButton.styleFrom(
+    primary: Colors.blue,
+  ),
+),
       SizedBox(height: 16),
       ElevatedButton.icon(
         onPressed: () {
           _bluetoothController.disconnect(widget.connection);
+          BluetoothManager().disconnect();
           Navigator.pop(context);
         },
         icon: Icon(

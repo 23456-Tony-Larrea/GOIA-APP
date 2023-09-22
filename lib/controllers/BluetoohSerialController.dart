@@ -53,4 +53,8 @@ Future<void> initBluetooth() async {
       print("Error al enviar la trama: $e");
     }
   }
+  Future<List<BluetoothDevice>> getBondedDevices() async {
+    final bondedDevices = await bluetooth.getBondedDevices();
+    return bondedDevices;
+  }
 }

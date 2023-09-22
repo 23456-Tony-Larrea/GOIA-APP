@@ -5,6 +5,8 @@ import 'package:rtv/views/identification/CalificationIdentificationView.dart';
 import 'package:rtv/views/identification/CalificationOtrosIdentificationView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../class/ListProcedure.dart';
+import '../../class/Trama.dart';
+import '../../controllers/HolgurasBluetoohController.dart';
 
 class IdentificationView extends StatefulWidget {
   @override
@@ -14,6 +16,8 @@ class IdentificationView extends StatefulWidget {
 class _IdentificationViewState extends State<IdentificationView> {
   final IdentificationController _controller = IdentificationController();
   List<List<ListProcedure>> _procedures = [];
+    final HolgurasBluetoothController _sendBluetooh = HolgurasBluetoothController();
+
 
   Defecto? selectedDefecto;
   DefectoEncontrado? defectoEncontrado;
@@ -22,6 +26,7 @@ class _IdentificationViewState extends State<IdentificationView> {
   void initState() {
     super.initState();
     clearCodeTVFromSharedPreferences();
+     _sendBluetooh.sendTrama(TramaType.Apagar);
   }
  Future<void> _getProcedures() async {
     

@@ -30,15 +30,15 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
       body: Column(
         children: [
           Expanded(
-            child: StreamBuilder<List<BluetoothDiscoveryResult>>(
-              stream: _bluetoothController.getScanResultsStream(),
+            child: StreamBuilder<List<BluetoothDevice>>(
+              stream: Stream.fromFuture(_bluetoothController.getBondedDevices()),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  final results = snapshot.data!;
+                  final devices = snapshot.data!;
                   return ListView.builder(
-                    itemCount: results.length,
+                    itemCount: devices.length,
                     itemBuilder: (context, index) {
-                      final device = results[index].device;
+                      final device = devices[index];
                       return Card(
                         // Usar un Card en lugar de un ListTile
                         child: ListTile(
@@ -48,7 +48,7 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
                             subtitle: Text(device.address),
                             onTap: () {
                               _connectToDevice(
-                                  context, results[index], device.name!);
+                                  context, device, device.name!);
                             }),
                       );
                     },
@@ -66,9 +66,9 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
     );
   }
 
- void _connectToDevice(BuildContext context, BluetoothDiscoveryResult device,
+ void _connectToDevice(BuildContext context, BluetoothDevice device,
       String deviceName) async {
-    await BluetoothManager().connectToDevice(device.device);
+    await BluetoothManager().connectToDevice(device);
 
     Navigator.push(
       context,

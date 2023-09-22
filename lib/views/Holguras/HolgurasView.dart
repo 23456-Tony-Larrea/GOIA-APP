@@ -18,8 +18,8 @@ class HolgurasView extends StatefulWidget {
 
 class _HolgurasViewState extends State<HolgurasView> {
   final HolgurasController _controller = HolgurasController();
-  final HolgurasBluetoothController _sendBluetooh =
-      HolgurasBluetoothController();
+  final HolgurasBluetoothController _sendBluetooh = HolgurasBluetoothController();
+      
 
   List<List<ListProcedureHolguras>> _holgurasLists = [];
   int codeRTV = 0;
@@ -31,6 +31,7 @@ class _HolgurasViewState extends State<HolgurasView> {
     clearCodeTVFromSharedPreferences();
     _connectedDeviceName = BluetoothManager().connectedDeviceName ?? '';
     BluetoothManager().setConnectedDeviceName('');
+    _sendBluetooh.sendTrama(TramaType.Encender);
   }
 
   void clearCodeTVFromSharedPreferences() async {
@@ -64,6 +65,15 @@ class _HolgurasViewState extends State<HolgurasView> {
         title: Text('Holguras'),
         automaticallyImplyLeading: false,
         actions: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Text(
+              _connectedDeviceName != null
+                  ? 'Dispositivo conectado a $_connectedDeviceName'
+                  : 'Ningún dispositivo vinculado',
+              style: Theme.of(context).textTheme.headline6,
+            ),
+          ),
           FloatingActionButton(
             onPressed: () {
               Navigator.push(
@@ -74,11 +84,6 @@ class _HolgurasViewState extends State<HolgurasView> {
               );
             },
             child: Icon(Icons.bluetooth),
-            mini: true,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(_connectedDeviceName ?? 'Sin conexión'),
           ),
         ],
       ),
@@ -247,7 +252,7 @@ class _HolgurasViewState extends State<HolgurasView> {
           ),
         ),
       ),
-      floatingActionButton: BluetoothManager().isConnected
+    floatingActionButton: BluetoothManager().isConnected
           ? SpeedDial(
               icon: Icons.menu_outlined,
               backgroundColor: Colors.blueAccent,
@@ -265,9 +270,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                   child: Icon(Icons.swap_horiz),
                   backgroundColor: Colors.blueAccent,
                   onTap: () {
-                    // Acción para la opción 2
                     _sendBluetooh.sendTrama(TramaType.HORIZONTAL);
-                    
                   },
                 ),
                 SpeedDialChild(
@@ -275,18 +278,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                   child: Icon(Icons.swap_vertical_circle),
                   backgroundColor: Colors.blueAccent,
                   onTap: () {
-                    // Acción para la opción 3
                     _sendBluetooh.sendTrama(TramaType.VERTICAL);
-                  },
-                ),
-                SpeedDialChild(
-                  label: 'Apagar',
-                  child: Icon(Icons.lightbulb),
-                  backgroundColor: Colors.blueAccent,
-                  onTap: () async {
-                    _sendBluetooh.sendTrama(TramaType.Encender);
-                    /* await BluetoothManager().disconnect();
-                    Navigator.pop(context); */
                   },
                 ),
               ],

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rtv/class/ListProcedureVisualInspection.dart';
+import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/VisualInspectionController.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../controllers/HolgurasBluetoohController.dart';
 import 'CalificationVisualInspection.dart';
 import 'CalificationOtrosVisualInspection.dart';
 
@@ -14,10 +16,13 @@ class VisualInspectionView extends StatefulWidget {
 class _VisualInspectionViewState extends State<VisualInspectionView> {
   final VisualInspectionController _controller = VisualInspectionController();
   List<List<ListProcedureInspection>> _procedureLists = [];
+      final HolgurasBluetoothController _sendBluetooh = HolgurasBluetoothController();
+
   @override
   void initState() {
     super.initState();
     clearCodeTVFromSharedPreferences();
+     _sendBluetooh.sendTrama(TramaType.Apagar);
   }
 
   Future<void> _loadProcedures() async {
