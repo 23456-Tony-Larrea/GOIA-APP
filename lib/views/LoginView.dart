@@ -48,8 +48,6 @@ Container(
                   .getHostFromSharedPreferences()
                   .then((estaIp) {
                 if (estaIp != null) {
-                  // Mostrar un mensaje Toast con el valor de esta_host
-                  print(estaIp);
                   Fluttertoast.showToast(
                     msg: 'Tu host es: $estaIp',
                     toastLength: Toast.LENGTH_SHORT,

@@ -181,7 +181,6 @@ class _IdentificationViewState extends State<IdentificationView> {
 if (_procedures.isNotEmpty)
   Column(
     children: [
-      
       TypeAheadField(
         textFieldConfiguration: TextFieldConfiguration(
           decoration: InputDecoration(

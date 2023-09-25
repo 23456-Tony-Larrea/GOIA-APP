@@ -25,7 +25,6 @@ class ConfigHostController {
       // Guardar los valores en SharedPreferences
 
       final jsonResponse = json.decode(response.body);
-      print(jsonResponse);
       if (jsonResponse is List && jsonResponse.isNotEmpty) {
         final firstObject = jsonResponse[0];
 

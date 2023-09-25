@@ -150,7 +150,6 @@ class IdentificationController {
           final List<dynamic> jsonResponse = jsonDecode(response.body);
           final List<ListProcedure> inspection =
               jsonResponse.map((data) => ListProcedure.fromJson(data)).toList();
-          print("Lista de Procedimientos: $inspection");
 
           if (inspection.isNotEmpty) {
             return inspection;

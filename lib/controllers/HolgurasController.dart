@@ -151,8 +151,6 @@ class HolgurasController {
           final List<ListProcedureHolguras> inspectionHolguras = jsonResponse
               .map((data) => ListProcedureHolguras.fromJson(data))
               .toList();
-          print("Lista de Procedimientos: $inspectionHolguras");
-
           if (inspectionHolguras.isNotEmpty) {
             return inspectionHolguras;
           } else {

@@ -149,10 +149,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
         if (response.statusCode == 200) {
           final List<dynamic> jsonResponse = jsonDecode(response.body);
           final List<ListProcedureInspection> visualInspection =
-              jsonResponse.map((data) => ListProcedureInspection.fromJson(data)).toList();
-
-          print("Lista de Procedimientos: $visualInspection");
-          
+              jsonResponse.map((data) => ListProcedureInspection.fromJson(data)).toList();          
           if (visualInspection.isNotEmpty) {
             return visualInspection;
           } else {

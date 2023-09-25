@@ -42,6 +42,8 @@ dependencies:
   flutter_speed_dial: ^7.0.0
   flutter_bluetooth_serial: ^0.4.0
   flutter_typeahead: ^4.8.0
+  camera: ^0.10.5+4
+
 
 
 
