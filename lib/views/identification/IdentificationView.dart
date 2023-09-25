@@ -5,6 +5,7 @@ import 'package:rtv/views/ExitView.dart';
 import 'package:rtv/views/identification/CalificationIdentificationView.dart';
 import 'package:rtv/views/identification/CalificationOtrosIdentificationView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import '../../class/ListProcedure.dart';
 import '../../class/Trama.dart';
 import '../../controllers/HolgurasBluetoohController.dart';
@@ -12,6 +13,7 @@ import '../../controllers/HolgurasBluetoohController.dart';
 class IdentificationView extends StatefulWidget {
   @override
   _IdentificationViewState createState() => _IdentificationViewState();
+  
 }
 
 class _IdentificationViewState extends State<IdentificationView> {
@@ -171,73 +173,96 @@ class _IdentificationViewState extends State<IdentificationView> {
                     ),
                   ),
                 ),
-              if (_procedures.isNotEmpty)
-                Card(
-                  elevation: 4,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (var procedures in _procedures)
-                        for (var procedure in procedures)
-                          GestureDetector(
-                            onTap: () {
-                              _showDefectsModal(context, procedure.defectos);
-                            },
-                            child: Card(
-                              elevation: 4,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
+if (_procedures.isNotEmpty)
+  Column(
+    children: [
+      TypeAheadField(
+        textFieldConfiguration: TextFieldConfiguration(
+          decoration: InputDecoration(
+            hintText: 'Buscar procedimiento',
+          ),
+        ),
+        suggestionsCallback: (pattern) async {
+          final suggestions = _procedures.expand((procedures) => procedures)
+              .where((procedure) => procedure.procedimiento.toLowerCase().contains(pattern.toLowerCase()))
+              .toList();
+          return suggestions;
+        },
+        itemBuilder: (context, suggestion) {
+          return ListTile(
+            title: Text(suggestion.procedimiento),
+          );
+        },
+        onSuggestionSelected: (suggestion) {
+          _showDefectsModal(context, suggestion.defectos);
+        },
+      ),
+      SizedBox(height: 16),
+      Card(
+        elevation: 4,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var procedures in _procedures)
+              for (var procedure in procedures)
+                GestureDetector(
+                  onTap: () {
+                    _showDefectsModal(context, procedure.defectos);
+                  },
+                  child: Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                "${procedure.abreviaturaDescripcion}",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18,
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                height: 4,
-                                              ), // Espacio entre el título y el subtítulo
-                                              Text(
-                                                "${procedure.procedimiento}", // Agrega el subtítulo aquí
-                                                overflow: TextOverflow
-                                                    .ellipsis, // Manejo del desbordamiento
-                                                maxLines:
-                                                    2, // Número máximo de líneas antes de mostrar el desbordamiento
-                                                style: TextStyle(
-                                                  fontSize: 13.5,
-                                                  color: Colors
-                                                      .grey, // Puedes personalizar el color y estilo según tus necesidades
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Icon(
-                                          Icons.arrow_forward,
-                                          size: 24,
-                                        ),
-                                      ],
+                                    Text(
+                                      "${procedure.abreviaturaDescripcion}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 4,
+                                    ),
+                                    Text(
+                                      "${procedure.procedimiento}",
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        color: Colors.grey,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
+                              Icon(
+                                Icons.arrow_forward,
+                                size: 24,
+                              ),
+                            ],
                           ),
-                    ],
+                        ],
+                      ),
+                    ),
                   ),
-                )
+                ),
+          ],
+        ),
+      ),
+    ],
+  ),
             ],
           ),
         ),

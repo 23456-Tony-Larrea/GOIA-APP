@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:rtv/class/BluetoohConnection.dart';
 import 'package:rtv/class/ListProcedureHolguras.dart';
 import 'package:rtv/class/Trama.dart';
@@ -213,72 +214,95 @@ class _HolgurasViewState extends State<HolgurasView> {
                   ),
                 ),
               if (_holgurasLists.isNotEmpty)
-                Card(
-                  elevation: 4,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (var procedures in _holgurasLists)
-                        for (var procedure in procedures)
-                          GestureDetector(
-                            onTap: () {
-                              _showDefectsModal(context, procedure.defectos);
-                            },
-                            child: Card(
-                              elevation: 4,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
+              Column(
+    children: [
+      TypeAheadField(
+        textFieldConfiguration: TextFieldConfiguration(
+          decoration: InputDecoration(
+            hintText: 'Buscar procedimiento',
+          ),
+        ),
+        suggestionsCallback: (pattern) async {
+          final suggestions = _holgurasLists.expand((procedures) => procedures)
+              .where((procedure) => procedure.procedimiento.toLowerCase().contains(pattern.toLowerCase()))
+              .toList();
+          return suggestions;
+        },
+        itemBuilder: (context, suggestion) {
+          return ListTile(
+            title: Text(suggestion.procedimiento),
+          );
+        },
+        onSuggestionSelected: (suggestion) {
+          _showDefectsModal(context, suggestion.defectos);
+        },
+      ),
+      SizedBox(height: 16),
+      Card(
+        elevation: 4,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var procedures in _holgurasLists)
+              for (var procedure in procedures)
+                GestureDetector(
+                  onTap: () {
+                    _showDefectsModal(context, procedure.defectos);
+                  },
+                  child: Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                "${procedure.abreviaturaDescripcion}",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18,
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                height: 4,
-                                              ), // Espacio entre el título y el subtítulo
-                                              Text(
-                                                "${procedure.procedimiento}", // Agrega el subtítulo aquí
-                                                overflow: TextOverflow
-                                                    .ellipsis, // Manejo del desbordamiento
-                                                maxLines:
-                                                    2, // Número máximo de líneas antes de mostrar el desbordamiento
-                                                style: TextStyle(
-                                                  fontSize: 13.5,
-                                                  color: Colors
-                                                      .grey, // Puedes personalizar el color y estilo según tus necesidades
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Icon(
-                                          Icons.arrow_forward,
-                                          size: 24,
-                                        ),
-                                      ],
+                                    Text(
+                                      "${procedure.abreviaturaDescripcion}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 4,
+                                    ),
+                                    Text(
+                                      "${procedure.procedimiento}",
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        color: Colors.grey,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
+                              Icon(
+                                Icons.arrow_forward,
+                                size: 24,
+                              ),
+                            ],
                           ),
-                    ],
+                        ],
+                      ),
+                    ),
                   ),
-                )
+                ),
+          ],
+        ),
+      ),
+    ],
+              ),
             ],
           ),
         ),

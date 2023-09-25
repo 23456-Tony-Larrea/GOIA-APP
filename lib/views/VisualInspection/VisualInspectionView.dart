@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:rtv/class/ListProcedureVisualInspection.dart';
 import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/VisualInspectionController.dart';
@@ -231,68 +232,96 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                   ),
                 ),
               SizedBox(height: 16.0),
-              if (_procedureLists.isNotEmpty)
-                Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Procedimientos',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                        SizedBox(height: 8),
-                        for (var procedures in _procedureLists)
-                          for (var procedure in procedures)
-                            GestureDetector(
-                              onTap: () {
-                                _showDefectsModal(context, procedure.defectos);
-                              },
-                              child: Card(
-                                elevation: 4,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          FittedBox(
-                                            fit: BoxFit
-                                                .scaleDown, // Puedes ajustar el fit según tus necesidades
-                                            child: Text(
-                                              '${procedure.abreviaturaDescripcion}', // Agrega el mensaje aquí
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                          ),
-                                          Icon(
-                                            Icons
-                                                .arrow_forward, // Agrega el icono aquí
-                                            size: 24,
-                                          ),
-                                        ],
+              if (_procedureLists.isNotEmpty)  
+              Column(
+    children: [
+      TypeAheadField(
+        textFieldConfiguration: TextFieldConfiguration(
+          decoration: InputDecoration(
+            hintText: 'Buscar procedimiento',
+          ),
+        ),
+        suggestionsCallback: (pattern) async {
+          final suggestions = _procedureLists.expand((procedures) => procedures)
+              .where((procedure) => procedure.procedimiento.toLowerCase().contains(pattern.toLowerCase()))
+              .toList();
+          return suggestions;
+        },
+        itemBuilder: (context, suggestion) {
+          return ListTile(
+            title: Text(suggestion.procedimiento),
+          );
+        },
+        onSuggestionSelected: (suggestion) {
+          _showDefectsModal(context, suggestion.defectos);
+        },
+      ),
+      SizedBox(height: 16),
+      Card(
+        elevation: 4,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var procedures in _procedureLists)
+              for (var procedure in procedures)
+                GestureDetector(
+                  onTap: () {
+                    _showDefectsModal(context, procedure.defectos);
+                  },
+                  child: Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${procedure.abreviaturaDescripcion}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
                                       ),
-                                      SizedBox(height: 8),
-                                      _buildProcedureField('Abreviatura',
-                                          procedure.procedimiento),
-                                    ],
-                                  ),
+                                    ),
+                                    SizedBox(
+                                      height: 4,
+                                    ),
+                                    Text(
+                                      "${procedure.procedimiento}",
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                      ],
+                              Icon(
+                                Icons.arrow_forward,
+                                size: 24,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                )
+                ),
+          ],
+        ),
+      ),
+    ],
+  ),
             ],
           ),
         ),

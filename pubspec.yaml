@@ -41,7 +41,7 @@ dependencies:
   url_launcher: ^6.1.14
   flutter_speed_dial: ^7.0.0
   flutter_bluetooth_serial: ^0.4.0
-
+  flutter_typeahead: ^4.8.0
 
 
 
