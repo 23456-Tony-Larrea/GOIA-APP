@@ -55,7 +55,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
         'codeTV'); // Esto eliminará el valor 'codeTV' de SharedPreferences
   }
 
-  void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
+  void _showDefectsModal(BuildContext context, List<Defecto> defectos , String Procedure ) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -65,7 +65,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Defecto a calificar :',
+                'Defecto a calificar: $Procedure',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -155,6 +155,8 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                         _controller.carData =
                             null; // Limpiamos la información del vehículo
                         _controller.searchCompleted = false;
+                        //clear list
+                        _procedureLists.clear();
                       });
                     },
                   ),
@@ -253,13 +255,13 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
           return Card(
     child: ListTile(
       title: Text(
-        suggestion.abreviaturaDescripcion,
+        suggestion.categoriaDescripcion,
         style: TextStyle(
           fontWeight: FontWeight.bold,
         ),
       ),
       subtitle: Text(
-        suggestion.abreviaturaDescripcion,
+        suggestion.procedimiento,
         style: TextStyle(
            color: Colors.grey,
         ),
@@ -268,7 +270,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
   );
         },
         onSuggestionSelected: (suggestion) {
-          _showDefectsModal(context, suggestion.defectos);
+          _showDefectsModal(context, suggestion.defectos,suggestion.procedimiento);
         },
       ),
       SizedBox(height: 16),
@@ -281,7 +283,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
               for (var procedure in procedures)
                 GestureDetector(
                   onTap: () {
-                    _showDefectsModal(context, procedure.defectos);
+                    _showDefectsModal(context, procedure.defectos,procedure.procedimiento);
                   },
                   child: Card(
                     elevation: 4,
@@ -300,7 +302,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
                                       CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "${procedure.abreviaturaDescripcion}",
+                                      "${procedure.categoriaDescripcion}",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,

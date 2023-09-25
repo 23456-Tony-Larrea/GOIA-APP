@@ -98,6 +98,8 @@ class _IdentificationViewState extends State<IdentificationView> {
                         _controller.carData =
                             null; // Limpiamos la información del vehículo
                         _controller.searchCompleted = false;
+                        //limpiar procedures
+                        _procedures.clear();
                       });
                     },
                   ),
@@ -203,7 +205,7 @@ if (_procedures.isNotEmpty)
         ),
       ),
       subtitle: Text(
-        suggestion.abreviaturaDescripcion,
+        suggestion.procedimiento,
         style: TextStyle(
            color: Colors.grey,
         ),
@@ -212,7 +214,7 @@ if (_procedures.isNotEmpty)
   );
 },
         onSuggestionSelected: (suggestion) {
-          _showDefectsModal(context, suggestion.defectos,suggestion.abreviaturaDescripcion);
+          _showDefectsModal(context, suggestion.defectos,suggestion.procedimiento);
         },
       ),
       SizedBox(height: 16),
@@ -225,7 +227,7 @@ if (_procedures.isNotEmpty)
               for (var procedure in procedures)
                 GestureDetector(
                   onTap: () {
-                    _showDefectsModal(context, procedure.defectos,procedure.abreviaturaDescripcion);
+                    _showDefectsModal(context, procedure.defectos,procedure.procedimiento);
                   },
                   child: Card(
                     elevation: 4,
@@ -244,7 +246,7 @@ if (_procedures.isNotEmpty)
                                       CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "${procedure.abreviaturaDescripcion}",
+                                      "${procedure.categoriaDescripcion}",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
@@ -405,7 +407,7 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos, String Proc
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Defectos : $Procedure',
+              'Defecto a calificar: $Procedure',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,

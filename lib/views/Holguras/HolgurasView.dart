@@ -135,8 +135,10 @@ class _HolgurasViewState extends State<HolgurasView> {
                       _controller.placaController.clear();
                       setState(() {
                         _controller.carData =
-                            null; // Limpiamos la información del vehículo
+                            null;
                         _controller.searchCompleted = false;
+                        //limpiar list
+                        _holgurasLists.clear();
                       });
                     },
                   ),
