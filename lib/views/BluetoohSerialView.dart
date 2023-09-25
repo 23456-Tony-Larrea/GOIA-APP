@@ -26,6 +26,8 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Bluetooth'),
+        //desactivar el atras
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [

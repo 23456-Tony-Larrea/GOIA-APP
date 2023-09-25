@@ -343,37 +343,36 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex:
-            1, // Set the current index to 2 to highlight the Holguras tab
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushNamed(context, '/identification');
-              break;
-            case 1:
-              Navigator.pushNamed(context, '/visual_inspection');
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/holguras');
-              break;
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.car_crash_rounded),
-            label: 'Identificación',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.remove_red_eye),
-            label: 'Inspección Visual',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Holguras',
-          ),
-        ],
-      ),
+     bottomNavigationBar: BottomNavigationBar(
+  currentIndex: 1,
+  onTap: (index) {
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/identification');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/visual_inspection');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/holguras');
+        break;
+    }
+  },
+  items: [
+    BottomNavigationBarItem(
+      icon: Icon(Icons.car_crash_rounded),
+      label: 'Identificación',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.remove_red_eye),
+      label: 'Inspección Visual',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.settings),
+      label: 'Holguras',
+    ),
+  ],
+),
     );
   }
 

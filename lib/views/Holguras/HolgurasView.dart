@@ -6,7 +6,6 @@ import 'package:rtv/class/ListProcedureHolguras.dart';
 import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/HolgurasBluetoohController.dart';
 import 'package:rtv/controllers/HolgurasController.dart';
-import 'package:rtv/views/BluetoohSerialView.dart';
 import 'package:rtv/views/ExitView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -69,11 +68,8 @@ class _HolgurasViewState extends State<HolgurasView> {
         actions: [
           FloatingActionButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BluetoothScreen(),
-                ),
+              Navigator.pushReplacementNamed(
+                context,'/bluetooh_serial'
               );
             },
             child: Icon(Icons.bluetooth),
@@ -352,37 +348,36 @@ class _HolgurasViewState extends State<HolgurasView> {
               ],
             )
           : null,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex:
-            2, // Set the current index to 2 to highlight the Holguras tab
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushNamed(context, '/identification');
-              break;
-            case 1:
-              Navigator.pushNamed(context, '/visual_inspection');
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/holguras');
-              break;
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.car_crash_rounded),
-            label: 'Identificación',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.remove_red_eye),
-            label: 'Inspección Visual',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Holguras',
-          ),
-        ],
-      ),
+bottomNavigationBar: BottomNavigationBar(
+  currentIndex: 2,
+  onTap: (index) {
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/identification');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/visual_inspection');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/holguras');
+        break;
+    }
+  },
+  items: [
+    BottomNavigationBarItem(
+      icon: Icon(Icons.car_crash_rounded),
+      label: 'Identificación',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.remove_red_eye),
+      label: 'Inspección Visual',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.settings),
+      label: 'Holguras',
+    ),
+  ],
+),
     );
   }
 
