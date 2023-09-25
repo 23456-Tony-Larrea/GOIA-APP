@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rtv/class/ListProcedureHolguras.dart';
+import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/HolgurasController.dart';
+
+import '../../controllers/HolgurasBluetoohController.dart';
 
 class NewPageHolgurasWidget extends StatefulWidget {
   final Defecto defecto;
@@ -12,11 +15,13 @@ class NewPageHolgurasWidget extends StatefulWidget {
 }
 
 class _NewPageHolgurasWidgetState extends State<NewPageHolgurasWidget> {
-    final HolgurasController _controller = HolgurasController();
+  final HolgurasController _controller = HolgurasController();
   final _obFocusNode = FocusNode();
+  final HolgurasBluetoothController _sendBluetooh =
+      HolgurasBluetoothController();
 
   List<int> selectedLocations = [];
- int? selectedCalification = null;  
+  int? selectedCalification = null;
 
   @override
   void dispose() {
@@ -103,60 +108,60 @@ class _NewPageHolgurasWidgetState extends State<NewPageHolgurasWidget> {
                   height: 250,
                 ),
                 SizedBox(height: 16),
-     Card(
-                    // Card para la calificación
-                    child: Column(
-                      children: [
-                        ListTile(
-                          title: Text('Calificación'),
-                        ),
-                        ListTile(
-                          title: Text(
-                              'Calificación:${selectedCalification ?? 'Sin calificación'}'),
-                        ),
-                        RadioListTile<int>(
-                          title: Text('1'),
-                          value: 1,
-                          groupValue: selectedCalification,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCalification = value!;
-                            });
-                          },
-                        ),
-                        RadioListTile<int>(
-                          title: Text('2'),
-                          value: 2,
-                          groupValue: selectedCalification,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCalification = value!;
-                            });
-                          },
-                        ),
-                        RadioListTile<int>(
-                          title: Text('3'),
-                          value: 3,
-                          groupValue: selectedCalification,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCalification = value!;
-                            });
-                          },
-                        ),
-                        RadioListTile<int>(
-                          title: Text('Cancelar'),
-                          value: 4,
-                          groupValue: selectedCalification,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCalification = value!;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
+                Card(
+                  // Card para la calificación
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text('Calificación'),
+                      ),
+                      ListTile(
+                        title: Text(
+                            'Calificación:${selectedCalification ?? 'Sin calificación'}'),
+                      ),
+                      RadioListTile<int>(
+                        title: Text('Tipo 1'),
+                        value: 1,
+                        groupValue: selectedCalification,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedCalification = value!;
+                          });
+                        },
+                      ),
+                      RadioListTile<int>(
+                        title: Text('Tipo 2'),
+                        value: 2,
+                        groupValue: selectedCalification,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedCalification = value!;
+                          });
+                        },
+                      ),
+                      RadioListTile<int>(
+                        title: Text('Tipo 3'),
+                        value: 3,
+                        groupValue: selectedCalification,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedCalification = value!;
+                          });
+                        },
+                      ),
+                      RadioListTile<int>(
+                        title: Text('Cancelar'),
+                        value: 4,
+                        groupValue: selectedCalification,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedCalification = value!;
+                          });
+                        },
+                      ),
+                    ],
                   ),
+                ),
                 SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
@@ -170,6 +175,7 @@ class _NewPageHolgurasWidgetState extends State<NewPageHolgurasWidget> {
                       selectedLocations.join(','),
                       selectedCalification,
                     );
+                    _sendBluetooh.sendTrama(TramaType.Apagar);
                   },
                   child: Text('Guardar'),
                 ),

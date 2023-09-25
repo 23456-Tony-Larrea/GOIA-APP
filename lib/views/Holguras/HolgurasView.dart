@@ -221,6 +221,7 @@ class _HolgurasViewState extends State<HolgurasView> {
           decoration: InputDecoration(
             hintText: 'Buscar procedimiento',
           ),
+          textCapitalization: TextCapitalization.characters
         ),
         suggestionsCallback: (pattern) async {
           final suggestions = _holgurasLists.expand((procedures) => procedures)
@@ -229,12 +230,25 @@ class _HolgurasViewState extends State<HolgurasView> {
           return suggestions;
         },
         itemBuilder: (context, suggestion) {
-          return ListTile(
-            title: Text(suggestion.procedimiento),
-          );
+          return Card(
+    child: ListTile(
+      title: Text(
+        suggestion.abreviaturaDescripcion,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      subtitle: Text(
+        suggestion.procedimiento,
+        style: TextStyle(
+           color: Colors.grey,
+        ),
+      ),
+    ),
+  );
         },
         onSuggestionSelected: (suggestion) {
-          _showDefectsModal(context, suggestion.defectos);
+          _showDefectsModal(context, suggestion.defectos,suggestion.procedimiento);
         },
       ),
       SizedBox(height: 16),
@@ -247,7 +261,7 @@ class _HolgurasViewState extends State<HolgurasView> {
               for (var procedure in procedures)
                 GestureDetector(
                   onTap: () {
-                    _showDefectsModal(context, procedure.defectos);
+                    _showDefectsModal(context, procedure.defectos,procedure.procedimiento);
                   },
                   child: Card(
                     elevation: 4,
@@ -266,7 +280,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                                       CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "${procedure.abreviaturaDescripcion}",
+                                      "${procedure.categoriaDescripcion}",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
@@ -420,17 +434,18 @@ class _HolgurasViewState extends State<HolgurasView> {
     );
   }
 
-  void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
+void _showDefectsModal(BuildContext context, List<Defecto> defectos, String Procedure) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return SingleChildScrollView(
+        child: Container(
           padding: EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Defectos',
+                'Defecto a calificar : $Procedure',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -454,10 +469,11 @@ class _HolgurasViewState extends State<HolgurasView> {
               ),
             ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   void _showDefectoModal(BuildContext context, Defecto defecto) {
     if (defecto.abreviatura == "OTROS") {

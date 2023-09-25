@@ -72,8 +72,11 @@ class _IdentificationViewState extends State<IdentificationView> {
                 },
               );
             },
+            
           ),
         ],
+        //desactivar la flecha
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -176,11 +179,13 @@ class _IdentificationViewState extends State<IdentificationView> {
 if (_procedures.isNotEmpty)
   Column(
     children: [
+      
       TypeAheadField(
         textFieldConfiguration: TextFieldConfiguration(
           decoration: InputDecoration(
             hintText: 'Buscar procedimiento',
           ),
+           textCapitalization: TextCapitalization.characters
         ),
         suggestionsCallback: (pattern) async {
           final suggestions = _procedures.expand((procedures) => procedures)
@@ -189,12 +194,25 @@ if (_procedures.isNotEmpty)
           return suggestions;
         },
         itemBuilder: (context, suggestion) {
-          return ListTile(
-            title: Text(suggestion.procedimiento),
-          );
-        },
+  return Card(
+    child: ListTile(
+      title: Text(
+        suggestion.abreviaturaDescripcion,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      subtitle: Text(
+        suggestion.abreviaturaDescripcion,
+        style: TextStyle(
+           color: Colors.grey,
+        ),
+      ),
+    ),
+  );
+},
         onSuggestionSelected: (suggestion) {
-          _showDefectsModal(context, suggestion.defectos);
+          _showDefectsModal(context, suggestion.defectos,suggestion.abreviaturaDescripcion);
         },
       ),
       SizedBox(height: 16),
@@ -207,7 +225,7 @@ if (_procedures.isNotEmpty)
               for (var procedure in procedures)
                 GestureDetector(
                   onTap: () {
-                    _showDefectsModal(context, procedure.defectos);
+                    _showDefectsModal(context, procedure.defectos,procedure.abreviaturaDescripcion);
                   },
                   child: Card(
                     elevation: 4,
@@ -377,7 +395,7 @@ Widget _buildProcedureField(String label, String value) {
   );
 }
 
-void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
+void _showDefectsModal(BuildContext context, List<Defecto> defectos, String Procedure) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
@@ -387,7 +405,7 @@ void _showDefectsModal(BuildContext context, List<Defecto> defectos) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Defectos',
+              'Defectos : $Procedure',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,

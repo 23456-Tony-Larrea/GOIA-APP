@@ -65,7 +65,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Defectos',
+                'Defecto a calificar :',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -134,6 +134,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
             },
           ),
         ],
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -240,6 +241,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
           decoration: InputDecoration(
             hintText: 'Buscar procedimiento',
           ),
+          textCapitalization: TextCapitalization.characters
         ),
         suggestionsCallback: (pattern) async {
           final suggestions = _procedureLists.expand((procedures) => procedures)
@@ -248,9 +250,22 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
           return suggestions;
         },
         itemBuilder: (context, suggestion) {
-          return ListTile(
-            title: Text(suggestion.procedimiento),
-          );
+          return Card(
+    child: ListTile(
+      title: Text(
+        suggestion.abreviaturaDescripcion,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      subtitle: Text(
+        suggestion.abreviaturaDescripcion,
+        style: TextStyle(
+           color: Colors.grey,
+        ),
+      ),
+    ),
+  );
         },
         onSuggestionSelected: (suggestion) {
           _showDefectsModal(context, suggestion.defectos);

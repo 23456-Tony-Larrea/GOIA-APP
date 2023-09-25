@@ -111,7 +111,7 @@ class _CalificationVisualInspectionWidgetState extends State<CalificationVisualW
                               'Calificación:${selectedCalification ?? 'Sin calificación'}'),
                         ),
                         RadioListTile<int>(
-                          title: Text('1'),
+                          title: Text('Tipo 1'),
                           value: 1,
                           groupValue: selectedCalification,
                           onChanged: (value) {
@@ -121,7 +121,7 @@ class _CalificationVisualInspectionWidgetState extends State<CalificationVisualW
                           },
                         ),
                         RadioListTile<int>(
-                          title: Text('2'),
+                          title: Text('Tipo 2'),
                           value: 2,
                           groupValue: selectedCalification,
                           onChanged: (value) {
@@ -131,7 +131,7 @@ class _CalificationVisualInspectionWidgetState extends State<CalificationVisualW
                           },
                         ),
                         RadioListTile<int>(
-                          title: Text('3'),
+                          title: Text('Tipo 3'),
                           value: 3,
                           groupValue: selectedCalification,
                           onChanged: (value) {
