@@ -27,6 +27,27 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
   bool _viewRight = false;
   bool _viewLeft = false;
   bool _mainManualy = false;
+  bool _isConnected = true;
+
+@override
+void initState() {
+  super.initState();
+  // Verificar si el dispositivo está conectado al iniciar la pantalla
+  _checkConnection();
+}
+
+Future<void> _checkConnection() async {
+  // Verificar si el dispositivo está conectado
+  bool isConnected = await widget.connection.isConnected;
+  setState(() {
+    _isConnected = isConnected;
+  });
+  // Esperar 1 segundo y volver a verificar la conexión
+  await Future.delayed(Duration(seconds: 1));
+  _checkConnection();
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +57,7 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
         //omite la felcha
         automaticallyImplyLeading: false,
       ),
-      body: widget.isConnected
+      body: _isConnected
           ? SingleChildScrollView(
               child: Card(
                 elevation: 4,
@@ -57,7 +78,7 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                           const SizedBox(height: 16),
                           Column(
                             children: [
-                              Text('Encender/Apagar'),
+                              Text('Apagar/Encender'),
                               Switch(
                                 value: isSelected[0],
                                 onChanged: (value) {
@@ -87,6 +108,7 @@ class _JoystickControllerViewState extends State<JoystickControllerView> {
                                 activeTrackColor: Colors.blueAccent,
                                 activeColor: Colors.blueAccent,
                               ),
+    
                             ],
                           ),
                           if (_mainManualy)
