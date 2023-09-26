@@ -11,6 +11,8 @@ class ListProcedureHolguras {
   final String categoriaDescripcion;
   final String procedimiento;
   bool isExpanded = false;
+    bool isRated = false;
+
 
   final List<Defecto> defectos;
   final DefectoEncontrado defectoEncontrado;

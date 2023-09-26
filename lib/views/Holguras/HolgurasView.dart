@@ -329,6 +329,9 @@ class _HolgurasViewState extends State<HolgurasView> {
                                 },
                                 child: Card(
                                   elevation: 4,
+                                   color: procedure.isRated
+                                      ? Colors.lightBlueAccent
+                                      : null,
                                   child: Padding(
                                     padding: const EdgeInsets.all(16.0),
                                     child: Column(
@@ -569,5 +572,17 @@ class _HolgurasViewState extends State<HolgurasView> {
         ),
       );
     }
+     setState(() {
+      // Find the procedure that was rated and set isRated to true
+      for (var procedures in _holgurasLists) {
+        for (var procedure in procedures) {
+          //crear un if para que se me seleccione solo lo que ya califique
+          if (procedure.defectos.contains(defecto)) {
+            procedure.isRated = true;
+          }
+        }
+      }
+    });
   }
+  
 }
