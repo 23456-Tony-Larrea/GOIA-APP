@@ -48,7 +48,7 @@ final TextEditingController observationController = TextEditingController();
         await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
 
         Fluttertoast.showToast(
-          msg: "El carro ha sido buscado con éxito",
+          msg: "Información encontrada con éxito",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,

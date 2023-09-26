@@ -101,7 +101,7 @@ void openModal() async {
               ),
               SizedBox(height: 8),
               Text(
-                'Califica los defectos',
+                'Defectos',
                 style: TextStyle(
                   color: Colors.black87.withOpacity(0.7),
                   fontSize: 15,
