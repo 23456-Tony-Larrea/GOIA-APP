@@ -504,7 +504,7 @@ Future<void> _checkConnection() async {
                               children: [
                                 ElevatedButton.icon(
                                   onPressed: () async {
-                                    Navigator.pushNamed(context, '/holguras');
+                                    Navigator.pushReplacementNamed(context, '/holguras');
                                   },
                                   icon: Icon(
                                     Icons.bluetooth,
@@ -526,7 +526,7 @@ Future<void> _checkConnection() async {
                                     _bluetoothController
                                         .disconnect(widget.connection);
                                     BluetoothManager().disconnect();
-                                    Navigator.pushNamed(
+                                    Navigator.pushReplacementNamed(
                                         context, '/bluetooh_serial');
                                   },
                                   icon: Icon(

@@ -189,7 +189,7 @@ class _OtrosHolgurasWidgetState extends State<OtrosHolgurasWidget> {
                       selectedCalification,
                     );
                     _sendBluetooh.sendTrama(TramaType.Apagar);
-                    Navigator.pushNamed(context, '/holguras');
+                    Navigator.pushReplacementNamed(context, '/holguras');
                   },
                   child: Text('Guardar'),
                 ),

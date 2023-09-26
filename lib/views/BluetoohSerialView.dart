@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rtv/controllers/BluetoohSerialController.dart';
 import 'package:rtv/views/JostickControllerView.dart';
 
@@ -68,20 +69,87 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
     );
   }
 
- void _connectToDevice(BuildContext context, BluetoothDevice device,
+void _connectToDevice(BuildContext context, BluetoothDevice device,
       String deviceName) async {
-    await BluetoothManager().connectToDevice(device);
+    if (BluetoothManager().isConnected) {
+      // Si ya hay una conexión abierta, muestra un diálogo de confirmación antes de desconectar
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Tu dispositivo $deviceName sigue conectado'),
+            content: Text('¿Quieres desconectarlo y volver a conectarte?'),
+            actions: [
+              TextButton(
+                child: Text('Cancelar'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Desconectar'),
+                onPressed: () async {
+                  await BluetoothManager().disconnect();
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+        
+      );
+    Fluttertoast.showToast(
+    msg: 'Presiona dos veces para desconectar',
+    toastLength: Toast.LENGTH_LONG,
+    gravity: ToastGravity.BOTTOM,
+    timeInSecForIosWeb: 1,
+    backgroundColor: Colors.orange,
+    textColor: Colors.white,
+    fontSize: 16.0,
+  );  
+    } else {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              height: 150,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 20),
+                  Text(
+                    'Conectando al dispositivo $deviceName...',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => JoystickControllerView(
-          isConnected: true,
-          deviceName: deviceName,
-          connection: BluetoothManager().connection!,
+      await Future.delayed(Duration(seconds: 3));
+
+      await BluetoothManager().connectToDevice(device);
+
+      Navigator.pop(context);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => JoystickControllerView(
+            isConnected: true,
+            deviceName: deviceName,
+            connection: BluetoothManager().connection!,
+          ),
         ),
-      ),
-    );
+      );
+    }
+
   }
+
 
 }
