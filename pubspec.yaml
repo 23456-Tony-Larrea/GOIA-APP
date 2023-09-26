@@ -43,6 +43,8 @@ dependencies:
   flutter_bluetooth_serial: ^0.4.0
   flutter_typeahead: ^4.8.0
   camera: ^0.10.5+4
+  multiselect_formfield: ^0.1.7
+
 
 
 

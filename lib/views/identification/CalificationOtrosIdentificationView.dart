@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:multiselect_formfield/multiselect_formfield.dart';
 import 'package:rtv/class/ListProcedure.dart';
 import 'package:rtv/controllers/IdentificationController.dart';
 
@@ -57,52 +58,36 @@ class _OtrosWidgetState extends State<OtrosWidget> {
                 SizedBox(height: 8),
                 Text('Descripción: ${widget.defecto.descripcion}'),
                 SizedBox(height: 16),
-                DropdownButtonFormField<int>(
-                  decoration: InputDecoration(
-                    labelText: 'Elige las ubicaciones',
-                    border: OutlineInputBorder(),
-                  ),
-                  value: 9, // Establece el valor inicial aquí
-                  onChanged: (int? newValue) {
-                    setState(() {
-                      if (newValue != null) {
-                        selectedLocations.add(newValue);
-                      }
-                    });
-                  },
-                  items: List.generate(
-                    9,
-                    (index) => DropdownMenuItem<int>(
-                      value: index + 9,
-                      child: Text((index + 9).toString()),
-                    ),
-                  ),
-                ),
-                if (selectedLocations.isNotEmpty)
-                  Card(
-                    child: Column(
-                      children: [
-                        ListTile(
-                          title: Text('Ubicaciones seleccionadas:'),
-                        ),
-                        Column(
-                          children: selectedLocations.map((location) {
-                            return ListTile(
-                              title: Text(location.toString()),
-                              trailing: IconButton(
-                                icon: Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    selectedLocations.remove(location);
-                                  });
-                                },
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
+MultiSelectFormField(
+  chipBackGroundColor: Colors.blue,
+  chipLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+  dialogTextStyle: TextStyle(fontWeight: FontWeight.bold),
+  checkBoxActiveColor: Colors.blue,
+  checkBoxCheckColor: Colors.white,
+  dialogShapeBorder: RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(12.0)),
+  ),
+  title: Text('Elige las ubicaciones'),
+  dataSource: List.generate(
+    9,
+    (index) => {
+      "display": (index + 9).toString(),
+      "value": index + 9,
+    },
+  ),
+  textField: 'display',
+  valueField: 'value',
+  okButtonLabel: 'Aceptar',
+  cancelButtonLabel: 'Cancelar',
+  hintWidget: Text('Selecciona una o varias ubicaciones'),
+  initialValue: selectedLocations,
+  onSaved: (value) {
+    if (value == null) return;
+    setState(() {
+      selectedLocations = List<int>.from(value);
+    });
+  },
+),
                 SizedBox(height: 16),
                 Image.asset(
                   'assets/images/carrito.png',
@@ -121,60 +106,68 @@ class _OtrosWidgetState extends State<OtrosWidget> {
                     textCapitalization: TextCapitalization.characters
                   ),
                     SizedBox(height: 16),
-     Card(
-                    // Card para la calificación
-                    child: Column(
-                      children: [
-                        ListTile(
-                          title: Text('Calificación'),
-                        ),
-                        ListTile(
-                          title: Text(
-                              'Calificación:${selectedCalification ?? 'Sin calificación'}'),
-                        ),
-                        RadioListTile<int>(
-                          title: Text('Tipo 1'),
-                          value: 1,
-                          groupValue: selectedCalification,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCalification = value!;
-                            });
-                          },
-                        ),
-                        RadioListTile<int>(
-                          title: Text('Tipo 2'),
-                          value: 2,
-                          groupValue: selectedCalification,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCalification = value!;
-                            });
-                          },
-                        ),
-                        RadioListTile<int>(
-                          title: Text('Tipo 3'),
-                          value: 3,
-                          groupValue: selectedCalification,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCalification = value!;
-                            });
-                          },
-                        ),
-                        RadioListTile<int>(
-                          title: Text('Cancelar'),
-                          value: 4,
-                          groupValue: selectedCalification,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCalification = value!;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+   Card(
+  // Card para la calificación
+  child: Column(
+    children: [
+      ListTile(
+        title: Text('Calificación', style: TextStyle(fontSize: 16)),
+      ),
+      Row(
+        children: [
+          Expanded(
+            child: RadioListTile<int>(
+              title: Text('Tipo 1', style: TextStyle(fontSize: 13)),
+              value: 1,
+              groupValue: selectedCalification,
+              onChanged: (value) {
+                setState(() {
+                  selectedCalification = value!;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: RadioListTile<int>(
+              title: Text('Tipo 2', style: TextStyle(fontSize: 13)),
+              value: 2,
+              groupValue: selectedCalification,
+              onChanged: (value) {
+                setState(() {
+                  selectedCalification = value!;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: RadioListTile<int>(
+              title: Text('Tipo 3', style: TextStyle(fontSize: 13)),
+              value: 3,
+              groupValue: selectedCalification,
+              onChanged: (value) {
+                setState(() {
+                  selectedCalification = value!;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: RadioListTile<int>(
+              title: Text('Cancelar', style: TextStyle(fontSize: 13)),
+              value: 4,
+              groupValue: selectedCalification,
+              onChanged: (value) {
+                setState(() {
+                  selectedCalification = value!;
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
                 SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
