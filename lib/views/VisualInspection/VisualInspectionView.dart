@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rtv/class/ListProcedureVisualInspection.dart';
 import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/VisualInspectionController.dart';
@@ -22,6 +23,8 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
       HolgurasBluetoothController();
   bool isLoading = false;
   bool hasSearched = false;
+    bool _saving = false; // variable para controlar el estado del ProgressBar
+
 
   @override
   void initState() {
@@ -54,7 +57,31 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
     prefs.remove(
         'codeTV'); // Esto eliminará el valor 'codeTV' de SharedPreferences
   }
-
+void openModal() async {
+ showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              height: 150,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 20),
+                  Text(
+                    'Guardando por favor espere ...',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+}
+  
   void _showDefectsModal(
       BuildContext context, List defectos, String Procedure) {
     showModalBottomSheet(
@@ -66,7 +93,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Defecto a calificar: $Procedure',
+                '$Procedure',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -144,6 +171,39 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
       appBar: AppBar(
         title: Text('Inspección Visual'),
         actions: [
+          Visibility(
+  visible: _procedureLists.isNotEmpty && _controller.carData != null,
+  child: FloatingActionButton(
+    onPressed: () async {
+      setState(() {
+        _saving = true; // cambiamos el estado del ProgressBar a true
+      });
+      _controller.placaController.clear();
+      setState(() {
+        _controller.carData = null;
+        _controller.searchCompleted = false;
+        hasSearched = false;
+      });
+      openModal();
+      await Future.delayed(Duration(seconds: 3)); // esperamos 3 segundos
+      Navigator.of(context).pop(); // cerramos el AlertDialog
+              Fluttertoast.showToast(
+          msg: "Inspección visual guardada con exito ",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.greenAccent,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      setState(() {
+        _saving = false; // cambiamos el estado del ProgressBar a false
+      });
+    },
+    child: _saving ? CircularProgressIndicator() : Icon(Icons.save_alt_rounded),
+    mini: true,
+  ),
+),
           IconButton(
             icon: Icon(
               Icons.exit_to_app,

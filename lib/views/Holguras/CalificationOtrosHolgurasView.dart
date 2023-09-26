@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:multiselect_formfield/multiselect_formfield.dart';
 import 'package:rtv/class/ListProcedureHolguras.dart';
-import 'package:rtv/controllers/HolgurasBluetoohController.dart';
 import 'package:rtv/controllers/HolgurasController.dart';
 
-import '../../class/Trama.dart';
 
 class OtrosHolgurasWidget extends StatefulWidget {
   final Defecto defecto;
@@ -19,8 +17,7 @@ class _OtrosHolgurasWidgetState extends State<OtrosHolgurasWidget> {
   final HolgurasController _controller = HolgurasController();
   final _obFocusNode = FocusNode();
   final TextEditingController _ob = TextEditingController();
-  final HolgurasBluetoothController _sendBluetooh =
-      HolgurasBluetoothController();
+
 
   List<int> selectedLocations = [];
   int? selectedCalification = null;
@@ -168,24 +165,26 @@ Card(
   ),
 ),
                 SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    _controller.savesaveInspectionHolgurasObservation(
-                      context,
-                      widget.defecto.codigo,
-                      widget.defecto.numero,
-                      widget.defecto.abreviatura,
-                      widget.defecto.descripcion,
-                      widget.defecto.codigoAs400,
-                      _ob.text,
-                      selectedLocations.join(','),
-                      selectedCalification,
-                    );
-                    _sendBluetooh.sendTrama(TramaType.Apagar);
-                    Navigator.pushReplacementNamed(context, '/holguras');
-                  },
-                  child: Text('Guardar'),
-                ),
+Center(
+  child: ElevatedButton.icon(
+    onPressed: () {
+      _controller.savesaveInspectionHolgurasObservation(
+        context,
+        widget.defecto.codigo,
+        widget.defecto.numero,
+        widget.defecto.abreviatura,
+        widget.defecto.descripcion,
+        widget.defecto.codigoAs400,
+        _ob.text,
+        selectedLocations.join(','),
+        selectedCalification,
+      );
+      Navigator.pushReplacementNamed(context, '/holguras');
+    },
+    icon: Icon(Icons.save),
+    label: Text('Guardar'),
+  ),
+),
               ],
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rtv/class/BluetoohConnection.dart';
 import 'package:rtv/class/ListProcedureHolguras.dart';
 import 'package:rtv/class/Trama.dart';
@@ -27,6 +28,7 @@ class _HolgurasViewState extends State<HolgurasView> {
   String? _connectedDeviceName;
   bool isLoading = false;
   bool hasSearched = false;
+  bool _saving = false; // variable para controlar el estado del ProgressBar
 
   @override
   void initState() {
@@ -61,6 +63,31 @@ class _HolgurasViewState extends State<HolgurasView> {
     }
   }
 
+  void openModal() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            height: 150,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 20),
+                Text(
+                  'Guardando por favor espere ...',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,6 +95,44 @@ class _HolgurasViewState extends State<HolgurasView> {
         title: Text('Holguras'),
         automaticallyImplyLeading: false,
         actions: [
+          Visibility(
+            visible: _holgurasLists.isNotEmpty && _controller.carData != null,
+            child: FloatingActionButton(
+              onPressed: () async {
+                setState(() {
+                  _saving = true; // cambiamos el estado del ProgressBar a true
+                });
+                _controller.placaController.clear();
+                setState(() {
+                  _controller.carData = null;
+                  _controller.searchCompleted = false;
+                  hasSearched = false;
+                });
+                openModal();
+                await Future.delayed(
+                    Duration(seconds: 3)); // esperamos 3 segundos
+                Navigator.of(context).pop(); // cerramos el AlertDialog
+                Fluttertoast.showToast(
+                  msg: "Holguras guardada con exito",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.greenAccent,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+                _sendBluetooh.sendTrama(TramaType.Apagar);
+                setState(() {
+                  _saving =
+                      false; // cambiamos el estado del ProgressBar a false
+                });
+              },
+              child: _saving
+                  ? CircularProgressIndicator()
+                  : Icon(Icons.save_alt_rounded),
+              mini: true,
+            ),
+          ),
           FloatingActionButton(
             onPressed: () {
               Navigator.pushReplacementNamed(context, '/bluetooh_serial');
@@ -175,7 +240,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                           SizedBox(width: isLoading ? 8.0 : 0.0),
                           Text(
                             isLoading
-                                ? 'Cargando información, por favor espere...'
+                                ? 'Cargando RTV, por favor espere...'
                                 : 'Buscar',
                           ),
                         ],
@@ -272,42 +337,42 @@ class _HolgurasViewState extends State<HolgurasView> {
                         final suggestions = _holgurasLists
                             .expand((procedures) => procedures)
                             .where((procedure) => procedure.codigo
-                            .toString()
+                                .toString()
                                 .toLowerCase()
                                 .contains(pattern.toLowerCase()))
                             .toList();
                         return suggestions;
                       },
                       itemBuilder: (context, suggestion) {
-                                                  return Card(
-    child: ListTile(
-      title: Row(
-        children: [
-          Text(
-            suggestion.codigo.toString(),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          SizedBox(width: 8),
-          Text(
-            suggestion.abreviaturaDescripcion,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-      subtitle: Text(
-        suggestion.procedimiento,
-        style: TextStyle(
-          color: Colors.grey,
-        ),
-      ),
-    ),
-  );
+                        return Card(
+                          child: ListTile(
+                            title: Row(
+                              children: [
+                                Text(
+                                  suggestion.codigo.toString(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  suggestion.abreviaturaDescripcion,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            subtitle: Text(
+                              suggestion.procedimiento,
+                              style: TextStyle(
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        );
                       },
                       onSuggestionSelected: (suggestion) {
                         _showDefectsModal(context, suggestion.defectos,
@@ -329,7 +394,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                                 },
                                 child: Card(
                                   elevation: 4,
-                                   color: procedure.isRated
+                                  color: procedure.isRated
                                       ? Colors.lightBlueAccent
                                       : null,
                                   child: Padding(
@@ -514,7 +579,7 @@ class _HolgurasViewState extends State<HolgurasView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Defecto a calificar: $Procedure',
+                '$Procedure',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -572,7 +637,7 @@ class _HolgurasViewState extends State<HolgurasView> {
         ),
       );
     }
-     setState(() {
+    setState(() {
       // Find the procedure that was rated and set isRated to true
       for (var procedures in _holgurasLists) {
         for (var procedure in procedures) {
@@ -584,5 +649,4 @@ class _HolgurasViewState extends State<HolgurasView> {
       }
     });
   }
-  
 }

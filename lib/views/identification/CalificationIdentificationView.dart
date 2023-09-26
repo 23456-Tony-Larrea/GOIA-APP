@@ -155,22 +155,25 @@ Card(
   ),
 ),
                 SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    _controller.saveIdentification(
-                      context,
-                      widget.defecto.codigo,
-                      widget.defecto.numero,
-                      widget.defecto.abreviatura,
-                      widget.defecto.descripcion,
-                      widget.defecto.codigoAs400,
-                      _kilometrajeController.text,
-                      selectedLocations.join(','),
-                      selectedCalification,
-                    );
-                  },
-                  child: Text('Guardar'),
-                ),
+              Center(
+  child: ElevatedButton.icon(
+    onPressed: () {
+      _controller.saveIdentification(
+        context,
+        widget.defecto.codigo,
+        widget.defecto.numero,
+        widget.defecto.abreviatura,
+        widget.defecto.descripcion,
+        widget.defecto.codigoAs400,
+        _kilometrajeController.text,
+        selectedLocations.join(','),
+        selectedCalification,
+      );
+    },
+    icon: Icon(Icons.save),
+    label: Text('Guardar'),
+  ),
+),
               ],
             ),
           ),

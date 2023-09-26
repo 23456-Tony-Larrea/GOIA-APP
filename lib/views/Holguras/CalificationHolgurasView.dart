@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rtv/class/ListProcedureHolguras.dart';
-import 'package:rtv/class/Trama.dart';
 import 'package:rtv/controllers/HolgurasController.dart';
 
-import '../../controllers/HolgurasBluetoohController.dart';
+
 import 'package:multiselect_formfield/multiselect_formfield.dart';
 class NewPageHolgurasWidget extends StatefulWidget {
   final Defecto defecto;
@@ -17,8 +16,7 @@ class NewPageHolgurasWidget extends StatefulWidget {
 class _NewPageHolgurasWidgetState extends State<NewPageHolgurasWidget> {
   final HolgurasController _controller = HolgurasController();
   final _obFocusNode = FocusNode();
-  final HolgurasBluetoothController _sendBluetooh =
-      HolgurasBluetoothController();
+
 
   List<int> selectedLocations = [];
   int? selectedCalification = null;
@@ -158,22 +156,24 @@ Card(
   ),
 ),
                 SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    _controller.saveInspectionHolguras(
-                      context,
-                      widget.defecto.codigo,
-                      widget.defecto.numero,
-                      widget.defecto.abreviatura,
-                      widget.defecto.descripcion,
-                      widget.defecto.codigoAs400,
-                      selectedLocations.join(','),
-                      selectedCalification,
-                    );
-                    _sendBluetooh.sendTrama(TramaType.Apagar);
-                  },
-                  child: Text('Guardar'),
-                ),
+Center(
+  child: ElevatedButton.icon(
+    onPressed: () {
+      _controller.saveInspectionHolguras(
+        context,
+        widget.defecto.codigo,
+        widget.defecto.numero,
+        widget.defecto.abreviatura,
+        widget.defecto.descripcion,
+        widget.defecto.codigoAs400,
+        selectedLocations.join(','),
+        selectedCalification,
+      );
+    },
+    icon: Icon(Icons.save),
+    label: Text('Guardar'),
+  ),
+),
               ],
             ),
           ),
