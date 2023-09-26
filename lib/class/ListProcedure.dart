@@ -12,6 +12,7 @@ class ListProcedure {
   final String procedimiento;
   final List<Defecto> defectos;
   final DefectoEncontrado defectoEncontrado;
+  bool isRated = false;
 
   ListProcedure({
     required this.codigo,
@@ -42,11 +43,12 @@ class ListProcedure {
       categoriaAbreviatura: json['categoria_abreviatura'],
       categoriaDescripcion: json['categoria_descripcion'],
       procedimiento: json['procedimiento'],
-      defectos: List<Defecto>.from(json['defectos'].map((defecto) => Defecto.fromJson(defecto))),
+      defectos: List<Defecto>.from(
+          json['defectos'].map((defecto) => Defecto.fromJson(defecto))),
       defectoEncontrado: DefectoEncontrado.fromJson(json['defectoEncontrado']),
     );
   }
-   @override
+  @override
   String toString() {
     return '''
     Código: $codigo
@@ -90,7 +92,7 @@ class Defecto {
       codigoAs400: json['codigo_as400'],
     );
   }
-   @override
+  @override
   String toString() {
     return '''
     Código: $codigo
@@ -130,9 +132,9 @@ class DefectoEncontrado {
       calificacion: json['calificacion'],
       ubicacion: json['ubicacion'],
       observacion: json['observacion'],
-    ); 
+    );
   }
-    @override
+  @override
   String toString() {
     return '''
     Número: $numero

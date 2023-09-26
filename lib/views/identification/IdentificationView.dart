@@ -217,6 +217,7 @@ class _IdentificationViewState extends State<IdentificationView> {
                               _controller.carData =
                                   null; // Limpiamos la información del vehículo
                               _controller.searchCompleted = false;
+                              hasSearched = false;
                             });
                           },
                           child: Text('Realizar una nueva consulta'),
@@ -238,42 +239,42 @@ class _IdentificationViewState extends State<IdentificationView> {
                         final suggestions = _procedures
                             .expand((procedures) => procedures)
                             .where((procedure) => procedure.codigo
-                            .toString()
+                                .toString()
                                 .toLowerCase()
                                 .contains(pattern.toLowerCase()))
                             .toList();
                         return suggestions;
                       },
                       itemBuilder: (context, suggestion) {
-                          return Card(
-    child: ListTile(
-      title: Row(
-        children: [
-          Text(
-            suggestion.codigo.toString(),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          SizedBox(width: 8),
-          Text(
-            suggestion.abreviaturaDescripcion,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-      subtitle: Text(
-        suggestion.procedimiento,
-        style: TextStyle(
-          color: Colors.grey,
-        ),
-      ),
-    ),
-  );
+                        return Card(
+                          child: ListTile(
+                            title: Row(
+                              children: [
+                                Text(
+                                  suggestion.codigo.toString(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  suggestion.abreviaturaDescripcion,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            subtitle: Text(
+                              suggestion.procedimiento,
+                              style: TextStyle(
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        );
                       },
                       onSuggestionSelected: (suggestion) {
                         _showDefectsModal(context, suggestion.defectos,
@@ -295,6 +296,9 @@ class _IdentificationViewState extends State<IdentificationView> {
                                 },
                                 child: Card(
                                   elevation: 4,
+                                  color: procedure.isRated
+                                      ? Colors.lightBlueAccent
+                                      : null,
                                   child: Padding(
                                     padding: const EdgeInsets.all(16.0),
                                     child: Column(
@@ -436,6 +440,88 @@ class _IdentificationViewState extends State<IdentificationView> {
       ),
     );
   }
+
+  void _showDefectoModal(BuildContext context, Defecto defecto) {
+    if (defecto.abreviatura == "OTROS") {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => OtrosWidget(defecto: defecto),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => NewPageWidget(defecto: defecto),
+        ),
+      );
+    }
+    setState(() {
+      // Find the procedure that was rated and set isRated to true
+      for (var procedures in _procedures) {
+        for (var procedure in procedures) {
+          //crear un if para que se me seleccione solo lo que ya califique
+          if (procedure.defectos.contains(defecto)) {
+            procedure.isRated = true;
+          }
+        }
+      }
+    });
+  }
+
+  void _showDefectsModal(
+      BuildContext context, List defectos, String Procedure) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Defecto a calificar: $Procedure',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Califica los defectos',
+                style: TextStyle(
+                  color: Colors.black87.withOpacity(0.7),
+                  fontSize: 16,
+                ),
+              ),
+              // Usar un ListView con physics para permitir el desplazamiento
+              Expanded(
+                child: Scrollbar(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: defectos.length,
+                    physics:
+                        BouncingScrollPhysics(), // O AlwaysScrollableScrollPhysics()
+                    itemBuilder: (context, index) {
+                      final defecto = defectos[index];
+                      return ListTile(
+                        title: Text(defecto.abreviatura),
+                        subtitle: Text(defecto.descripcion),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showDefectoModal(context, defecto);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 Widget _buildProcedureField(String label, String value) {
@@ -461,74 +547,4 @@ Widget _buildProcedureField(String label, String value) {
       ],
     ),
   );
-}
-
-void _showDefectsModal(BuildContext context, List defectos, String Procedure) {
-  showModalBottomSheet(
-    context: context,
-    builder: (BuildContext context) {
-      return Container(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Defecto a calificar: $Procedure',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Califica los defectos',
-              style: TextStyle(
-                color: Colors.black87.withOpacity(0.7),
-                fontSize: 16,
-              ),
-            ),
-            // Usar un ListView con physics para permitir el desplazamiento
-            Expanded(
-              child: Scrollbar(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: defectos.length,
-                  physics:
-                      BouncingScrollPhysics(), // O AlwaysScrollableScrollPhysics()
-                  itemBuilder: (context, index) {
-                    final defecto = defectos[index];
-                    return ListTile(
-                      title: Text(defecto.abreviatura),
-                      subtitle: Text(defecto.descripcion),
-                      onTap: () {
-                        Navigator.pop(context);
-                        _showDefectoModal(context, defecto);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-
-void _showDefectoModal(BuildContext context, Defecto defecto) {
-  if (defecto.abreviatura == "OTROS") {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => OtrosWidget(defecto: defecto),
-      ),
-    );
-  } else {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => NewPageWidget(defecto: defecto),
-      ),
-    );
-  }
 }
