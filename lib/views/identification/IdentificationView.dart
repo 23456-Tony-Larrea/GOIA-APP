@@ -117,7 +117,7 @@ Visibility(
         _saving = false; // cambiamos el estado del ProgressBar a false
       });
     },
-    child: _saving ? CircularProgressIndicator() : Icon(Icons.save_alt_rounded),
+    child: _saving ? CircularProgressIndicator() : Icon(Icons.save),
     mini: true,
   ),
 ),
@@ -138,8 +138,7 @@ Visibility(
         ],
         automaticallyImplyLeading: false,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
+      body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -201,7 +200,7 @@ Visibility(
                           SizedBox(width: isLoading ? 8.0 : 0.0),
                           Text(
                             isLoading
-                                ? 'Cargando información, por favor espere...'
+                                ? 'Cargando RTV, por favor espere...'
                                 : 'Buscar',
                           ),
                         ],
@@ -225,8 +224,9 @@ Visibility(
                     ),
                 ],
               ),
+              
               SizedBox(height: 16.0),
-              if (_controller.carData != null)
+               if (_controller.carData != null)
                 Card(
                   elevation: 4,
                   child: Column(
@@ -274,8 +274,7 @@ Visibility(
                           onPressed: () {
                             _controller.placaController.clear();
                             setState(() {
-                              _controller.carData =
-                                  null; // Limpiamos la información del vehículo
+                              _controller.carData = null;
                               _controller.searchCompleted = false;
                               hasSearched = false;
                             });
@@ -286,11 +285,13 @@ Visibility(
                     ),
                   ),
                 ),
-              if (_procedures.isNotEmpty && _controller.carData != null)
-                Column(
-                  children: [
-                    TypeAheadField(
-                      textFieldConfiguration: TextFieldConfiguration(
+                       if (_procedures.isNotEmpty && _controller.carData != null)
+  Expanded(
+    child: SingleChildScrollView(
+      child: Column(
+        children: [
+          TypeAheadField(
+             textFieldConfiguration: TextFieldConfiguration(
                           decoration: InputDecoration(
                             hintText: 'Buscar por codigo',
                           ),
@@ -298,126 +299,125 @@ Visibility(
                       suggestionsCallback: (pattern) async {
                         final suggestions = _procedures
                             .expand((procedures) => procedures)
-                            .where((procedure) => procedure.codigo
-                                .toString()
-                                .toLowerCase()
-                                .contains(pattern.toLowerCase()))
-                            .toList();
+.where((procedure) =>
+      "${procedure.familia}${procedure.subfamilia}${procedure.categoria}".toLowerCase().contains(pattern.toLowerCase())
+    )
+    .toList();
                         return suggestions;
                       },
                       itemBuilder: (context, suggestion) {
-                        return Card(
-                          child: ListTile(
-                            title: Row(
-                              children: [
-                                Text(
-                                  suggestion.codigo.toString(),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  suggestion.abreviaturaDescripcion,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            subtitle: Text(
-                              suggestion.procedimiento,
-                              style: TextStyle(
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        );
+                                                 return Card(
+  child: ListTile(
+    title: Row(
+      children: [
+        Text(
+          suggestion.abreviaturaDescripcion,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    ),
+    subtitle: Text(
+      suggestion.procedimiento,
+      style: TextStyle(
+        color: Colors.grey,
+      ),
+    ),
+    trailing: Text(
+      "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 14,
+      ),
+    ),
+  ),
+);
                       },
                       onSuggestionSelected: (suggestion) {
                         _showDefectsModal(context, suggestion.defectos,
                             suggestion.procedimiento);
                       },
                     ),
-                    SizedBox(height: 16),
-                    Card(
-                      elevation: 4,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (var procedures in _procedures)
-                            for (var procedure in procedures)
-                              GestureDetector(
-                                onTap: () {
-                                  _showDefectsModal(context, procedure.defectos,
-                                      procedure.procedimiento);
-                                },
-                                child: Card(
-                                  elevation: 4,
-                                  color: procedure.isRated
-                                      ? Colors.lightBlueAccent
-                                      : null,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "${procedure.categoriaDescripcion}",
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 18,
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 4,
-                                                  ),
-                                                  Text(
-                                                    "${procedure.procedimiento}",
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    maxLines: 2,
-                                                    style: TextStyle(
-                                                      fontSize: 13.5,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Icon(
-                                              Icons.arrow_forward,
-                                              size: 24,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                        ],
-                      ),
+          SizedBox(height: 16),
+          Card(
+            elevation: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var procedures in _procedures)
+                  for (var procedure in procedures)
+                    GestureDetector(
+                      onTap: () {
+                        _showDefectsModal(context, procedure.defectos,
+                            procedure.procedimiento);
+                      },
+child: Card(
+  elevation: 4,
+  color: procedure.isRated ? Colors.lightBlueAccent : null,
+  child: Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${procedure.categoriaDescripcion}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
-                  ],
+                  ),
+                  SizedBox(
+                    height: 4,
+                  ),
+                  Text(
+                    "${procedure.procedimiento}",
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              children: [   
+                Text(
+                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+  ),
+),
+                    ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
             ],
           ),
         ),
-      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
         onTap: (index) {
@@ -564,14 +564,16 @@ Visibility(
                         BouncingScrollPhysics(), // O AlwaysScrollableScrollPhysics()
                     itemBuilder: (context, index) {
                       final defecto = defectos[index];
-                      return ListTile(
-                        title: Text(defecto.abreviatura),
-                        subtitle: Text(defecto.descripcion),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _showDefectoModal(context, defecto);
-                        },
-                      );
+return Card(
+  child: ListTile(
+    title: Text(defecto.abreviatura),
+    subtitle: Text(defecto.descripcion),
+    onTap: () {
+      Navigator.pop(context);
+      _showDefectoModal(context, defecto);
+    },
+  ),
+);
                     },
                   ),
                 ),

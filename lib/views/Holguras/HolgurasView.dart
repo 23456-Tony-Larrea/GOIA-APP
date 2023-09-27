@@ -129,7 +129,7 @@ class _HolgurasViewState extends State<HolgurasView> {
               },
               child: _saving
                   ? CircularProgressIndicator()
-                  : Icon(Icons.save_alt_rounded),
+                  : Icon(Icons.save),
               mini: true,
             ),
           ),
@@ -156,8 +156,7 @@ class _HolgurasViewState extends State<HolgurasView> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
+      body:Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -324,11 +323,13 @@ class _HolgurasViewState extends State<HolgurasView> {
                     ),
                   ),
                 ),
-              if (_holgurasLists.isNotEmpty && _controller.carData != null)
-                Column(
-                  children: [
-                    TypeAheadField(
-                      textFieldConfiguration: TextFieldConfiguration(
+    if (_holgurasLists.isNotEmpty && _controller.carData != null)
+  Expanded(
+    child: SingleChildScrollView(
+      child: Column(
+        children: [
+          TypeAheadField(
+             textFieldConfiguration: TextFieldConfiguration(
                           decoration: InputDecoration(
                             hintText: 'Buscar por codigo',
                           ),
@@ -336,125 +337,124 @@ class _HolgurasViewState extends State<HolgurasView> {
                       suggestionsCallback: (pattern) async {
                         final suggestions = _holgurasLists
                             .expand((procedures) => procedures)
-                            .where((procedure) => procedure.codigo
-                                .toString()
-                                .toLowerCase()
-                                .contains(pattern.toLowerCase()))
-                            .toList();
+.where((procedure) =>
+      "${procedure.familia}${procedure.subfamilia}${procedure.categoria}".toLowerCase().contains(pattern.toLowerCase())
+    )
+    .toList();
                         return suggestions;
                       },
                       itemBuilder: (context, suggestion) {
-                        return Card(
-                          child: ListTile(
-                            title: Row(
-                              children: [
-                                Text(
-                                  suggestion.codigo.toString(),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  suggestion.abreviaturaDescripcion,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            subtitle: Text(
-                              suggestion.procedimiento,
-                              style: TextStyle(
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                                                 return Card(
+  child: ListTile(
+    title: Row(
+      children: [
+        Text(
+          suggestion.abreviaturaDescripcion,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    ),
+    subtitle: Text(
+      suggestion.procedimiento,
+      style: TextStyle(
+        color: Colors.grey,
+      ),
+    ),
+    trailing: Text(
+      "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 14,
+      ),
+    ),
+  ),
+);          },
                       onSuggestionSelected: (suggestion) {
                         _showDefectsModal(context, suggestion.defectos,
                             suggestion.procedimiento);
                       },
                     ),
-                    SizedBox(height: 16),
-                    Card(
-                      elevation: 4,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (var procedures in _holgurasLists)
-                            for (var procedure in procedures)
-                              GestureDetector(
-                                onTap: () {
-                                  _showDefectsModal(context, procedure.defectos,
-                                      procedure.procedimiento);
-                                },
-                                child: Card(
-                                  elevation: 4,
-                                  color: procedure.isRated
-                                      ? Colors.lightBlueAccent
-                                      : null,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "${procedure.categoriaDescripcion}",
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 18,
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 4,
-                                                  ),
-                                                  Text(
-                                                    "${procedure.procedimiento}",
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    maxLines: 2,
-                                                    style: TextStyle(
-                                                      fontSize: 13.5,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Icon(
-                                              Icons.arrow_forward,
-                                              size: 24,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                        ],
-                      ),
+          SizedBox(height: 16),
+          Card(
+            elevation: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var procedures in _holgurasLists)
+                  for (var procedure in procedures)
+                    GestureDetector(
+                      onTap: () {
+                        _showDefectsModal(context, procedure.defectos,
+                            procedure.procedimiento);
+                      },
+child: Card(
+  elevation: 4,
+  color: procedure.isRated ? Colors.lightBlueAccent : null,
+  child: Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${procedure.categoriaDescripcion}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
-                  ],
+                  ),
+                  SizedBox(
+                    height: 4,
+                  ),
+                  Text(
+                    "${procedure.procedimiento}",
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              children: [   
+                Text(
+                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+  ),
+),
+                    ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
             ],
           ),
-        ),
+
       ),
       floatingActionButton: BluetoothManager().isConnected
           ? SpeedDial(
@@ -603,14 +603,16 @@ class _HolgurasViewState extends State<HolgurasView> {
                         BouncingScrollPhysics(), // O AlwaysScrollableScrollPhysics()
                     itemBuilder: (context, index) {
                       final defecto = defectos[index];
-                      return ListTile(
-                        title: Text(defecto.abreviatura),
-                        subtitle: Text(defecto.descripcion),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _showDefectoModal(context, defecto);
-                        },
-                      );
+                     return Card(
+  child: ListTile(
+    title: Text(defecto.abreviatura),
+    subtitle: Text(defecto.descripcion),
+    onTap: () {
+      Navigator.pop(context);
+      _showDefectoModal(context, defecto);
+    },
+  ),
+);
                     },
                   ),
                 ),
