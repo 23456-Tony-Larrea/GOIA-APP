@@ -4,7 +4,7 @@ class Defecto {
   final String descripcion;
   final String numero;
   final String codigo_as400;
-  
+  bool isRated = false;
 
   Defecto({
     required this.codigo,
