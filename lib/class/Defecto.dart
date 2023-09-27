@@ -4,6 +4,7 @@ class Defecto {
   final String descripcion;
   final String numero;
   final String codigo_as400;
+  
 
   Defecto({
     required this.codigo,

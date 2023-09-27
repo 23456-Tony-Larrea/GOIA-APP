@@ -405,6 +405,16 @@ child: Card(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                     Row(
+              children: [   
+                Text(
+                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
                   Text(
                     "${procedure.categoriaDescripcion}",
                     style: TextStyle(
@@ -427,17 +437,7 @@ child: Card(
                 ],
               ),
             ),
-            Row(
-              children: [   
-                Text(
-                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
+         
           ],
         ),
       ],

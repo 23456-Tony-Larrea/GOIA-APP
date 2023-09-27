@@ -395,6 +395,16 @@ return Card(
     child: ListTile(
     title: Row(
       children: [
+           Row(
+              children: [   
+                Text(
+                  "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
         Text(
           suggestion.abreviaturaDescripcion,
           style: TextStyle(
@@ -446,13 +456,23 @@ child: Card(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+   Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                     Row(
+              children: [   
+                Text(
+                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
                   Text(
                     "${procedure.categoriaDescripcion}",
                     style: TextStyle(
@@ -475,17 +495,7 @@ child: Card(
                 ],
               ),
             ),
-            Row(
-              children: [   
-                Text(
-                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
+         
           ],
         ),
       ],

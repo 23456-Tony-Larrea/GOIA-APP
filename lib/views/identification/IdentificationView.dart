@@ -310,6 +310,16 @@ Visibility(
   child: ListTile(
     title: Row(
       children: [
+             Row(
+              children: [   
+                Text(
+                  "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
         Text(
           suggestion.abreviaturaDescripcion,
           style: TextStyle(
@@ -323,13 +333,6 @@ Visibility(
       suggestion.procedimiento,
       style: TextStyle(
         color: Colors.grey,
-      ),
-    ),
-    trailing: Text(
-      "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 14,
       ),
     ),
   ),
@@ -361,13 +364,23 @@ child: Card(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+   Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                     Row(
+              children: [   
+                Text(
+                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
                   Text(
                     "${procedure.categoriaDescripcion}",
                     style: TextStyle(
@@ -390,17 +403,7 @@ child: Card(
                 ],
               ),
             ),
-            Row(
-              children: [   
-                Text(
-                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
+         
           ],
         ),
       ],
@@ -501,7 +504,7 @@ child: Card(
     );
   }
 
-  void _showDefectoModal(BuildContext context, Defecto defecto) {
+  void _showDefectoModal(BuildContext context, Defecto defecto ) {
     if (defecto.abreviatura == "OTROS") {
       Navigator.of(context).push(
         MaterialPageRoute(
