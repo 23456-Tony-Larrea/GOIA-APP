@@ -31,7 +31,32 @@ class _NewPageWidgetState extends State<NewPageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+     return WillPopScope(
+    onWillPop: () async {
+      // Evita que el usuario retroceda si no ha calificado.
+      if (selectedCalification == null) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Calificación obligatoria'),
+              content: Text('Debes calificar antes de retroceder.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Aceptar'),
+                ),
+              ],
+            );
+          },
+        );
+        return false;
+      }
+      return true;
+    },
+    child:Scaffold(
       appBar: AppBar(
         title: Text('Calificacion'),
       ),
@@ -161,30 +186,35 @@ class _NewPageWidgetState extends State<NewPageWidget> {
                   ),
                 ),
                 SizedBox(height: 16),
-                Center(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      _controller.saveIdentification(
-                        context,
-                        widget.defecto.codigo,
-                        widget.defecto.numero,
-                        widget.defecto.abreviatura,
-                        widget.defecto.descripcion,
-                        widget.defecto.codigoAs400,
-                        _kilometrajeController.text,
-                        selectedLocations.join(','),
-                        selectedCalification,
-                      );
-                    },
-                    icon: Icon(Icons.save),
-                    label: Text('Guardar'),
-                  ),
-                ),
+Center(
+  child: ElevatedButton.icon(
+    onPressed: selectedCalification == null
+        ? null // Desactivar el botón si no hay calificación
+        : () {
+            _controller.saveIdentification(
+              context,
+              widget.defecto.codigo,
+              widget.defecto.numero,
+              widget.defecto.abreviatura,
+              widget.defecto.descripcion,
+              widget.defecto.codigoAs400,
+              _kilometrajeController.text,
+              selectedLocations.join(','),
+              selectedCalification,
+            );
+          },
+    icon: Icon(Icons.save),
+    label: Text('Guardar'),
+  ),
+),
+
+
               ],
             ),
           ),
         ),
       ),
+    ),
     );
   }
 }

@@ -26,7 +26,32 @@ class _CalificationVisualInspectionWidgetState extends State<CalificationVisualW
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+return WillPopScope(
+    onWillPop: () async {
+      // Evita que el usuario retroceda si no ha calificado.
+      if (selectedCalification == null) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Calificación obligatoria'),
+              content: Text('Debes calificar antes de retroceder.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Aceptar'),
+                ),
+              ],
+            );
+          },
+        );
+        return false;
+      }
+      return true;
+    },
+    child:Scaffold(
       appBar: AppBar(
         title: Text('Calificacion'),
       ),
@@ -170,6 +195,7 @@ Card(
           ),
         ),
       ),
+    ),
     );
   }
 }

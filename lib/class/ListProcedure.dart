@@ -74,6 +74,8 @@ class Defecto {
   final String descripcion;
   final String numero;
   final String codigoAs400;
+    bool _isRated = false;
+
 
   Defecto({
     required this.codigo,
@@ -83,6 +85,11 @@ class Defecto {
     required this.codigoAs400,
   });
 
+  bool get isRated => _isRated;
+
+  set isRated(bool value) {
+    _isRated = value;
+  }
   factory Defecto.fromJson(Map<String, dynamic> json) {
     return Defecto(
       codigo: json['codigo'],
