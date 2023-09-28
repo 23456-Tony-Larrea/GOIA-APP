@@ -20,6 +20,8 @@ class _NewPageWidgetState extends State<NewPageWidget> {
   List<int> selectedLocations = [];
   int? selectedCalification = null;
   List<Defecto> defectosCalificados = [];
+  bool canPop = false;
+
 
   @override
   void dispose() {
@@ -34,27 +36,28 @@ class _NewPageWidgetState extends State<NewPageWidget> {
      return WillPopScope(
     onWillPop: () async {
       // Evita que el usuario retroceda si no ha calificado.
-      if (selectedCalification == null) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Calificación obligatoria'),
-              content: Text('Debes calificar antes de retroceder.'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Aceptar'),
-                ),
-              ],
-            );
-          },
-        );
-        return false;
-      }
-      return true;
+       if (!canPop) {
+      // Mostrar un diálogo o mensaje que indique que debe calificar y guardar.
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Calificación obligatoria'),
+            content: Text('Debes calificar antes de salir.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Aceptar'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+    // Impide retroceder si canPop es false.
+    return canPop;
     },
     child:Scaffold(
       appBar: AppBar(
@@ -202,6 +205,9 @@ Center(
               selectedLocations.join(','),
               selectedCalification,
             );
+             setState(() {
+    canPop = true;
+  });
           },
     icon: Icon(Icons.save),
     label: Text('Guardar'),
