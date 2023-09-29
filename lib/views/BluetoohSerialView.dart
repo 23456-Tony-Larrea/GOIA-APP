@@ -24,11 +24,22 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+  return WillPopScope(
+    onWillPop: () async {
+      Navigator.pushReplacementNamed(context, '/holguras');
+      return false; // Cambia esto a true si deseas permitir la navegación de retroceso nativa.
+    },
+    child: Scaffold(
       appBar: AppBar(
         title: Text('Bluetooth'),
         //desactivar el atras
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading:false,
+         leading: IconButton(
+          icon: Icon(Icons.arrow_back), // Icono de navegación personalizado
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/holguras'); // Navegar a la ruta /holguras
+          },
+        ),
       ),
       body: Column(
         children: [
@@ -66,6 +77,7 @@ class _BluetoothScreenState extends State<BluetoothScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -131,7 +143,7 @@ void _connectToDevice(BuildContext context, BluetoothDevice device,
         },
       );
 
-      await Future.delayed(Duration(seconds: 3));
+      await Future.delayed(Duration(seconds: 2));
 
       await BluetoothManager().connectToDevice(device);
 

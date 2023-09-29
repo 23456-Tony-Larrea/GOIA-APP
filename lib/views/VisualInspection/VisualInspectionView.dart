@@ -169,7 +169,13 @@ return Card(
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+ return WillPopScope(
+    onWillPop: () async {
+      // Intercepta el evento de retroceso y realiza la acción que desees,
+      // en este caso, puedes no hacer nada para desactivar el botón de retroceso nativo.
+      return false; // Cambia esto a true si deseas permitir la navegación de retroceso nativa.
+    },
+    child:Scaffold(
       appBar: AppBar(
         title: Text('Inspección Visual'),
         actions: [
@@ -543,6 +549,7 @@ child: Card(
           ),
         ],
       ),
+    ),
     );
   }
 

@@ -117,8 +117,8 @@ class _NewPageWidgetState extends State<NewPageWidget> {
                 SizedBox(height: 16),
                 Image.asset(
                   'assets/images/carrito.png',
-                  width: 250,
-                  height: 250,
+                  width: 350,
+                  height: 350,
                 ),
                 SizedBox(height: 16),
                 Card(

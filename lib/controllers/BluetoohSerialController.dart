@@ -7,32 +7,19 @@ import 'dart:async';
 class BluetoothSerialController {
   final FlutterBluetoothSerial bluetooth = FlutterBluetoothSerial.instance;
   List<BluetoothDiscoveryResult> scanResults = [];
-  StreamSubscription<BluetoothDiscoveryResult>? _scanSubscription;
-
-Stream<List<BluetoothDiscoveryResult>> getScanResultsStream() async* {
-  final results = await bluetooth.startDiscovery().toList();
-  yield results;
-}
 
 Future<void> initBluetooth() async {
-    await bluetooth.requestEnable();
-    await Permission.bluetooth.request();
-  }
- Future<void> startScan() async {
-  if (await Permission.location.request().isGranted &&
-      await Permission.bluetoothScan.request().isGranted) {
-      await bluetooth.requestEnable();
-    _scanSubscription = bluetooth.startDiscovery().listen((result) {
-      scanResults.add(result);
-    });
+  // Solicitar los permisos necesarios
+  if (await Permission.bluetoothScan.request().isGranted &&
+      await Permission.location.request().isGranted) {
+    // Los permisos han sido concedidos
+    await FlutterBluetoothSerial.instance.requestEnable();
   } else {
-    print("Permisos denegados");
+    // Los permisos han sido denegados
+    throw Exception('No se han concedido los permisos necesarios');
   }
 }
 
-  Future<void> stop() async {
-    await _scanSubscription?.cancel();
-  }
 
  Future<BluetoothConnection> connectToDevice(BuildContext context, device) async {
     BluetoothConnection connection = await BluetoothConnection.toAddress(device.device.address);
