@@ -42,15 +42,23 @@ class _NewPageHolgurasWidgetState extends State<NewPageHolgurasWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Defecto: ${widget.defecto.abreviatura}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text('Descripción: ${widget.defecto.descripcion}'),
+Center(
+  child: Card(
+    elevation: 4, // Ampliar el Card
+    child: ListTile(
+      leading: Icon(Icons.info), // Agregar un icono
+      title: Text(
+        'Defecto: ${widget.defecto.abreviatura}',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+      subtitle: Text('Descripción: ${widget.defecto.descripcion}'),
+    ),
+  ),
+),
+
                 SizedBox(height: 16),
                 MultiSelectFormField(
                   chipBackGroundColor: Colors.blue,
@@ -85,8 +93,8 @@ class _NewPageHolgurasWidgetState extends State<NewPageHolgurasWidget> {
                 SizedBox(height: 16),
                 Image.asset(
                   'assets/images/carrito.png',
-                  width: 250,
-                  height: 250,
+                    width: 400,
+                  height: 400,
                 ),
                 SizedBox(height: 16),
                 Card(

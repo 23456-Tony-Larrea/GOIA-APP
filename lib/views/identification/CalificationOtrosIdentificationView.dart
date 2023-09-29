@@ -18,6 +18,9 @@ class _OtrosWidgetState extends State<OtrosWidget> {
   final _kilometrajeFocusNode = FocusNode();
   final _kilometrajeController = TextEditingController();
   final TextEditingController _ob = TextEditingController();
+  bool _obValid = false;
+
+
 
   List<int> selectedLocations = [];
   int? selectedCalification = null;
@@ -47,15 +50,23 @@ class _OtrosWidgetState extends State<OtrosWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Defecto: ${widget.defecto.abreviatura}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text('Descripción: ${widget.defecto.descripcion}'),
+Center(
+  child: Card(
+    elevation: 4, // Ampliar el Card
+    child: ListTile(
+      leading: Icon(Icons.info), // Agregar un icono
+      title: Text(
+        'Defecto: ${widget.defecto.abreviatura}',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+      subtitle: Text('Descripción: ${widget.defecto.descripcion}'),
+    ),
+  ),
+),
+
                 SizedBox(height: 16),
                 MultiSelectFormField(
                   chipBackGroundColor: Colors.blue,
@@ -90,19 +101,40 @@ class _OtrosWidgetState extends State<OtrosWidget> {
                 SizedBox(height: 16),
                 Image.asset(
                   'assets/images/carrito.png',
-                  width: 250,
-                  height: 250,
+                  width: 400,
+                  height: 400,
                 ),
                 SizedBox(height: 16),
-                TextField(
-                    controller: _ob,
-                    focusNode: _obFocusNode,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Observación',
-                    ),
-                    textCapitalization: TextCapitalization.characters),
+ TextFormField(
+                  controller: _ob,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Observación',
+                  ),
+                  textCapitalization: TextCapitalization.characters,
+                  onChanged: (value) {
+                    setState(() {
+                      _obValid = value.length >= 10;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Este campo es requerido';
+                    } else if (value.length < 10) {
+                      return 'Debe contener al menos 10 caracteres';
+                    }
+                    return null;
+                  },
+                ),
+                _obValid
+                    ? SizedBox(height: 16)
+                    : Text(
+                        'La observación debe tener al menos 10 caracteres.',
+                        style: TextStyle(
+                          color: Colors.red,
+                        ),
+                      ),
                 SizedBox(height: 16),
                 Card(
                   // Card para la calificación
@@ -174,7 +206,7 @@ class _OtrosWidgetState extends State<OtrosWidget> {
                 SizedBox(height: 16),
                 Center(
                   child: ElevatedButton.icon(
-                    onPressed: selectedCalification == null
+                            onPressed: selectedCalification == null
                         ? null // Desactivar el botón si no hay calificación
                         : () {
                             _controller.saveIdentificationObservation(

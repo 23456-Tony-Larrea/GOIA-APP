@@ -209,7 +209,8 @@ class _HolgurasViewState extends State<HolgurasView> {
                       },
                     ),
                   ),
-                  textCapitalization: TextCapitalization.characters),
+                  textCapitalization: TextCapitalization.characters
+                  ),
               SizedBox(height: 16.0),
               Stack(
                 children: [
