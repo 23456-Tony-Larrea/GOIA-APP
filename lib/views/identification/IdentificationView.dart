@@ -40,7 +40,7 @@ class _IdentificationViewState extends State<IdentificationView> {
       List<ListProcedure> procedures = await _controller.lisProcedure();
 
       if (procedures.isNotEmpty) {
-        for (int i = 0; i < 265; i++) {
+        for (int i = 0; i < 500; i++) {
           _procedures.add(
               procedures.where((procedure) => procedure.numero == i).toList());
         }
@@ -527,26 +527,41 @@ class _IdentificationViewState extends State<IdentificationView> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => OtrosWidget(defecto: defecto),
-        ),
-      );
+        )
+      ).then((value) {
+        // Aquí actualizas el estado de isRated cuando el usuario califica
+        if (value == true) {
+          setState(() {
+            for (var procedures in _procedures) {
+              for (var procedure in procedures) {
+                if (procedure.defectos.contains(defecto)) {
+                  procedure.isRated = true;
+                }
+              }
+            }
+          });
+        }
+      });
     } else {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => NewPageWidget(defecto: defecto),
         ),
-      );
-       setState(() {
-      // Find the procedure that was rated and set isRated to true
-      for (var procedures in _procedures) {
-        for (var procedure in procedures) {
-          //crear un if para que se me seleccione solo lo que ya califique
-          if (procedure.defectos.contains(defecto)) {
-              procedure.isRated = true;
+      ).then((value) {
+        // Aquí actualizas el estado de isRated cuando el usuario califica
+        if (value == true) {
+          setState(() {
+            for (var procedures in _procedures) {
+              for (var procedure in procedures) {
+                if (procedure.defectos.contains(defecto)) {
+                  procedure.isRated = true;
+                }
+              }
             }
+          });
         }
-      }
-    });
+      });
     }
    
   }

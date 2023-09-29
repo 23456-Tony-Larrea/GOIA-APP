@@ -20,7 +20,6 @@ class _OtrosHolgurasWidgetState extends State<OtrosHolgurasWidget> {
 
   List<int> selectedLocations = [];
  int? selectedCalification = null;  
-  bool canPop = false;
 
   @override
   void dispose() {
@@ -31,33 +30,7 @@ class _OtrosHolgurasWidgetState extends State<OtrosHolgurasWidget> {
 
   @override
   Widget build(BuildContext context) {
- return WillPopScope(
-    onWillPop: () async {
-      // Evita que el usuario retroceda si no ha calificado.
-       if (!canPop) {
-      // Mostrar un diálogo o mensaje que indique que debe calificar y guardar.
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Calificación obligatoria'),
-            content: Text('Debes calificar antes de salir.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Aceptar'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-    // Impide retroceder si canPop es false.
-    return canPop;
-    },
-    child:Scaffold(
+ return Scaffold(
       appBar: AppBar(
         title: Text('Calificacion'),
       ),
@@ -209,9 +182,8 @@ Card(
         selectedLocations.join(','),
         selectedCalification,
       );
-         setState(() {
-    canPop = true;
-  });
+                                Navigator.of(context).pop(true);
+
     },
     icon: Icon(Icons.save),
     label: Text('Guardar'),
@@ -222,7 +194,6 @@ Card(
           ),
         ),
       ),
-    )
     );
   }
 }

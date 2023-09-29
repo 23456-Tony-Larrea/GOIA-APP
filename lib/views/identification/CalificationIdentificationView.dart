@@ -22,7 +22,6 @@ class _NewPageWidgetState extends State<NewPageWidget> {
   List<Defecto> defectosCalificados = [];
   bool canPop = false;
 
-
   @override
   void dispose() {
     _obFocusNode.dispose();
@@ -33,33 +32,8 @@ class _NewPageWidgetState extends State<NewPageWidget> {
 
   @override
   Widget build(BuildContext context) {
-     return WillPopScope(
-    onWillPop: () async {
-      // Evita que el usuario retroceda si no ha calificado.
-       if (!canPop) {
-      // Mostrar un diálogo o mensaje que indique que debe calificar y guardar.
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Calificación obligatoria'),
-            content: Text('Debes calificar antes de salir.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Aceptar'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-    // Impide retroceder si canPop es false.
-    return canPop;
-    },
-    child:Scaffold(
+    return
+    Scaffold(
       appBar: AppBar(
         title: Text('Calificacion'),
       ),
@@ -189,38 +163,33 @@ class _NewPageWidgetState extends State<NewPageWidget> {
                   ),
                 ),
                 SizedBox(height: 16),
-Center(
-  child: ElevatedButton.icon(
-    onPressed: selectedCalification == null
-        ? null // Desactivar el botón si no hay calificación
-        : () {
-            _controller.saveIdentification(
-              context,
-              widget.defecto.codigo,
-              widget.defecto.numero,
-              widget.defecto.abreviatura,
-              widget.defecto.descripcion,
-              widget.defecto.codigoAs400,
-              _kilometrajeController.text,
-              selectedLocations.join(','),
-              selectedCalification,
-            );
-             setState(() {
-    canPop = true;
-  });
-          },
-    icon: Icon(Icons.save),
-    label: Text('Guardar'),
-  ),
-),
-
-
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: selectedCalification == null
+                        ? null // Desactivar el botón si no hay calificación
+                        : () {
+                            _controller.saveIdentification(
+                              context,
+                              widget.defecto.codigo,
+                              widget.defecto.numero,
+                              widget.defecto.abreviatura,
+                              widget.defecto.descripcion,
+                              widget.defecto.codigoAs400,
+                              _kilometrajeController.text,
+                              selectedLocations.join(','),
+                              selectedCalification,
+                            );
+                              Navigator.of(context).pop(true);
+                          },
+                    icon: Icon(Icons.save),
+                    label: Text('Guardar'),
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ),
-    ),
     );
   }
 }
