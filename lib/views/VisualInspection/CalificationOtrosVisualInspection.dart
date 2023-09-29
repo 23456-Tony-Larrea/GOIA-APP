@@ -16,7 +16,6 @@ class _OtrosHolgurasWidgetState extends State<OtrosHolgurasWidget> {
     final VisualInspectionController _controller = VisualInspectionController();
   final _obFocusNode = FocusNode();
   final TextEditingController _ob = TextEditingController();
-  bool _obValid = false;
 
 
   List<int> selectedLocations = [];
@@ -101,36 +100,32 @@ Center(
                 ),
 
                    SizedBox(height: 16),
- TextFormField(
-                  controller: _ob,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Observación',
-                  ),
-                  textCapitalization: TextCapitalization.characters,
-                  onChanged: (value) {
-                    setState(() {
-                      _obValid = value.length >= 10;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Este campo es requerido';
-                    } else if (value.length < 10) {
-                      return 'Debe contener al menos 10 caracteres';
-                    }
-                    return null;
-                  },
-                ),
-                _obValid
-                    ? SizedBox(height: 16)
-                    : Text(
-                        'La observación debe tener al menos 10 caracteres.',
-                        style: TextStyle(
-                          color: Colors.red,
-                        ),
-                      ),
+TextFormField(
+  controller: _ob,
+  maxLines: 3,
+  decoration: InputDecoration(
+    border: OutlineInputBorder(),
+    labelText: 'Observación',
+  ),
+  textCapitalization: TextCapitalization.characters,
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'Este campo es requerido';
+    } else if (value.length < 10) {
+      return 'Debe contener al menos 10 caracteres';
+    }
+    return null;
+  },
+   onChanged: (value) {
+    setState(() {}); // Actualiza el estado para reflejar los cambios en el texto
+  },
+),
+Text(
+  'Caracteres escritos: ${_ob.text.length}/10',
+  style: TextStyle(
+    color: Colors.grey,
+  ),
+),
                     SizedBox(height: 16),
 Card(
   // Card para la calificación
@@ -197,7 +192,7 @@ Card(
                 SizedBox(height: 16),
               Center(
   child: ElevatedButton.icon(
-     onPressed: selectedCalification == null
+       onPressed: (selectedCalification == null || _ob.text.length < 10)
         ? null // Desactivar el botón si no hay calificación
         : () {
       _controller.saveIdentificationVisualInspectionObservation(
