@@ -5,6 +5,7 @@ import 'package:rtv/views/VisualInspection/VisualInspectionView.dart';
 import 'package:rtv/views/Holguras/HolgurasView.dart';
 import 'package:rtv/views/BluetoohSerialView.dart';
 
+
 void main() async {
   runApp(const MyApp());
 }

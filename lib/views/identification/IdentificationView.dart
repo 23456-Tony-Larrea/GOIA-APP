@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -7,9 +10,12 @@ import 'package:rtv/views/identification/CalificationIdentificationView.dart';
 import 'package:rtv/views/identification/CalificationOtrosIdentificationView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import '../../class/Image.dart';
 import '../../class/ListProcedure.dart';
 import '../../class/Trama.dart';
 import '../../controllers/HolgurasBluetoohController.dart';
+import 'dart:convert';
+import 'package:image/image.dart' as img;
 
 class IdentificationView extends StatefulWidget {
   @override
@@ -26,13 +32,26 @@ class _IdentificationViewState extends State<IdentificationView> {
   bool isLoading = false;
   bool hasSearched = false;
   bool _saving = false; // variable para controlar el estado del ProgressBar
+  List<XFile> _photos = [];
+  late Future<void> _initializeControllerFuture;
+  late CameraController _controller2;
+    final ImageStorage imageStorage = ImageStorage(); // Instancia de ImageStorage
 
+
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    final firstCamera = cameras.first;
+
+    _controller2 = CameraController(firstCamera, ResolutionPreset.medium);
+    _initializeControllerFuture = _controller2.initialize();
+  }
 
   @override
   void initState() {
     super.initState();
     clearCodeTVFromSharedPreferences();
     _sendBluetooh.sendTrama(TramaType.Apagar);
+    _initializeCamera();
   }
 
   Future<void> _getProcedures() async {
@@ -49,6 +68,32 @@ class _IdentificationViewState extends State<IdentificationView> {
     } catch (e) {
       print(e);
     }
+  }
+
+  void _showMaxPhotosAlert() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Límite de fotos alcanzado'),
+          content: Text('Puedes tomar un máximo de 1 a 5 fotos.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _removePhoto(int index) {
+    setState(() {
+      _photos.removeAt(index);
+    });
   }
 
   void clearCodeTVFromSharedPreferences() async {
@@ -84,391 +129,538 @@ class _IdentificationViewState extends State<IdentificationView> {
 
   @override
   Widget build(BuildContext context) {
-     return WillPopScope(
-    onWillPop: () async {
-      // Intercepta el evento de retroceso y realiza la acción que desees,
-      // en este caso, puedes no hacer nada para desactivar el botón de retroceso nativo.
-      return false; // Cambia esto a true si deseas permitir la navegación de retroceso nativa.
-    },
-
-    child: Scaffold(
-      appBar: AppBar(
-        title: Text('Identificación'),
-        actions: [
-          Visibility(
-            visible: _procedures.isNotEmpty && _controller.carData != null,
-            child: FloatingActionButton(
-              onPressed: () async {
-                setState(() {
-                  _saving = true; // cambiamos el estado del ProgressBar a true
-                });
-                _controller.placaController.clear();
-                setState(() {
-                  _controller.carData = null;
-                  _controller.searchCompleted = false;
-                  hasSearched = false;
-                });
-                openModal();
-                await Future.delayed(
-                    Duration(seconds: 3)); // esperamos 3 segundos
-                Navigator.of(context).pop(); // cerramos el AlertDialog
-                Fluttertoast.showToast(
-                  msg: "Identificación guardada con exito",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.CENTER,
-                  timeInSecForIosWeb: 1,
-                  backgroundColor: Colors.greenAccent,
-                  textColor: Colors.white,
-                  fontSize: 16.0,
-                );
-                setState(() {
-                  _saving =
-                      false; // cambiamos el estado del ProgressBar a false
-                });
-              },
-              child: _saving ? CircularProgressIndicator() : Icon(Icons.save),
-              mini: true,
-            ),
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.exit_to_app,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return ExitView();
+    return WillPopScope(
+      onWillPop: () async {
+        // Intercepta el evento de retroceso y realiza la acción que desees,
+        // en este caso, puedes no hacer nada para desactivar el botón de retroceso nativo.
+        return false; // Cambia esto a true si deseas permitir la navegación de retroceso nativa.
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Identificación'),
+          actions: [
+            Visibility(
+              visible: _procedures.isNotEmpty && _controller.carData != null,
+              child: FloatingActionButton(
+                onPressed: () async {
+                  setState(() {
+                    _saving =
+                        true; // cambiamos el estado del ProgressBar a true
+                  });
+                  _controller.placaController.clear();
+                  setState(() {
+                    _controller.carData = null;
+                    _controller.searchCompleted = false;
+                    hasSearched = false;
+                  });
+                  openModal();
+                  await Future.delayed(
+                      Duration(seconds: 3)); // esperamos 3 segundos
+                  Navigator.of(context).pop(); // cerramos el AlertDialog
+                  Fluttertoast.showToast(
+                    msg: "Identificación guardada con exito",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.greenAccent,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                  setState(() {
+                    _saving =
+                        false; // cambiamos el estado del ProgressBar a false
+                  });
                 },
-              );
-            },
-          ),
-        ],
-        automaticallyImplyLeading: false,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-                controller: _controller.placaController,
-                decoration: InputDecoration(
-                  hintText: 'Buscar por placa',
-                  prefixIcon: Icon(Icons.search),
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.clear),
-                    onPressed: () {
-                      _controller.placaController.clear();
-                      hasSearched = false;
-                      setState(() {
-                        _controller.carData =
-                            null; // Limpiamos la información del vehículo
-                        _controller.searchCompleted = false;
-                        //limpiar procedures
-                        _procedures.clear();
+                child: _saving ? CircularProgressIndicator() : Icon(Icons.save),
+                mini: true,
+              ),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.exit_to_app,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return ExitView();
+                  },
+                );
+              },
+            ),
+          ],
+          automaticallyImplyLeading: false,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                  controller: _controller.placaController,
+                  decoration: InputDecoration(
+                    hintText: 'Buscar por placa',
+                    prefixIcon: Icon(Icons.search),
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        _controller.placaController.clear();
                         hasSearched = false;
-                      });
-                    },
+                        setState(() {
+                          _controller.carData =
+                              null; // Limpiamos la información del vehículo
+                          _controller.searchCompleted = false;
+                          //limpiar procedures
+                          _procedures.clear();
+                          hasSearched = false;
+                        });
+                      },
+                    ),
                   ),
-                ),
-                textCapitalization: TextCapitalization.characters),
-            SizedBox(height: 16.0),
-            Stack(
-              children: [
-                SizedBox(
-                  width: 580.0,
-                  child: ElevatedButton(
-                    onPressed: hasSearched
-                        ? null
-                        : () async {
-                            setState(() {
-                              isLoading = true;
-                            });
+                  textCapitalization: TextCapitalization.characters),
+              SizedBox(height: 16.0),
+              Stack(
+                children: [
+                  SizedBox(
+                    width: 580.0,
+                    child: ElevatedButton(
+                      onPressed: hasSearched
+                          ? null
+                          : () async {
+                              setState(() {
+                                isLoading = true;
+                              });
 
-                            await _controller.searchVehicle(
-                                context, _controller.placaController.text);
-                            await _getProcedures();
-                            setState(() {
-                              isLoading = false;
-                              hasSearched = true;
-                            });
-                          },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (isLoading)
-                          SizedBox(
-                            width: 24.0,
-                            height: 24.0,
+                              await _controller.searchVehicle(
+                                  context, _controller.placaController.text);
+                              await _getProcedures();
+                              setState(() {
+                                isLoading = false;
+                                hasSearched = true;
+                              });
+                            },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (isLoading)
+                            SizedBox(
+                              width: 24.0,
+                              height: 24.0,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3.0,
+                              ),
+                            ),
+                          SizedBox(width: isLoading ? 8.0 : 0.0),
+                          Text(
+                            isLoading
+                                ? 'Cargando RTV, por favor espere...'
+                                : 'Buscar',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (isLoading)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.white.withOpacity(0.5),
+                        child: Center(
+                          child: SizedBox(
+                            width: 48.0,
+                            height: 48.0,
                             child: CircularProgressIndicator(
-                              strokeWidth: 3.0,
+                              strokeWidth: 4.0,
                             ),
                           ),
-                        SizedBox(width: isLoading ? 8.0 : 0.0),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              SizedBox(height: 16.0),
+              if (_controller.carData != null)
+                Card(
+                  elevation: 4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        leading: Icon(Icons.info),
+                        title: Text(
+                          'Información del vehículo',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildInfoField(
+                                'Marca', _controller.carData!.marca),
+                            _buildInfoField(
+                                'Modelo', _controller.carData!.modelo),
+                            _buildInfoField(
+                                'Cliente', _controller.carData!.cliente),
+                            _buildInfoField(
+                                'Cédula', _controller.carData!.cedula),
+ 
+                SizedBox(height: 16),
+             
+                          ],
+                          
+                        ),
+                        
+                      ),
+                    ],
+                  ),
+                )
+              else if (_controller.searchCompleted)
+                Card(
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
                         Text(
-                          isLoading
-                              ? 'Cargando RTV, por favor espere...'
-                              : 'Buscar',
+                          'Sin información de este vehículo.',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            _controller.placaController.clear();
+                            setState(() {
+                              _controller.carData = null;
+                              _controller.searchCompleted = false;
+                              hasSearched = false;
+                            });
+                          },
+                          child: Text('Realizar una nueva consulta'),
                         ),
                       ],
                     ),
                   ),
                 ),
-                if (isLoading)
-                  Positioned.fill(
-                    child: Container(
-                      color: Colors.white.withOpacity(0.5),
-                      child: Center(
-                        child: SizedBox(
-                          width: 48.0,
-                          height: 48.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 4.0,
-                          ),
+              if (_procedures.isNotEmpty && _controller.carData != null)
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        TypeAheadField(
+                          textFieldConfiguration: TextFieldConfiguration(
+                              decoration: InputDecoration(
+                                hintText: 'Buscar por codigo',
+                              ),
+                              textCapitalization:
+                                  TextCapitalization.characters),
+                          suggestionsCallback: (pattern) async {
+                            final suggestions = _procedures
+                                .expand((procedures) => procedures)
+                                .where((procedure) =>
+                                    "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
+                                        .toLowerCase()
+                                        .contains(pattern.toLowerCase()))
+                                .toList();
+                            return suggestions;
+                          },
+                          itemBuilder: (context, suggestion) {
+                            return Card(
+                              child: ListTile(
+                                title: Row(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      suggestion.abreviaturaDescripcion,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                subtitle: Text(
+                                  suggestion.procedimiento,
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          onSuggestionSelected: (suggestion) {
+                            _showDefectsModal(context, suggestion.defectos,
+                                suggestion.procedimiento);
+                          },
                         ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            SizedBox(height: 16.0),
-            if (_controller.carData != null)
-              Card(
-                elevation: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.info),
-                      title: Text(
-                        'Información del vehículo',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildInfoField('Marca', _controller.carData!.marca),
-                          _buildInfoField(
-                              'Modelo', _controller.carData!.modelo),
-                          _buildInfoField(
-                              'Cliente', _controller.carData!.cliente),
-                          _buildInfoField(
-                              'Cédula', _controller.carData!.cedula),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else if (_controller.searchCompleted)
-              Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Sin información de este vehículo.',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          _controller.placaController.clear();
-                          setState(() {
-                            _controller.carData = null;
-                            _controller.searchCompleted = false;
-                            hasSearched = false;
-                          });
-                        },
-                        child: Text('Realizar una nueva consulta'),
-                      ),
-                    ],
-                  ),
-                ),
+                        SizedBox(height: 16),
+ Card(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                leading: Icon(Icons.info_outline), // Icono del título
+                title: Text('Items a considerar'), // Título del Card
               ),
-            if (_procedures.isNotEmpty && _controller.carData != null)
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      TypeAheadField(
-                        textFieldConfiguration: TextFieldConfiguration(
-                            decoration: InputDecoration(
-                              hintText: 'Buscar por codigo',
+              SizedBox(height: 16),
+              FloatingActionButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Cámara'),
+                        content: FutureBuilder<void>(
+                          future: _initializeControllerFuture,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              return CameraPreview(
+                                  _controller2); // Muestra la vista previa de la cámara
+                            } else {
+                              return Center(
+                                  child: CircularProgressIndicator());
+                            }
+                          },
+                        ),
+                        contentPadding: EdgeInsets.only(
+                            left:
+                                16), // Alinea el contenido a la izquierda
+                        actions: [
+                          Align(
+                            alignment: Alignment
+                                .topLeft, // Alinea el icono a la izquierda
+                            child: IconButton(
+                              icon: Icon(Icons.photo_camera),
+                              onPressed: () async {
+                                if (_photos.length >= 5) {
+                                  _showMaxPhotosAlert();
+                                } else {
+                                  if (_controller2.value.isInitialized) {
+                                    try {
+                                      final XFile photo =
+                                          await _controller2.takePicture();
+
+                                      // Lee la imagen como bytes
+                                      final File imageFile =
+                                          File(photo.path);
+                                      final List<int> imageBytes =
+                                          await imageFile.readAsBytes();
+
+                                      // Convierte la imagen a formato JPEG
+                                      final img.Image? image =
+                                          img.decodeImage(Uint8List.fromList(
+                                              imageBytes));
+                                      final List<int> jpegBytes =
+                                          img.encodeJpg(image!);
+
+                                      // Convierte los bytes en una cadena base64
+                                      final String base64Image =
+                                          base64Encode(jpegBytes);
+                                      imageStorage.addBase64Image(base64Image);
+
+                                      setState(() {
+                                        _photos.add(photo);
+                                      });
+                                      print(base64Image);
+                                    } catch (e) {
+                                      print(
+                                          'Error al tomar la foto: $e');
+                                    }
+                                  }
+                                }
+                              },
                             ),
-                            textCapitalization: TextCapitalization.characters),
-                        suggestionsCallback: (pattern) async {
-                          final suggestions = _procedures
-                              .expand((procedures) => procedures)
-                              .where((procedure) =>
-                                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
-                                      .toLowerCase()
-                                      .contains(pattern.toLowerCase()))
-                              .toList();
-                          return suggestions;
-                        },
-                        itemBuilder: (context, suggestion) {
-                          return Card(
-                            child: ListTile(
-                              title: Row(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: Icon(Icons.camera_alt),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(width: 16),
+           ListTile(
+                  leading: Icon(Icons.directions_car), // Icono del kilometraje
+                  title: Text('Kilometraje'), // Label del kilometraje
+                  subtitle: TextFormField(
+                    controller: _controller.kilometraje ,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      hintText: 'Ingresa el kilometraje',
+                    ),
+                  ),
+                ),
+           
+      ],
+    ),
+  ),
+                        SizedBox(height: 16),
+                        //usa un card para visualizar las fotos tomadas
+                        if (_photos.isNotEmpty)
+                          Card(
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  title: Text('Fotos Tomadas',
+                                      style: TextStyle(fontSize: 16)),
+                                ),
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: _photos.length,
+                                  itemBuilder: (context, index) {
+                                    final photo = _photos[index];
+                                    return ListTile(
+                                      leading: Image.file(File(photo.path)),
+                                      trailing: IconButton(
+                                        icon: Icon(Icons.delete),
+                                        onPressed: () {
+                                          _removePhoto(index);
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        Card(
+                          elevation: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (var procedures in _procedures)
+                                for (var procedure in procedures)
+                                  GestureDetector(
+                                    onTap: () {
+                                      _showDefectsModal(
+                                          context,
+                                          procedure.defectos,
+                                          procedure.procedimiento);
+                                    },
+                                    child: Card(
+                                      elevation: 4,
+                                      color: procedure.isRated
+                                          ? Colors.lightBlueAccent
+                                          : null,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                            "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Text(
+                                                        "${procedure.categoriaDescripcion}",
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 18,
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 4,
+                                                      ),
+                                                      Text(
+                                                        "${procedure.procedimiento}",
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        maxLines: 2,
+                                                        style: TextStyle(
+                                                          fontSize: 13.5,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  Text(
-                                    suggestion.abreviaturaDescripcion,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
                                     ),
                                   ),
-                                ],
-                              ),
-                              subtitle: Text(
-                                suggestion.procedimiento,
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                        onSuggestionSelected: (suggestion) {
-                          _showDefectsModal(context, suggestion.defectos,
-                              suggestion.procedimiento);
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      Card(
-                        elevation: 4,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (var procedures in _procedures)
-                              for (var procedure in procedures)
-                                GestureDetector(
-                                  onTap: () {
-                                    _showDefectsModal(
-                                        context,
-                                        procedure.defectos,
-                                        procedure.procedimiento);
-                                  },
-                                  child: Card(
-                                    elevation: 4,
-                                    color: procedure.isRated
-                                        ? Colors.lightBlueAccent
-                                        : null,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Text(
-                                                          "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Text(
-                                                      "${procedure.categoriaDescripcion}",
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 18,
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 4,
-                                                    ),
-                                                    Text(
-                                                      "${procedure.procedimiento}",
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      maxLines: 2,
-                                                      style: TextStyle(
-                                                        fontSize: 13.5,
-                                                        color: Colors.grey,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: 0,
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                Navigator.pushReplacementNamed(context, '/identification');
+                break;
+              case 1:
+                Navigator.pushReplacementNamed(context, '/visual_inspection');
+                break;
+              case 2:
+                Navigator.pushReplacementNamed(context, '/holguras');
+                break;
+            }
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.car_crash_rounded),
+              label: 'Identificación',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.remove_red_eye),
+              label: 'Inspección Visual',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Holguras',
+            ),
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushReplacementNamed(context, '/identification');
-              break;
-            case 1:
-              Navigator.pushReplacementNamed(context, '/visual_inspection');
-              break;
-            case 2:
-              Navigator.pushReplacementNamed(context, '/holguras');
-              break;
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.car_crash_rounded),
-            label: 'Identificación',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.remove_red_eye),
-            label: 'Inspección Visual',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Holguras',
-          ),
-        ],
-      ),
-    ), 
     );
   }
 
@@ -524,11 +716,11 @@ class _IdentificationViewState extends State<IdentificationView> {
 
   void _showDefectoModal(BuildContext context, Defecto defecto) {
     if (defecto.abreviatura == "OTROS") {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => OtrosWidget(defecto: defecto),
-        )
-      ).then((value) {
+      Navigator.of(context)
+          .push(MaterialPageRoute(
+        builder: (context) => OtrosWidget(defecto: defecto),
+      ))
+          .then((value) {
         // Aquí actualizas el estado de isRated cuando el usuario califica
         if (value == true) {
           setState(() {
@@ -563,7 +755,6 @@ class _IdentificationViewState extends State<IdentificationView> {
         }
       });
     }
-   
   }
 
   void _showDefectsModal(

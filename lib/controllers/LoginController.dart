@@ -46,7 +46,8 @@ class LoginController {
                 actions: <Widget>[
                   TextButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/identification');
+                      Navigator.pushReplacementNamed(
+                          context, '/identification');
                     },
                     child: const Text('OK'),
                   ),
@@ -77,23 +78,23 @@ class LoginController {
         }
       }
     } catch (e) {
-        showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Error'),
-          content: Text('Fallo la connexion al servidor'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Fallo la conexión al servidor'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 

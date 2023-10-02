@@ -1,3 +1,5 @@
+
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:multiselect_formfield/multiselect_formfield.dart';
 import 'package:rtv/class/ListProcedure.dart';
@@ -20,7 +22,13 @@ class _NewPageWidgetState extends State<NewPageWidget> {
   List<int> selectedLocations = [];
   int? selectedCalification = null;
   List<Defecto> defectosCalificados = [];
-  bool canPop = false;
+  List<XFile> _photos = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
 
   @override
   void dispose() {
@@ -30,10 +38,35 @@ class _NewPageWidgetState extends State<NewPageWidget> {
     super.dispose();
   }
 
+  void _showMaxPhotosAlert() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Límite de fotos alcanzado'),
+          content: Text('Puedes tomar un máximo de 1 a 5 fotos.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _removePhoto(int index) {
+    setState(() {
+      _photos.removeAt(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return
-    Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text('Calificacion'),
       ),
@@ -48,23 +81,24 @@ class _NewPageWidgetState extends State<NewPageWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-Center(
-  child: Card(
-    elevation: 4, // Ampliar el Card
-    child: ListTile(
-      leading: Icon(Icons.info), // Agregar un icono
-      title: Text(
-        'Defecto: ${widget.defecto.abreviatura}',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-      ),
-      subtitle: Text('Descripción: ${widget.defecto.descripcion}'),
-    ),
-  ),
-),
-
+                Center(
+                  child: Card(
+                    elevation: 4, // Ampliar el Card
+                    child: ListTile(
+                      leading: Icon(Icons.info), // Agregar un icono
+                      title: Text(
+                        'Defecto: ${widget.defecto.abreviatura}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      subtitle:
+                          Text('Descripción: ${widget.defecto.descripcion}'),
+                    ),
+                  ),
+                ),
+              
                 SizedBox(height: 16),
                 MultiSelectFormField(
                   chipBackGroundColor: Colors.blue,
@@ -183,11 +217,10 @@ Center(
                               widget.defecto.abreviatura,
                               widget.defecto.descripcion,
                               widget.defecto.codigoAs400,
-                              _kilometrajeController.text,
                               selectedLocations.join(','),
                               selectedCalification,
                             );
-                              Navigator.of(context).pop(true);
+                            Navigator.of(context).pop(true);
                           },
                     icon: Icon(Icons.save),
                     label: Text('Guardar'),

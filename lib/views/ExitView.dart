@@ -13,6 +13,7 @@ class ExitView extends StatelessWidget {
             final prefs = await SharedPreferences.getInstance();
             prefs.remove('vehi_codigo');
             prefs.remove('codeTV');
+            prefs.remove('usua_codigo');
             Navigator.pushReplacementNamed(context, '/login');
           },
           child: Text('Aceptar'),

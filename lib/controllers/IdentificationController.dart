@@ -3,6 +3,7 @@ import "package:http/http.dart" as http;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rtv/class/Cars.dart';
+import 'package:rtv/class/Image.dart';
 import 'package:rtv/constants/url2.dart';
 import 'package:rtv/class/ListProcedure.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,10 @@ class IdentificationController {
   int? savedRtvCode;
   bool searchCompleted = false; // Agregar esta propiedad
   final TextEditingController observationController = TextEditingController();
+  ImageStorage imageStorage = ImageStorage();
+  final TextEditingController kilometraje = TextEditingController();
+  
+
   Future<void> searchVehicle(BuildContext context, String placa) async {
     final response = await http.post(
       Uri.parse('${url}/GetCodVehiculo'),
@@ -208,6 +213,8 @@ class IdentificationController {
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
     int? userId = prefs2.getInt('usua_codigo');
+    List<String> base64Images = ImageStorage().getBase64Images();
+    print("base64Images,${base64Images}");
     try {
       final response = await http.post(
         Uri.parse('${url}/GuardarIdentificacion1'),
@@ -332,8 +339,7 @@ class IdentificationController {
             }
           ]),
           "fotos": jsonEncode([
-            {"f": "", "filename": "", "filepath": ""},
-            {"f": "", "filename": "", "filepath": ""}
+            {"f": base64Images, "filename": formattedDate, "filepath": ""},
           ]),
           "fecha_inicio": formattedDate,
           "usua_codigo": userId,
@@ -351,6 +357,7 @@ class IdentificationController {
           fontSize: 16.0,
         );
         Navigator.pop(build);
+        print("mi resp,${response.body}");
       } else {
         Fluttertoast.showToast(
           msg: "La identificación no se pudo crear",
@@ -375,7 +382,6 @@ class IdentificationController {
     String abreviaturaIdentification,
     String descripcionIdentification,
     String Codigo_as400Identification,
-    String kmIdentification,
     String ubicacionesIdentification,
     int? calificacionIdentification, // Agrega la calificación
   ) async {
@@ -388,6 +394,9 @@ class IdentificationController {
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
     int? userId = prefs2.getInt('usua_codigo');
+    List<String> base64Images = ImageStorage().getBase64Images();
+    String concatenatedBase64Images = base64Images.join("");
+    print("base64Images,${concatenatedBase64Images}");
 
     try {
       final response = await http.post(
@@ -398,7 +407,7 @@ class IdentificationController {
         body: jsonEncode(<String, dynamic>{
           "rete_codigo": codeRTVexample,
           "vehi_codigo": vehiCodigo2,
-          "kilometraje": kmIdentification,
+          "kilometraje": kilometraje,
           "dato": jsonEncode([
             {
               "codigo": 1,
@@ -513,8 +522,11 @@ class IdentificationController {
             }
           ]),
           "fotos": jsonEncode([
-            {"f": "", "filename": "", "filepath": ""},
-            {"f": "", "filename": "", "filepath": ""}
+            {
+              "f": "data:image/jpeg;base64,/${concatenatedBase64Images}",
+              "filename": formattedDate,
+              "filepath": ""
+            },
           ]),
           "fecha_inicio": formattedDate,
           "usua_codigo": userId,
@@ -531,6 +543,8 @@ class IdentificationController {
           textColor: Colors.white,
           fontSize: 16.0,
         );
+        print("respeusta,${response.statusCode}");
+        print("body,${response.body}");
         Navigator.pop(build);
       } else {
         Fluttertoast.showToast(
@@ -543,8 +557,10 @@ class IdentificationController {
           fontSize: 16.0,
         );
       }
+      print("respeusta,${response.statusCode}");
+      print("body,${response.body}");
     } catch (e) {
-      print(e);
+      print("thi is error,$e");
       throw Exception('An error occurred');
     }
   }
