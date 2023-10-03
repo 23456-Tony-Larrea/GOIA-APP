@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,8 +34,8 @@ class _IdentificationViewState extends State<IdentificationView> {
   List<XFile> _photos = [];
   late Future<void> _initializeControllerFuture;
   late CameraController _controller2;
-    final ImageStorage imageStorage = ImageStorage(); // Instancia de ImageStorage
-
+  final ImageStorage imageStorage = ImageStorage(); // Instancia de ImageStorage
+  final TextEditingController _kilometrajeController = TextEditingController();
 
   Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
@@ -98,8 +97,7 @@ class _IdentificationViewState extends State<IdentificationView> {
 
   void clearCodeTVFromSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove(
-        'codeTV'); // Esto eliminará el valor 'codeTV' de SharedPreferences
+    prefs.remove('codeTV');
   }
 
   void openModal() async {
@@ -148,10 +146,16 @@ class _IdentificationViewState extends State<IdentificationView> {
                         true; // cambiamos el estado del ProgressBar a true
                   });
                   _controller.placaController.clear();
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  prefs.remove('vehi_kilometraje');
+
                   setState(() {
                     _controller.carData = null;
                     _controller.searchCompleted = false;
                     hasSearched = false;
+                    //limpiar el inpur de kilometraje
+                    _kilometrajeController.clear();
                   });
                   openModal();
                   await Future.delayed(
@@ -207,6 +211,7 @@ class _IdentificationViewState extends State<IdentificationView> {
                       onPressed: () {
                         _controller.placaController.clear();
                         hasSearched = false;
+                        _kilometrajeController.clear();
                         setState(() {
                           _controller.carData =
                               null; // Limpiamos la información del vehículo
@@ -306,13 +311,9 @@ class _IdentificationViewState extends State<IdentificationView> {
                                 'Cliente', _controller.carData!.cliente),
                             _buildInfoField(
                                 'Cédula', _controller.carData!.cedula),
- 
-                SizedBox(height: 16),
-             
+                            SizedBox(height: 16),
                           ],
-                          
                         ),
-                        
                       ),
                     ],
                   ),
@@ -348,6 +349,177 @@ class _IdentificationViewState extends State<IdentificationView> {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
+                        Card(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment
+                                  .center, // Alinea al centro verticalmente
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      ListTile(
+                                        leading: Icon(Icons
+                                            .info_outline), // Icono del título
+                                        title: Text(
+                                            'Items a considerar'), // Título del Card
+                                      ),
+                                      SizedBox(height: 16),
+                                      TextFormField(
+                                        controller: _kilometrajeController,
+                                        decoration: InputDecoration(
+                                          labelText: 'Kilometraje',
+                                          prefixIcon: Icon(Icons
+                                              .directions_car), // Icono de carro
+                                        ),
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly, // Permite solo números
+                                        ],
+                                        keyboardType: TextInputType.number,
+                                        onChanged: (value) {
+                                          _controller.updateKilometraje(value);
+                                        },
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment
+                                      .center, // Alinea el botón al centro verticalmente
+                                  child: FloatingActionButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text('Cámara'),
+                                            content: FutureBuilder<void>(
+                                              future:
+                                                  _initializeControllerFuture,
+                                              builder: (context, snapshot) {
+                                                if (snapshot.connectionState ==
+                                                    ConnectionState.done) {
+                                                  return CameraPreview(
+                                                      _controller2); // Muestra la vista previa de la cámara
+                                                } else {
+                                                  return Center(
+                                                      child:
+                                                          CircularProgressIndicator());
+                                                }
+                                              },
+                                            ),
+                                            contentPadding: EdgeInsets.only(
+                                                left:
+                                                    16), // Alinea el contenido a la izquierda
+                                            actions: [
+                                              Align(
+                                                alignment: Alignment
+                                                    .topLeft, // Alinea el icono a la izquierda
+                                                child: IconButton(
+                                                  icon:
+                                                      Icon(Icons.photo_camera),
+                                                  onPressed: () async {
+                                                    if (_photos.length >= 5) {
+                                                      _showMaxPhotosAlert();
+                                                    } else {
+                                                      if (_controller2.value
+                                                          .isInitialized) {
+                                                        try {
+                                                          final XFile photo =
+                                                              await _controller2
+                                                                  .takePicture();
+
+                                                          // Lee la imagen como bytes
+                                                          final File imageFile =
+                                                              File(photo.path);
+                                                          final List<int>
+                                                              imageBytes =
+                                                              await imageFile
+                                                                  .readAsBytes();
+
+                                                          // Convierte la imagen a formato JPEG
+                                                          final img.Image?
+                                                              image =
+                                                              img.decodeImage(
+                                                                  Uint8List
+                                                                      .fromList(
+                                                                          imageBytes));
+                                                          final List<int>
+                                                              jpegBytes =
+                                                              img.encodeJpg(
+                                                                  image!);
+
+                                                          // Convierte los bytes en una cadena base64
+                                                          final String
+                                                              base64Image =
+                                                              base64Encode(
+                                                                  jpegBytes);
+                                                          imageStorage
+                                                              .addBase64Image(
+                                                                  base64Image);
+
+                                                          setState(() {
+                                                            _photos.add(photo);
+                                                          });
+                                                          print(base64Image);
+                                                        } catch (e) {
+                                                          print(
+                                                              'Error al tomar la foto: $e');
+                                                        }
+                                                      }
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: Icon(Icons.camera_alt),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        if (_photos.isNotEmpty)
+                          Card(
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  title: Text('Fotos Tomadas',
+                                      style: TextStyle(fontSize: 16)),
+                                ),
+                                SizedBox(
+                                  height: 100, // Altura de la lista horizontal
+                                  child: ListView.builder(
+                                    scrollDirection:
+                                        Axis.horizontal, // Dirección horizontal
+                                    itemCount: _photos.length,
+                                    itemBuilder: (context, index) {
+                                      final photo = _photos[index];
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Image.file(
+                                          File(photo.path),
+                                          width: 100, // Ancho de cada imagen
+                                          height: 100, // Altura de cada imagen
+                                          fit: BoxFit
+                                              .cover, // Ajuste de la imagen
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         TypeAheadField(
                           textFieldConfiguration: TextFieldConfiguration(
                               decoration: InputDecoration(
@@ -404,143 +576,6 @@ class _IdentificationViewState extends State<IdentificationView> {
                           },
                         ),
                         SizedBox(height: 16),
- Card(
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                leading: Icon(Icons.info_outline), // Icono del título
-                title: Text('Items a considerar'), // Título del Card
-              ),
-              SizedBox(height: 16),
-              FloatingActionButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Cámara'),
-                        content: FutureBuilder<void>(
-                          future: _initializeControllerFuture,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.done) {
-                              return CameraPreview(
-                                  _controller2); // Muestra la vista previa de la cámara
-                            } else {
-                              return Center(
-                                  child: CircularProgressIndicator());
-                            }
-                          },
-                        ),
-                        contentPadding: EdgeInsets.only(
-                            left:
-                                16), // Alinea el contenido a la izquierda
-                        actions: [
-                          Align(
-                            alignment: Alignment
-                                .topLeft, // Alinea el icono a la izquierda
-                            child: IconButton(
-                              icon: Icon(Icons.photo_camera),
-                              onPressed: () async {
-                                if (_photos.length >= 5) {
-                                  _showMaxPhotosAlert();
-                                } else {
-                                  if (_controller2.value.isInitialized) {
-                                    try {
-                                      final XFile photo =
-                                          await _controller2.takePicture();
-
-                                      // Lee la imagen como bytes
-                                      final File imageFile =
-                                          File(photo.path);
-                                      final List<int> imageBytes =
-                                          await imageFile.readAsBytes();
-
-                                      // Convierte la imagen a formato JPEG
-                                      final img.Image? image =
-                                          img.decodeImage(Uint8List.fromList(
-                                              imageBytes));
-                                      final List<int> jpegBytes =
-                                          img.encodeJpg(image!);
-
-                                      // Convierte los bytes en una cadena base64
-                                      final String base64Image =
-                                          base64Encode(jpegBytes);
-                                      imageStorage.addBase64Image(base64Image);
-
-                                      setState(() {
-                                        _photos.add(photo);
-                                      });
-                                      print(base64Image);
-                                    } catch (e) {
-                                      print(
-                                          'Error al tomar la foto: $e');
-                                    }
-                                  }
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: Icon(Icons.camera_alt),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: 16),
-           ListTile(
-                  leading: Icon(Icons.directions_car), // Icono del kilometraje
-                  title: Text('Kilometraje'), // Label del kilometraje
-                  subtitle: TextFormField(
-                    controller: _controller.kilometraje ,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'Ingresa el kilometraje',
-                    ),
-                  ),
-                ),
-           
-      ],
-    ),
-  ),
-                        SizedBox(height: 16),
-                        //usa un card para visualizar las fotos tomadas
-                        if (_photos.isNotEmpty)
-                          Card(
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: Text('Fotos Tomadas',
-                                      style: TextStyle(fontSize: 16)),
-                                ),
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: _photos.length,
-                                  itemBuilder: (context, index) {
-                                    final photo = _photos[index];
-                                    return ListTile(
-                                      leading: Image.file(File(photo.path)),
-                                      trailing: IconButton(
-                                        icon: Icon(Icons.delete),
-                                        onPressed: () {
-                                          _removePhoto(index);
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
                         Card(
                           elevation: 4,
                           child: Column(

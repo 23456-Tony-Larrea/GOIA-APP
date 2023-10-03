@@ -16,10 +16,9 @@ class IdentificationController {
   Cars? carData;
   int? savedRtvCode;
   bool searchCompleted = false; // Agregar esta propiedad
-  final TextEditingController observationController = TextEditingController();
   ImageStorage imageStorage = ImageStorage();
-  final TextEditingController kilometraje = TextEditingController();
-  
+    String? _kilometrajeValue;
+
 
   Future<void> searchVehicle(BuildContext context, String placa) async {
     final response = await http.post(
@@ -375,6 +374,12 @@ class IdentificationController {
     }
   }
 
+
+   void updateKilometraje(String value) {
+    _kilometrajeValue = value;
+    print("Kilometraje actualizado: $_kilometrajeValue");
+    saveVehi_code('vehi_kilometraje', int.parse(value));
+  }
   Future<void> saveIdentification(
     BuildContext build,
     int codigoIdentification,
@@ -394,11 +399,11 @@ class IdentificationController {
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
     int? userId = prefs2.getInt('usua_codigo');
-    List<String> base64Images = ImageStorage().getBase64Images();
+/*     List<String> base64Images = ImageStorage().getBase64Images();
     String concatenatedBase64Images = base64Images.join("");
-    print("base64Images,${concatenatedBase64Images}");
-
-    try {
+    print("base64Images,${concatenatedBase64Images}"); */
+    int? KM = prefs2.getInt('vehi_kilometraje');
+try {
       final response = await http.post(
         Uri.parse('${url}/GuardarIdentificacion1'),
         headers: <String, String>{
@@ -407,7 +412,7 @@ class IdentificationController {
         body: jsonEncode(<String, dynamic>{
           "rete_codigo": codeRTVexample,
           "vehi_codigo": vehiCodigo2,
-          "kilometraje": kilometraje,
+          "kilometraje": KM,
           "dato": jsonEncode([
             {
               "codigo": 1,
@@ -522,11 +527,7 @@ class IdentificationController {
             }
           ]),
           "fotos": jsonEncode([
-            {
-              "f": "data:image/jpeg;base64,/${concatenatedBase64Images}",
-              "filename": formattedDate,
-              "filepath": ""
-            },
+            {"f": "", "filename": "", "filepath": ""},
           ]),
           "fecha_inicio": formattedDate,
           "usua_codigo": userId,
@@ -562,6 +563,6 @@ class IdentificationController {
     } catch (e) {
       print("thi is error,$e");
       throw Exception('An error occurred');
-    }
+    } 
   }
 }

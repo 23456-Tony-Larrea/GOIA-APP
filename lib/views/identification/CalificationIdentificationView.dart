@@ -1,9 +1,8 @@
-
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:multiselect_formfield/multiselect_formfield.dart';
 import 'package:rtv/class/ListProcedure.dart';
 import 'package:rtv/controllers/IdentificationController.dart';
+
 
 class NewPageWidget extends StatefulWidget {
   final Defecto defecto;
@@ -22,13 +21,11 @@ class _NewPageWidgetState extends State<NewPageWidget> {
   List<int> selectedLocations = [];
   int? selectedCalification = null;
   List<Defecto> defectosCalificados = [];
-  List<XFile> _photos = [];
 
   @override
   void initState() {
     super.initState();
   }
-
 
   @override
   void dispose() {
@@ -38,31 +35,6 @@ class _NewPageWidgetState extends State<NewPageWidget> {
     super.dispose();
   }
 
-  void _showMaxPhotosAlert() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Límite de fotos alcanzado'),
-          content: Text('Puedes tomar un máximo de 1 a 5 fotos.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _removePhoto(int index) {
-    setState(() {
-      _photos.removeAt(index);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +70,6 @@ class _NewPageWidgetState extends State<NewPageWidget> {
                     ),
                   ),
                 ),
-              
                 SizedBox(height: 16),
                 MultiSelectFormField(
                   chipBackGroundColor: Colors.blue,

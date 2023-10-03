@@ -14,6 +14,8 @@ class ExitView extends StatelessWidget {
             prefs.remove('vehi_codigo');
             prefs.remove('codeTV');
             prefs.remove('usua_codigo');
+                            prefs.remove('vehi_kilometraje');
+
             Navigator.pushReplacementNamed(context, '/login');
           },
           child: Text('Aceptar'),
