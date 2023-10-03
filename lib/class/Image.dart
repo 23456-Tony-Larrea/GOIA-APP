@@ -1,5 +1,5 @@
 class ImageStorage {
-  List<String> _base64Images = [];
+  List<Map<String, dynamic>> _base64Images = [];
   static final ImageStorage _singleton = ImageStorage._internal();
 
   factory ImageStorage() {
@@ -8,11 +8,11 @@ class ImageStorage {
 
   ImageStorage._internal();
 
-  void addBase64Image(String base64Image) {
-    _base64Images.add(base64Image);
+  void addBase64Image(String base64Image, String fileName) {
+    _base64Images.add({'f': base64Image, 'filename': fileName});
   }
 
-  List<String> getBase64Images() {
+  List<Map<String, dynamic>> getBase64Images() {
     return _base64Images;
   }
 }

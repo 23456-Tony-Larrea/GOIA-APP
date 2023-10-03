@@ -17,8 +17,7 @@ class IdentificationController {
   int? savedRtvCode;
   bool searchCompleted = false; // Agregar esta propiedad
   ImageStorage imageStorage = ImageStorage();
-    String? _kilometrajeValue;
-
+  String? _kilometrajeValue;
 
   Future<void> searchVehicle(BuildContext context, String placa) async {
     final response = await http.post(
@@ -212,8 +211,8 @@ class IdentificationController {
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
     int? userId = prefs2.getInt('usua_codigo');
-    List<String> base64Images = ImageStorage().getBase64Images();
-    print("base64Images,${base64Images}");
+    /*  List<String> base64Images = ImageStorage().getBase64Images(); */
+    /*   print("base64Images,${base64Images}"); */
     try {
       final response = await http.post(
         Uri.parse('${url}/GuardarIdentificacion1'),
@@ -338,7 +337,7 @@ class IdentificationController {
             }
           ]),
           "fotos": jsonEncode([
-            {"f": base64Images, "filename": formattedDate, "filepath": ""},
+            /*  {"f": base64Images, "filename": formattedDate, "filepath": ""}, */
           ]),
           "fecha_inicio": formattedDate,
           "usua_codigo": userId,
@@ -374,12 +373,12 @@ class IdentificationController {
     }
   }
 
-
-   void updateKilometraje(String value) {
+  void updateKilometraje(String value) {
     _kilometrajeValue = value;
     print("Kilometraje actualizado: $_kilometrajeValue");
     saveVehi_code('vehi_kilometraje', int.parse(value));
   }
+
   Future<void> saveIdentification(
     BuildContext build,
     int codigoIdentification,
@@ -399,11 +398,10 @@ class IdentificationController {
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
     int? userId = prefs2.getInt('usua_codigo');
-/*     List<String> base64Images = ImageStorage().getBase64Images();
-    String concatenatedBase64Images = base64Images.join("");
-    print("base64Images,${concatenatedBase64Images}"); */
     int? KM = prefs2.getInt('vehi_kilometraje');
-try {
+    try {
+    final imageStorage = ImageStorage();
+    final base64Images = imageStorage.getBase64Images();
       final response = await http.post(
         Uri.parse('${url}/GuardarIdentificacion1'),
         headers: <String, String>{
@@ -527,7 +525,7 @@ try {
             }
           ]),
           "fotos": jsonEncode([
-            {"f": "", "filename": "", "filepath": ""},
+            {"f":  base64Url.encode(utf8.encode(base64Images[0]['f'])), "filename":base64Images[0]['filename']},
           ]),
           "fecha_inicio": formattedDate,
           "usua_codigo": userId,
@@ -544,8 +542,7 @@ try {
           textColor: Colors.white,
           fontSize: 16.0,
         );
-        print("respeusta,${response.statusCode}");
-        print("body,${response.body}");
+        print("body para comprobar,${response.body}");
         Navigator.pop(build);
       } else {
         Fluttertoast.showToast(
@@ -558,11 +555,8 @@ try {
           fontSize: 16.0,
         );
       }
-      print("respeusta,${response.statusCode}");
-      print("body,${response.body}");
     } catch (e) {
-      print("thi is error,$e");
-      throw Exception('An error occurred');
-    } 
+      throw Exception('');
+    }
   }
 }

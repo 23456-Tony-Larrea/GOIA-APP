@@ -15,6 +15,7 @@ import '../../class/Trama.dart';
 import '../../controllers/HolgurasBluetoohController.dart';
 import 'dart:convert';
 import 'package:image/image.dart' as img;
+import 'package:intl/intl.dart';
 
 class IdentificationView extends StatefulWidget {
   @override
@@ -429,43 +430,27 @@ class _IdentificationViewState extends State<IdentificationView> {
                                                       if (_controller2.value
                                                           .isInitialized) {
                                                         try {
-                                                          final XFile photo =
-                                                              await _controller2
-                                                                  .takePicture();
+                                                        final now = DateTime.now();
+final formattedDate = DateFormat('yyyy-MM-dd_HH:mm:ss').format(now);
+final fileName = '$formattedDate.jpg';
 
-                                                          // Lee la imagen como bytes
-                                                          final File imageFile =
-                                                              File(photo.path);
-                                                          final List<int>
-                                                              imageBytes =
-                                                              await imageFile
-                                                                  .readAsBytes();
+final XFile photo = await _controller2.takePicture();
 
-                                                          // Convierte la imagen a formato JPEG
-                                                          final img.Image?
-                                                              image =
-                                                              img.decodeImage(
-                                                                  Uint8List
-                                                                      .fromList(
-                                                                          imageBytes));
-                                                          final List<int>
-                                                              jpegBytes =
-                                                              img.encodeJpg(
-                                                                  image!);
+// Read the image as bytes
+final File imageFile = File(photo.path);
+final List<int> imageBytes = await imageFile.readAsBytes();
 
-                                                          // Convierte los bytes en una cadena base64
-                                                          final String
-                                                              base64Image =
-                                                              base64Encode(
-                                                                  jpegBytes);
-                                                          imageStorage
-                                                              .addBase64Image(
-                                                                  base64Image);
+// Convert the image to JPEG format
+final img.Image? image = img.decodeImage(Uint8List.fromList(imageBytes));
+final List<int> jpegBytes = img.encodeJpg(image!);
 
-                                                          setState(() {
-                                                            _photos.add(photo);
-                                                          });
-                                                          print(base64Image);
+// Convert the bytes to a base64 string and add the filename
+final String base64Image = base64Encode(jpegBytes);
+imageStorage.addBase64Image(base64Image, fileName);
+
+setState(() {
+  _photos.add(photo);
+});
                                                         } catch (e) {
                                                           print(
                                                               'Error al tomar la foto: $e');
@@ -496,27 +481,44 @@ class _IdentificationViewState extends State<IdentificationView> {
                                   title: Text('Fotos Tomadas',
                                       style: TextStyle(fontSize: 16)),
                                 ),
-                                SizedBox(
-                                  height: 100, // Altura de la lista horizontal
-                                  child: ListView.builder(
-                                    scrollDirection:
-                                        Axis.horizontal, // Dirección horizontal
-                                    itemCount: _photos.length,
-                                    itemBuilder: (context, index) {
-                                      final photo = _photos[index];
-                                      return Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Image.file(
-                                          File(photo.path),
-                                          width: 100, // Ancho de cada imagen
-                                          height: 100, // Altura de cada imagen
-                                          fit: BoxFit
-                                              .cover, // Ajuste de la imagen
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
+                               SizedBox(
+  height: 100, // Altura de la lista horizontal
+  child: ListView.builder(
+    scrollDirection: Axis.horizontal, // Dirección horizontal
+    itemCount: _photos.length,
+    itemBuilder: (context, index) {
+      final photo = _photos[index];
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Stack(
+          children: [
+            Image.file(
+              File(photo.path),
+              width: 100, // Ancho de cada imagen
+              height: 100, // Altura de cada imagen
+              fit: BoxFit.cover, // Ajuste de la imagen
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _removePhoto(index);
+                  });
+                },
+                child: Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  ),
+),
                               ],
                             ),
                           ),
