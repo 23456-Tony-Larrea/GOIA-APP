@@ -215,6 +215,16 @@ class IdentificationController {
     int? userId = prefs2.getInt('usua_codigo');
 
     try {
+            final imageStorage = ImageStorage();
+final List<Map<String, dynamic>> base64Images = imageStorage.getBase64Images();
+  final List<Map<String, dynamic>> photos = [];
+for (final image in base64Images) {
+  final String filename = 'f_${DateTime.now().year}_${DateTime.now().day}_${DateTime.now().month}_${DateTime.now().hour}_${DateTime.now().minute}.jpg';
+  photos.add({
+    "f": "data:image/jpeg;base64,${image['f']}",
+    "filename": filename
+  });
+}
       final response = await http.post(
         Uri.parse('${url}/GuardarIdentificacion1'),
         headers: <String, String>{
@@ -238,53 +248,6 @@ class IdentificationController {
               "categoria_descripcion": "NUMERO DE PLACA",
               "procedimiento":
                   "COMPROBAR EL ESTADO, FIJACION Y UBICACION DE LAS PLACAS. CONSTATAR QUE EL NUMERO DE PLACA CORRESPONDE A LA DOCUMENTACION.",
-              "defectos": [
-                {
-                  "codigo": 10,
-                  "abreviatura": "OTROS",
-                  "descripcion":
-                      "OTROS(A INTRODUCIR POR EL INSPECTOR DE LINEA)",
-                  "numero": "01",
-                  "codigo_as400": "010101"
-                },
-                {
-                  "codigo": 11,
-                  "abreviatura": "CORRESPONDE",
-                  "descripcion":
-                      "NÚMERO DE PLACA NO COINCIDE CON LA DOCUMENTACIÓN",
-                  "numero": "02",
-                  "codigo_as400": "010102"
-                },
-                {
-                  "codigo": 12,
-                  "abreviatura": "EXIST/DETERIORO",
-                  "descripcion": "PLACAS INEXISTENTES O DETERIORADAS.",
-                  "numero": "03",
-                  "codigo_as400": "010103"
-                },
-                {
-                  "codigo": 13,
-                  "abreviatura": "ILEGIBLE",
-                  "descripcion": "PLACAS ILEGIBLES",
-                  "numero": "04",
-                  "codigo_as400": "010104"
-                },
-                {
-                  "codigo": 14,
-                  "abreviatura": "POSICIÓN",
-                  "descripcion":
-                      "PLACAS SITUADAS EN POSICIÓN O LUGAR INCORRECTO.",
-                  "numero": "05",
-                  "codigo_as400": "010105"
-                },
-                {
-                  "codigo": 15,
-                  "abreviatura": "SUJECIÓN",
-                  "descripcion": "DEFECTOS DE SUJECIÓN EN LAS PLACAS",
-                  "numero": "06",
-                  "codigo_as400": "010106"
-                }
-              ],
               "defectoEncontrado": {
                 "numero": numero,
                 "abreviatura": abreviatura,
@@ -337,15 +300,20 @@ class IdentificationController {
               }
             }
           ]),
-          "fotos": jsonEncode([
-            /*  {"f": base64Images, "filename": formattedDate, "filepath": ""}, */
-          ]),
+          "fotos": jsonEncode(photos),
           "fecha_inicio": formattedDate,
           "usua_codigo": userId,
           "esta_host": estaHost
         }),
       );
       if (response.statusCode == 200) {
+        
+   for (var i = 0; i < photos.length; i++) {
+    final file = File(photos[i]['filename']);
+    if (await file.exists()) {
+      await file.delete();
+    }
+  }
         Fluttertoast.showToast(
           msg: "La identificación ha sido creada con éxito",
           toastLength: Toast.LENGTH_SHORT,

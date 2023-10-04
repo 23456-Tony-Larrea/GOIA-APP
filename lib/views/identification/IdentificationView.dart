@@ -15,7 +15,6 @@ import '../../class/Trama.dart';
 import '../../controllers/HolgurasBluetoohController.dart';
 import 'dart:convert';
 import 'package:image/image.dart' as img;
-import 'package:intl/intl.dart';
 
 class IdentificationView extends StatefulWidget {
   @override
