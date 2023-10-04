@@ -17,7 +17,8 @@ class VisualInspectionController {
   bool searchCompleted = false; // Agregar esta propiedad
 final TextEditingController observationController = TextEditingController();
 
-  Future<void> searchVehicle(BuildContext context, String placa) async {
+ Future<void> searchVehicle(BuildContext context, String placa) async {
+  try {
     final response = await http.post(
       Uri.parse('${url}/GetCodVehiculo'),
       headers: <String, String>{
@@ -27,10 +28,8 @@ final TextEditingController observationController = TextEditingController();
         'placa': placaController.text,
       }),
     );
-
     if (response.statusCode == 200) {
       final List<dynamic> jsonResponse = jsonDecode(response.body);
-
       if (jsonResponse.isEmpty) {
         Fluttertoast.showToast(
           msg: "El vehículo no se pudo encontrar",
@@ -60,18 +59,31 @@ final TextEditingController observationController = TextEditingController();
         carData = await getInformationCar(this.vehiCodigo ?? 0);
         await getRegisterRTV(this.vehiCodigo ?? 0);
       }
-    } else {
+    }
+  } catch (e) {
+    Fluttertoast.showToast(
+      msg: "No se pudo conectar con el servidor",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  } finally {
+    if (searchCompleted == false) {
       Fluttertoast.showToast(
-        msg: "El servidor esta apagado",
+        msg: "No se pudo conectar con el servidor",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 5,
+        timeInSecForIosWeb: 1,
         backgroundColor: Colors.red,
         textColor: Colors.white,
         fontSize: 16.0,
       );
     }
   }
+}
 Future<Cars> getInformationCar(int vehiCodigo) async {
     final response = await http.post(
       Uri.parse('${url}/GetDatoVehiculo'),

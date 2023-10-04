@@ -21,7 +21,8 @@ class IdentificationController {
   String? _kilometrajeValue;
 
 
-  Future<void> searchVehicle(BuildContext context, String placa) async {
+ Future<void> searchVehicle(BuildContext context, String placa) async {
+  try {
     final response = await http.post(
       Uri.parse('${url}/GetCodVehiculo'),
       headers: <String, String>{
@@ -31,40 +32,50 @@ class IdentificationController {
         'placa': placaController.text,
       }),
     );
-    try {
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonResponse = jsonDecode(response.body);
-        if (jsonResponse.isEmpty) {
-          Fluttertoast.showToast(
-            msg: "El vehículo no se pudo encontrar",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 5,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-          searchCompleted = true;
-        } else {
-          final Map<String, dynamic> firstElement = jsonResponse[0];
-          this.vehiCodigo = firstElement['vehi_codigo'];
-          await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonResponse = jsonDecode(response.body);
+      if (jsonResponse.isEmpty) {
+        Fluttertoast.showToast(
+          msg: "El vehículo no se pudo encontrar",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        searchCompleted = true;
+      } else {
+        final Map<String, dynamic> firstElement = jsonResponse[0];
+        this.vehiCodigo = firstElement['vehi_codigo'];
+        await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
 
-          Fluttertoast.showToast(
-            msg: "Información encontrada con éxito",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.greenAccent,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
+        Fluttertoast.showToast(
+          msg: "Información encontrada con éxito",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.greenAccent,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
 
-          carData = await getInformationCar(this.vehiCodigo ?? 0);
-          await getRegisterRTV(this.vehiCodigo ?? 0);
-        }
+        carData = await getInformationCar(this.vehiCodigo ?? 0);
+        await getRegisterRTV(this.vehiCodigo ?? 0);
       }
-    } catch (e) {
+    }
+  } catch (e) {
+    Fluttertoast.showToast(
+      msg: "No se pudo conectar con el servidor",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  } finally {
+    if (searchCompleted == false) {
       Fluttertoast.showToast(
         msg: "No se pudo conectar con el servidor",
         toastLength: Toast.LENGTH_SHORT,
@@ -76,6 +87,7 @@ class IdentificationController {
       );
     }
   }
+}
 
   Future<Cars> getInformationCar(int vehiCodigo) async {
     final response = await http.post(
