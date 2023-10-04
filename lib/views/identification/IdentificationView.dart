@@ -430,9 +430,6 @@ class _IdentificationViewState extends State<IdentificationView> {
                                                       if (_controller2.value
                                                           .isInitialized) {
                                                         try {
-                                                        final now = DateTime.now();
-final formattedDate = DateFormat('yyyy-MM-dd_HH:mm:ss').format(now);
-final fileName = '$formattedDate.jpg';
 
 final XFile photo = await _controller2.takePicture();
 
@@ -446,7 +443,7 @@ final List<int> jpegBytes = img.encodeJpg(image!);
 
 // Convert the bytes to a base64 string and add the filename
 final String base64Image = base64Encode(jpegBytes);
-imageStorage.addBase64Image(base64Image, fileName);
+imageStorage.addBase64Image(base64Image);
 
 setState(() {
   _photos.add(photo);

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import "package:http/http.dart" as http;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -19,6 +20,7 @@ class IdentificationController {
   ImageStorage imageStorage = ImageStorage();
   String? _kilometrajeValue;
 
+
   Future<void> searchVehicle(BuildContext context, String placa) async {
     final response = await http.post(
       Uri.parse('${url}/GetCodVehiculo'),
@@ -29,45 +31,45 @@ class IdentificationController {
         'placa': placaController.text,
       }),
     );
+    try {
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonResponse = jsonDecode(response.body);
+        if (jsonResponse.isEmpty) {
+          Fluttertoast.showToast(
+            msg: "El vehículo no se pudo encontrar",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 5,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          searchCompleted = true;
+        } else {
+          final Map<String, dynamic> firstElement = jsonResponse[0];
+          this.vehiCodigo = firstElement['vehi_codigo'];
+          await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
 
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonResponse = jsonDecode(response.body);
+          Fluttertoast.showToast(
+            msg: "Información encontrada con éxito",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.greenAccent,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
 
-      if (jsonResponse.isEmpty) {
-        Fluttertoast.showToast(
-          msg: "El vehículo no se pudo encontrar",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 5,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-        searchCompleted = true;
-      } else {
-        final Map<String, dynamic> firstElement = jsonResponse[0];
-        this.vehiCodigo = firstElement['vehi_codigo'];
-        await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
-
-        Fluttertoast.showToast(
-          msg: "Información encontrada con éxito",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.greenAccent,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-
-        carData = await getInformationCar(this.vehiCodigo ?? 0);
-        await getRegisterRTV(this.vehiCodigo ?? 0);
+          carData = await getInformationCar(this.vehiCodigo ?? 0);
+          await getRegisterRTV(this.vehiCodigo ?? 0);
+        }
       }
-    } else {
+    } catch (e) {
       Fluttertoast.showToast(
-        msg: "El servidor esta apagado",
+        msg: "No se pudo conectar con el servidor",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 5,
+        timeInSecForIosWeb: 1,
         backgroundColor: Colors.red,
         textColor: Colors.white,
         fontSize: 16.0,
@@ -211,8 +213,7 @@ class IdentificationController {
     int? codeRTVexample = prefs2.getInt('codeTV');
     int? vehiCodigo2 = prefs2.getInt('vehi_codigo');
     int? userId = prefs2.getInt('usua_codigo');
-    /*  List<String> base64Images = ImageStorage().getBase64Images(); */
-    /*   print("base64Images,${base64Images}"); */
+
     try {
       final response = await http.post(
         Uri.parse('${url}/GuardarIdentificacion1'),
@@ -400,14 +401,22 @@ class IdentificationController {
     int? userId = prefs2.getInt('usua_codigo');
     int? KM = prefs2.getInt('vehi_kilometraje');
     try {
-    final imageStorage = ImageStorage();
-    final base64Images = imageStorage.getBase64Images();
-      final response = await http.post(
-        Uri.parse('${url}/GuardarIdentificacion1'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, dynamic>{
+      final imageStorage = ImageStorage();
+final List<Map<String, dynamic>> base64Images = imageStorage.getBase64Images();
+  final List<Map<String, dynamic>> photos = [];
+for (final image in base64Images) {
+  final String filename = 'f_${DateTime.now().year}_${DateTime.now().day}_${DateTime.now().month}_${DateTime.now().hour}_${DateTime.now().minute}.jpg';
+  photos.add({
+    "f": "data:image/jpeg;base64,${image['f']}",
+    "filename": filename
+  });
+}
+        final response = await http.post(
+          Uri.parse('${url}/GuardarIdentificacion1'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, dynamic>{
           "rete_codigo": codeRTVexample,
           "vehi_codigo": vehiCodigo2,
           "kilometraje": KM,
@@ -524,37 +533,44 @@ class IdentificationController {
               }
             }
           ]),
-          "fotos": jsonEncode([
-            {"f":  base64Url.encode(utf8.encode(base64Images[0]['f'])), "filename":base64Images[0]['filename']},
-          ]),
+            "fotos": jsonEncode(photos),
           "fecha_inicio": formattedDate,
           "usua_codigo": userId,
           "esta_host": estaHost
         }),
-      );
-      if (response.statusCode == 200) {
-        Fluttertoast.showToast(
-          msg: "La identificación ha sido creada con éxito",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.greenAccent,
-          textColor: Colors.white,
-          fontSize: 16.0,
+
         );
-        print("body para comprobar,${response.body}");
-        Navigator.pop(build);
-      } else {
-        Fluttertoast.showToast(
-          msg: "La identificación no se pudo crear",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 5,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-      }
+        if (response.statusCode == 200) {
+            for (var i = 0; i < photos.length; i++) {
+    final file = File(photos[i]['filename']);
+    if (await file.exists()) {
+      await file.delete();
+    }
+  }
+
+          Fluttertoast.showToast(
+            msg: "La identificación ha sido creada con éxito",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.greenAccent,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+      
+
+          Navigator.pop(build);
+        } else {
+          Fluttertoast.showToast(
+            msg: "La identificación no se pudo crear",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 5,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
     } catch (e) {
       throw Exception('');
     }

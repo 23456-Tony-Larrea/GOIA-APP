@@ -8,8 +8,8 @@ class ImageStorage {
 
   ImageStorage._internal();
 
-  void addBase64Image(String base64Image, String fileName) {
-    _base64Images.add({'f': base64Image, 'filename': fileName});
+  void addBase64Image(String base64Image) {
+    _base64Images.add({'f': base64Image});
   }
 
   List<Map<String, dynamic>> getBase64Images() {
