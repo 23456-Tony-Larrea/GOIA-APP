@@ -361,55 +361,60 @@ class _HolgurasViewState extends State<HolgurasView> {
     child: SingleChildScrollView(
       child: Column(
         children: [
-          TypeAheadField(
-             textFieldConfiguration: TextFieldConfiguration(
-                          decoration: InputDecoration(
-                            hintText: 'Buscar por codigo',
-                          ),
-                          textCapitalization: TextCapitalization.characters),
-                      suggestionsCallback: (pattern) async {
-                        final suggestions = _holgurasLists
-                            .expand((procedures) => procedures)
-.where((procedure) =>
-      "${procedure.familia}${procedure.subfamilia}${procedure.categoria}".toLowerCase().contains(pattern.toLowerCase())
-    )
-    .toList();
-                        return suggestions;
-                      },
-                      itemBuilder: (context, suggestion) {
-                                                 return Card(
-  child: ListTile(
-    title: Row(
-      children: [
-        Text(
-          suggestion.abreviaturaDescripcion,
+Card(
+  child: TypeAheadField(
+    textFieldConfiguration: TextFieldConfiguration(
+      decoration: InputDecoration(
+        hintText: 'Buscar por codigo',
+      ),
+      textCapitalization: TextCapitalization.characters,
+    ),
+    suggestionsCallback: (pattern) async {
+      final suggestions = _holgurasLists
+          .expand((procedures) => procedures)
+          .where((procedure) =>
+              "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
+                  .toLowerCase()
+                  .contains(pattern.toLowerCase()))
+          .toList();
+      return suggestions;
+    },
+    itemBuilder: (context, suggestion) {
+      return ListTile(
+        title: Row(
+          children: [
+            Row(
+              children: [
+                Text(
+                  "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              suggestion.abreviaturaDescripcion,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        subtitle: Text(
+          suggestion.procedimiento,
           style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
+            color: Colors.grey,
           ),
         ),
-      ],
-    ),
-    subtitle: Text(
-      suggestion.procedimiento,
-      style: TextStyle(
-        color: Colors.grey,
-      ),
-    ),
-    trailing: Text(
-      "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 14,
-      ),
-    ),
+      );
+    },
+    onSuggestionSelected: (suggestion) {
+      _showDefectsModal(context, suggestion.defectos, suggestion.procedimiento);
+    },
   ),
-);          },
-                      onSuggestionSelected: (suggestion) {
-                        _showDefectsModal(context, suggestion.defectos,
-                            suggestion.procedimiento);
-                      },
-                    ),
+),
           SizedBox(height: 16),
           Card(
             elevation: 4,
