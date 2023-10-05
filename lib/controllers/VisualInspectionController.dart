@@ -70,18 +70,6 @@ final TextEditingController observationController = TextEditingController();
       textColor: Colors.white,
       fontSize: 16.0,
     );
-  } finally {
-    if (searchCompleted == false) {
-      Fluttertoast.showToast(
-        msg: "No se pudo conectar con el servidor",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    }
   }
 }
 Future<Cars> getInformationCar(int vehiCodigo) async {
@@ -138,9 +126,17 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
       } else {
         throw Exception('Failed to load cars');
       }
-    } catch (error) {
-      print(error);
-    }
+    }catch (error) {
+       Fluttertoast.showToast(
+      msg: "No se pudo conectar con el servidor",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  } 
   }
   Future<List<ListProcedureInspection>> listInspectionProcedure() async {
     try {

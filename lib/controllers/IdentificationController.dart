@@ -20,62 +20,50 @@ class IdentificationController {
   ImageStorage imageStorage = ImageStorage();
   String? _kilometrajeValue;
 
+  Future<void> searchVehicle(BuildContext context, String placa) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${url}/GetCodVehiculo'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'placa': placaController.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonResponse = jsonDecode(response.body);
+        if (jsonResponse.isEmpty) {
+          Fluttertoast.showToast(
+            msg: "El vehículo no se pudo encontrar",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 5,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          searchCompleted = true;
+        } else {
+          final Map<String, dynamic> firstElement = jsonResponse[0];
+          this.vehiCodigo = firstElement['vehi_codigo'];
+          await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
 
- Future<void> searchVehicle(BuildContext context, String placa) async {
-  try {
-    final response = await http.post(
-      Uri.parse('${url}/GetCodVehiculo'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'placa': placaController.text,
-      }),
-    );
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonResponse = jsonDecode(response.body);
-      if (jsonResponse.isEmpty) {
-        Fluttertoast.showToast(
-          msg: "El vehículo no se pudo encontrar",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 5,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-        searchCompleted = true;
-      } else {
-        final Map<String, dynamic> firstElement = jsonResponse[0];
-        this.vehiCodigo = firstElement['vehi_codigo'];
-        await saveVehi_code('vehi_codigo', this.vehiCodigo ?? 0);
+          Fluttertoast.showToast(
+            msg: "Información encontrada con éxito",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.greenAccent,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
 
-        Fluttertoast.showToast(
-          msg: "Información encontrada con éxito",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.greenAccent,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-
-        carData = await getInformationCar(this.vehiCodigo ?? 0);
-        await getRegisterRTV(this.vehiCodigo ?? 0);
+          carData = await getInformationCar(this.vehiCodigo ?? 0);
+          await getRegisterRTV(this.vehiCodigo ?? 0);
+        }
       }
-    }
-  } catch (e) {
-    Fluttertoast.showToast(
-      msg: "No se pudo conectar con el servidor",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  } finally {
-    if (searchCompleted == false) {
+    } catch (e) {
       Fluttertoast.showToast(
         msg: "No se pudo conectar con el servidor",
         toastLength: Toast.LENGTH_SHORT,
@@ -87,7 +75,6 @@ class IdentificationController {
       );
     }
   }
-}
 
   Future<Cars> getInformationCar(int vehiCodigo) async {
     final response = await http.post(
@@ -128,7 +115,7 @@ class IdentificationController {
           savedRtvCode = rtvCode;
           await saveCodeRTV('codeTV', rtvCode);
           await lisProcedure();
-        } else {
+        } else if (carsRTV.isEmpty || carsRTV[0]['codigo'] == null) {
           Fluttertoast.showToast(
             msg: "el vehiculo no tiene RTV",
             toastLength: Toast.LENGTH_SHORT,
@@ -143,7 +130,16 @@ class IdentificationController {
         throw Exception('Failed to load cars');
       }
     } catch (error) {
-      print(error);
+      Fluttertoast.showToast(
+        msg: "No se pudo conectar con el servidor",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      print("cual es el error,${error}");
     }
   }
 
@@ -227,16 +223,18 @@ class IdentificationController {
     int? userId = prefs2.getInt('usua_codigo');
 
     try {
-            final imageStorage = ImageStorage();
-final List<Map<String, dynamic>> base64Images = imageStorage.getBase64Images();
-  final List<Map<String, dynamic>> photos = [];
-for (final image in base64Images) {
-  final String filename = 'f_${DateTime.now().year}_${DateTime.now().day}_${DateTime.now().month}_${DateTime.now().hour}_${DateTime.now().minute}.jpg';
-  photos.add({
-    "f": "data:image/jpeg;base64,${image['f']}",
-    "filename": filename
-  });
-}
+      final imageStorage = ImageStorage();
+      final List<Map<String, dynamic>> base64Images =
+          imageStorage.getBase64Images();
+      final List<Map<String, dynamic>> photos = [];
+      for (final image in base64Images) {
+        final String filename =
+            'f_${DateTime.now().year}_${DateTime.now().day}_${DateTime.now().month}_${DateTime.now().hour}_${DateTime.now().minute}.jpg';
+        photos.add({
+          "f": "data:image/jpeg;base64,${image['f']}",
+          "filename": filename
+        });
+      }
       final response = await http.post(
         Uri.parse('${url}/GuardarIdentificacion1'),
         headers: <String, String>{
@@ -319,13 +317,12 @@ for (final image in base64Images) {
         }),
       );
       if (response.statusCode == 200) {
-        
-   for (var i = 0; i < photos.length; i++) {
-    final file = File(photos[i]['filename']);
-    if (await file.exists()) {
-      await file.delete();
-    }
-  }
+        for (var i = 0; i < photos.length; i++) {
+          final file = File(photos[i]['filename']);
+          if (await file.exists()) {
+            await file.delete();
+          }
+        }
         Fluttertoast.showToast(
           msg: "La identificación ha sido creada con éxito",
           toastLength: Toast.LENGTH_SHORT,
@@ -382,21 +379,23 @@ for (final image in base64Images) {
     int? KM = prefs2.getInt('vehi_kilometraje');
     try {
       final imageStorage = ImageStorage();
-final List<Map<String, dynamic>> base64Images = imageStorage.getBase64Images();
-  final List<Map<String, dynamic>> photos = [];
-for (final image in base64Images) {
-  final String filename = 'f_${DateTime.now().year}_${DateTime.now().day}_${DateTime.now().month}_${DateTime.now().hour}_${DateTime.now().minute}.jpg';
-  photos.add({
-    "f": "data:image/jpeg;base64,${image['f']}",
-    "filename": filename
-  });
-}
-        final response = await http.post(
-          Uri.parse('${url}/GuardarIdentificacion1'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(<String, dynamic>{
+      final List<Map<String, dynamic>> base64Images =
+          imageStorage.getBase64Images();
+      final List<Map<String, dynamic>> photos = [];
+      for (final image in base64Images) {
+        final String filename =
+            'f_${DateTime.now().year}_${DateTime.now().day}_${DateTime.now().month}_${DateTime.now().hour}_${DateTime.now().minute}.jpg';
+        photos.add({
+          "f": "data:image/jpeg;base64,${image['f']}",
+          "filename": filename
+        });
+      }
+      final response = await http.post(
+        Uri.parse('${url}/GuardarIdentificacion1'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
           "rete_codigo": codeRTVexample,
           "vehi_codigo": vehiCodigo2,
           "kilometraje": KM,
@@ -513,44 +512,42 @@ for (final image in base64Images) {
               }
             }
           ]),
-            "fotos": jsonEncode(photos),
+          "fotos": jsonEncode(photos),
           "fecha_inicio": formattedDate,
           "usua_codigo": userId,
           "esta_host": estaHost
         }),
-
-        );
-        if (response.statusCode == 200) {
-            for (var i = 0; i < photos.length; i++) {
-    final file = File(photos[i]['filename']);
-    if (await file.exists()) {
-      await file.delete();
-    }
-  }
-
-          Fluttertoast.showToast(
-            msg: "La identificación ha sido creada con éxito",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.greenAccent,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-      
-
-          Navigator.pop(build);
-        } else {
-          Fluttertoast.showToast(
-            msg: "La identificación no se pudo crear",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 5,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
+      );
+      if (response.statusCode == 200) {
+        for (var i = 0; i < photos.length; i++) {
+          final file = File(photos[i]['filename']);
+          if (await file.exists()) {
+            await file.delete();
+          }
         }
+
+        Fluttertoast.showToast(
+          msg: "La identificación ha sido creada con éxito",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.greenAccent,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+
+        Navigator.pop(build);
+      } else {
+        Fluttertoast.showToast(
+          msg: "La identificación no se pudo crear",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
     } catch (e) {
       throw Exception('');
     }

@@ -138,7 +138,7 @@ class _IdentificationViewState extends State<IdentificationView> {
           title: Text('Identificación'),
           actions: [
             Visibility(
-              visible: _procedures.isNotEmpty && _controller.carData != null,
+              visible: _procedures.isNotEmpty && _controller.carData != null && _photos.isNotEmpty,
               child: FloatingActionButton(
                 onPressed: () async {
                   setState(() {

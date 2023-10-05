@@ -69,18 +69,6 @@ class HolgurasController {
       textColor: Colors.white,
       fontSize: 16.0,
     );
-  } finally {
-    if (searchCompleted == false) {
-      Fluttertoast.showToast(
-        msg: "No se pudo conectar con el servidor",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    }
   }
 }
   Future<Cars> getInformationCar(int vehiCodigo) async {
@@ -138,8 +126,16 @@ class HolgurasController {
         throw Exception('Failed to load cars');
       }
     } catch (error) {
-      print(error);
-    }
+       Fluttertoast.showToast(
+      msg: "No se pudo conectar con el servidor",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
   }
   Future<List<ListProcedureHolguras>> listInspectionProcedure() async {
     try {
