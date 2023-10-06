@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
    return MaterialApp(
   title: MyApp._title,
-  home: LoginView(),
+  home: IdentificationView(),
   routes: {
     '/login': (context) => LoginView(),
     '/identification': (context) => IdentificationView(),

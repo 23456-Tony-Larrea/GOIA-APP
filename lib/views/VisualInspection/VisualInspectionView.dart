@@ -269,7 +269,7 @@ return Card(
                     ),
                   ),
                   textCapitalization: TextCapitalization.characters),
-              SizedBox(height: 16.0),
+              SizedBox(height: 2),
               Stack(
                 children: [
                   SizedBox(
@@ -328,66 +328,128 @@ return Card(
                     ),
                 ],
               ),
-              SizedBox(height: 16.0),
+              SizedBox(height: 2),
               if (_controller.carData != null)
-                Card(
-                  elevation: 4,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        leading: Icon(Icons.info),
-                        title: Text(
-                          'Información del vehículo',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+              Card(
+                    elevation: 4,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          leading: Icon(Icons.info),
+                          title: Text(
+                            'Información del vehículo',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
                         ),
-                      ),
-                     Padding(
-  padding: const EdgeInsets.all(16.0),
-  child: Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoFieldWithIcon(
-              'Marca',
-              _controller.carData!.marca,
-              Icons.directions_car, // Icono para la marca
-            ),
-            _buildInfoFieldWithIcon(
-              'Modelo',
-              _controller.carData!.modelo,
-              Icons.car_rental, // Icono para el modelo
-            ),
-          ],
-        ),
-      ),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoFieldWithIcon(
-              'Nombre',
-              _controller.carData!.cliente,
-              Icons.person, // Icono para el cliente
-            ),
-            _buildInfoFieldWithIcon(
-              'Cédula',
-              _controller.carData!.cedula,
-              Icons.credit_card, // Icono para la cédula
-            ),
-          ],
-        ),
-      ),
-    ],
-  ),
-)
-                    ],
-                  ),
-                )
+                        Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildInfoFieldWithIcon(
+                                      'Marca',
+                                      _controller.carData!.marca,
+                                      Icons
+                                          .directions_car, // Icono para la marca
+                                    ),
+                                    _buildInfoFieldWithIcon(
+                                      'Modelo',
+                                      _controller.carData!.modelo,
+                                      Icons.car_rental, // Icono para el modelo
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildInfoFieldWithIcon(
+                                      'Nombre',
+                                      _controller.carData!.cliente,
+                                      Icons.person, // Icono para el cliente
+                                    ),
+                                    _buildInfoFieldWithIcon(
+                                      'Cédula',
+                                      _controller.carData!.cedula,
+                                      Icons.credit_card, // Icono para la cédula
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_procedureLists.isNotEmpty &&
+                            _controller.carData != null)
+                          TypeAheadField(
+                            textFieldConfiguration: TextFieldConfiguration(
+                              decoration: InputDecoration(
+                                hintText: 'Buscar por codigo',
+                              ),
+                                                                      inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
+                                        ],
+                                        keyboardType: TextInputType.number,
+
+                            ),
+                            suggestionsCallback: (pattern) async {
+                              final suggestions = _procedureLists
+                                  .expand((procedures) => procedures)
+                                  .where((procedure) =>
+                                      "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
+                                          .toLowerCase()
+                                          .contains(pattern.toLowerCase()))
+                                  .toList();
+                              return suggestions;
+                            },
+                            itemBuilder: (context, suggestion) {
+                              return ListTile(
+                                title: Row(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      suggestion.abreviaturaDescripcion,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                subtitle: Text(
+                                  suggestion.procedimiento,
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              );
+                            },
+                            onSuggestionSelected: (suggestion) {
+                              _showDefectsModal(context, suggestion.defectos,
+                                  suggestion.procedimiento);
+                            },
+                            
+                          ),
+                      ],
+                    ),
+                  )
               else if (_controller.searchCompleted)
                 Card(
                   elevation: 4,
