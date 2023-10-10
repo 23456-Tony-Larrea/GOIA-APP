@@ -29,6 +29,10 @@ class _HolgurasViewState extends State<HolgurasView> {
   bool isLoading = false;
   bool hasSearched = false;
   bool _saving = false; // variable para controlar el estado del ProgressBar
+        bool isTextFieldEnabled = true; // Add this variable to track the TextField's enabled state
+    bool isClearIconEnabled = false; // Initialize the variable to false
+
+
 
   @override
   void initState() {
@@ -190,86 +194,67 @@ class _HolgurasViewState extends State<HolgurasView> {
                 ),
               ),
               SizedBox(height: 2),
-              TextField(
-                  controller: _controller.placaController,
-                  decoration: InputDecoration(
-                    hintText: 'Buscar por placa',
-                    prefixIcon: Icon(Icons.search),
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
-                      onPressed: () {
-                        _controller.placaController.clear();
-                        setState(() {
-                          _controller.carData = null;
-                          _controller.searchCompleted = false;
-                          //limpiar list
-                          _holgurasLists.clear();
-                          hasSearched = false;
-                        });
-                      },
-                    ),
-                  ),
-                  textCapitalization: TextCapitalization.characters
-                  ),
-              SizedBox(height: 2),
-              Stack(
-                children: [
-                  SizedBox(
-                    width: 580.0,
-                    child: ElevatedButton(
-                      onPressed: hasSearched
-                          ? null
-                          : () async {
-                              setState(() {
-                                isLoading = true;
-                              });
+Row(
+  children: [
+    Expanded(
+      child: TextField(
+        controller: _controller.placaController,
+        decoration: InputDecoration(
+          labelText: 'Digite su placa', // Add the label text
+        ),
+        textCapitalization: TextCapitalization.characters,
+        enabled: isTextFieldEnabled, // Use the variable to enable or disable the TextField
+        onChanged: (value) {
+          setState(() {
+            if (value.isEmpty) {
+              isClearIconEnabled = false; // Disable the clear icon if the TextField is empty
+            } else {
+              isClearIconEnabled = true; // Enable the clear icon if the TextField is not empty
+            }
+          });
+        },
+      ),
+    ),
+    SizedBox(width: 16),
+    FloatingActionButton(
+      onPressed: () async {
+        if (hasSearched) { // Check if a search has been performed
+          _controller.placaController.clear();
+          hasSearched = false;
+          setState(() {
+            _controller.carData = null;
+            _holgurasLists.clear();
+            isTextFieldEnabled = true; // Enable the TextField after clear
+          });
+        } else {
+          showDialog(
+            context: context,
+            barrierDismissible: false, // Prevent the user from dismissing the dialog
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Cargando RTV, Por favor espere...'),
+              );
+            },
+          );
 
-                              await _controller.searchVehicle(
-                                  context, _controller.placaController.text);
-                              await _loadProcedures();
-                              setState(() {
-                                isLoading = false;
-                                hasSearched = true;
-                              });
-                            },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (isLoading)
-                            SizedBox(
-                              width: 24.0,
-                              height: 24.0,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3.0,
-                              ),
-                            ),
-                          SizedBox(width: isLoading ? 8.0 : 0.0),
-                          Text(
-                            isLoading
-                                ? 'Cargando RTV, por favor espere...'
-                                : 'Buscar',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (isLoading)
-                    Positioned.fill(
-                      child: Container(
-                        color: Colors.white.withOpacity(0.5),
-                        child: Center(
-                          child: SizedBox(
-                            width: 48.0,
-                            height: 48.0,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 4.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+          await _controller.searchVehicle(
+            context,
+            _controller.placaController.text,
+          );
+          await _loadProcedures();
+          Navigator.pop(context); // Close the dialog
+          setState(() {
+            hasSearched = true;
+            isTextFieldEnabled = false; // Disable the TextField after search
+          });
+        }
+      },
+      child: hasSearched // Use the variable to change the icon
+          ? Icon(Icons.clear)
+          : Icon(Icons.search),
+    ),
+  ],
+),
               SizedBox(height: 2),
               if (_controller.carData != null)
               Card(
@@ -410,6 +395,8 @@ class _HolgurasViewState extends State<HolgurasView> {
                               _controller.carData = null;
                               _controller.searchCompleted = false;
                               hasSearched = false;
+                              isTextFieldEnabled = true;
+                              
                             });
                           },
                           child: Text('Realizar una nueva consulta'),

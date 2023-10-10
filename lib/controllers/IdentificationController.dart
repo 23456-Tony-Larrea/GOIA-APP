@@ -37,7 +37,7 @@ class IdentificationController {
           Fluttertoast.showToast(
             msg: "El vehículo no se pudo encontrar",
             toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
+            gravity: ToastGravity.BOTTOM,
             timeInSecForIosWeb: 5,
             backgroundColor: Colors.red,
             textColor: Colors.white,
@@ -52,7 +52,7 @@ class IdentificationController {
           Fluttertoast.showToast(
             msg: "Información encontrada con éxito",
             toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
+            gravity: ToastGravity.BOTTOM,
             timeInSecForIosWeb: 1,
             backgroundColor: Colors.greenAccent,
             textColor: Colors.white,
@@ -67,7 +67,7 @@ class IdentificationController {
       Fluttertoast.showToast(
         msg: "No se pudo conectar con el servidor",
         toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
+        gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.red,
         textColor: Colors.white,
@@ -133,7 +133,7 @@ class IdentificationController {
       Fluttertoast.showToast(
         msg: "No se pudo conectar con el servidor",
         toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
+        gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.red,
         textColor: Colors.white,
@@ -176,12 +176,11 @@ class IdentificationController {
         Fluttertoast.showToast(
           msg: "el vehiculo no tiene RTV",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 5,
           backgroundColor: Colors.red,
           textColor: Colors.white,
           fontSize: 16.0,
-          webPosition: "center",
         );
         throw Exception('Vehicle has no RTV');
       }
@@ -326,7 +325,7 @@ class IdentificationController {
         Fluttertoast.showToast(
           msg: "La identificación ha sido creada con éxito",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.greenAccent,
           textColor: Colors.white,
@@ -338,7 +337,7 @@ class IdentificationController {
         Fluttertoast.showToast(
           msg: "La identificación no se pudo crear",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 5,
           backgroundColor: Colors.red,
           textColor: Colors.white,
@@ -529,7 +528,7 @@ class IdentificationController {
         Fluttertoast.showToast(
           msg: "La identificación ha sido creada con éxito",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.greenAccent,
           textColor: Colors.white,
@@ -541,7 +540,7 @@ class IdentificationController {
         Fluttertoast.showToast(
           msg: "La identificación no se pudo crear",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 5,
           backgroundColor: Colors.red,
           textColor: Colors.white,

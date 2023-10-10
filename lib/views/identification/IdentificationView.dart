@@ -36,6 +36,11 @@ class _IdentificationViewState extends State<IdentificationView> {
   late CameraController _controller2;
   final ImageStorage imageStorage = ImageStorage(); // Instancia de ImageStorage
   final TextEditingController _kilometrajeController = TextEditingController();
+  bool _isProcessingImage = false;
+  bool isTextFieldEnabled = true; // Add this variable to track the TextField's enabled state
+    bool isClearIconEnabled = false; // Initialize the variable to false
+
+
 
   String searchValue = '';
 
@@ -140,9 +145,7 @@ class _IdentificationViewState extends State<IdentificationView> {
           title: Text('Identificación'),
           actions: [
             Visibility(
-              visible: _procedures.isNotEmpty &&
-                  _controller.carData != null &&
-                  _photos.isNotEmpty,
+              visible: _procedures.isNotEmpty && _controller.carData != null,
               child: FloatingActionButton(
                 onPressed: () async {
                   setState(() {
@@ -158,8 +161,8 @@ class _IdentificationViewState extends State<IdentificationView> {
                     _controller.carData = null;
                     _controller.searchCompleted = false;
                     hasSearched = false;
-                    //limpiar el inpur de kilometraje
                     _kilometrajeController.clear();
+                    _photos.clear();
                   });
                   openModal();
                   await Future.delayed(
@@ -205,408 +208,405 @@ class _IdentificationViewState extends State<IdentificationView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
-                  controller: _controller.placaController,
-                  decoration: InputDecoration(
-                    hintText: 'Buscar por placa',
-                    prefixIcon: Icon(Icons.search),
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
-                      onPressed: () {
-                        _controller.placaController.clear();
-                        hasSearched = false;
-                        _kilometrajeController.clear();
-                        setState(() {
-                          _controller.carData =
-                              null; // Limpiamos la información del vehículo
-                          _controller.searchCompleted = false;
-                          //limpiar procedures
-                          _procedures.clear();
-                          hasSearched = false;
-                        });
-                      },
-                    ),
-                  ),
-                  textCapitalization: TextCapitalization.characters),
-              Stack(
-                children: [
-                  SizedBox(
-                    width: 580.0,
-                    child: ElevatedButton(
-                      onPressed: hasSearched
-                          ? null
-                          : () async {
-                              setState(() {
-                                isLoading = true;
-                              });
+Row(
+  children: [
+    Expanded(
+      child: TextField(
+        controller: _controller.placaController,
+        decoration: InputDecoration(
+          labelText: 'Digite su placa', // Add the label text
+        ),
+        textCapitalization: TextCapitalization.characters,
+        enabled: isTextFieldEnabled, // Use the variable to enable or disable the TextField
+        onChanged: (value) {
+          setState(() {
+            if (value.isEmpty) {
+              isClearIconEnabled = false; // Disable the clear icon if the TextField is empty
+            } else {
+              isClearIconEnabled = true; // Enable the clear icon if the TextField is not empty
+            }
+          });
+        },
+      ),
+    ),
+    SizedBox(width: 16),
+    FloatingActionButton(
+      onPressed: () async {
+        if (hasSearched) { // Check if a search has been performed
+          _controller.placaController.clear();
+          hasSearched = false;
+          _kilometrajeController.clear();
+          setState(() {
+            _controller.carData = null;
+            _procedures.clear();
+            _photos.clear();
+            isTextFieldEnabled = true; // Enable the TextField after clear
+          });
+        } else {
+          showDialog(
+            context: context,
+            barrierDismissible: false, // Prevent the user from dismissing the dialog
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Cargando RTV, Por favor espere...'),
+              );
+            },
+          );
 
-                              await _controller.searchVehicle(
-                                  context, _controller.placaController.text);
-                              await _getProcedures();
-                              setState(() {
-                                isLoading = false;
-                                hasSearched = true;
-                              });
-                            },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (isLoading)
-                            SizedBox(
-                              width: 24.0,
-                              height: 24.0,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3.0,
+          await _controller.searchVehicle(
+            context,
+            _controller.placaController.text,
+          );
+          await _getProcedures();
+          Navigator.pop(context); // Close the dialog
+          setState(() {
+            hasSearched = true;
+            isTextFieldEnabled = false; // Disable the TextField after search
+          });
+        }
+      },
+      child: hasSearched // Use the variable to change the icon
+          ? Icon(Icons.clear)
+          : Icon(Icons.search),
+    ),
+  ],
+),
+              if (_controller.carData != null)
+                Card(
+                  elevation: 4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        leading: Icon(Icons.info),
+                        title: Text(
+                          'Información del vehículo',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildInfoFieldWithIcon(
+                                    'Marca',
+                                    _controller.carData!.marca,
+                                    Icons.directions_car, // Icono para la marca
+                                  ),
+                                  _buildInfoFieldWithIcon(
+                                    'Modelo',
+                                    _controller.carData!.modelo,
+                                    Icons.car_rental, // Icono para el modelo
+                                  ),
+                                ],
                               ),
                             ),
-                          SizedBox(width: isLoading ? 8.0 : 0.0),
-                          Text(
-                            isLoading
-                                ? 'Cargando RTV, por favor espere...'
-                                : 'Buscar',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (isLoading)
-                    Positioned.fill(
-                      child: Container(
-                        color: Colors.white.withOpacity(0.5),
-                        child: Center(
-                          child: SizedBox(
-                            width: 48.0,
-                            height: 48.0,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 4.0,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildInfoFieldWithIcon(
+                                    'Nombre',
+                                    _controller.carData!.cliente,
+                                    Icons.person, // Icono para el cliente
+                                  ),
+                                  _buildInfoFieldWithIcon(
+                                    'Cédula',
+                                    _controller.carData!.cedula,
+                                    Icons.credit_card, // Icono para la cédula
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                    ),
-                ],
-              ),
-              if (_controller.carData != null) 
-              Card(
-                    elevation: 4,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ListTile(
-                          leading: Icon(Icons.info),
-                          title: Text(
-                            'Información del vehículo',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                        ),
+                      if (_procedures.isNotEmpty && _controller.carData != null)
                         Padding(
-                          padding: const EdgeInsets.all(1.0),
+                          padding: EdgeInsets.symmetric(horizontal: 0),
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _buildInfoFieldWithIcon(
-                                      'Marca',
-                                      _controller.carData!.marca,
-                                      Icons
-                                          .directions_car, // Icono para la marca
-                                    ),
-                                    _buildInfoFieldWithIcon(
-                                      'Modelo',
-                                      _controller.carData!.modelo,
-                                      Icons.car_rental, // Icono para el modelo
-                                    ),
+                                    TextFormField(
+                                      controller: _kilometrajeController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Escriba el Kilometraje',
+                                        prefixIcon: Icon(Icons.directions_car),
+                                        contentPadding: EdgeInsets.symmetric(
+                                            horizontal:
+                                                2), // Reduce el padding horizontal
+                                      ),
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (value) {
+                                        _controller.updateKilometraje(value);
+                                      },
+                                    )
                                   ],
                                 ),
                               ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildInfoFieldWithIcon(
-                                      'Nombre',
-                                      _controller.carData!.cliente,
-                                      Icons.person, // Icono para el cliente
-                                    ),
-                                    _buildInfoFieldWithIcon(
-                                      'Cédula',
-                                      _controller.carData!.cedula,
-                                      Icons.credit_card, // Icono para la cédula
-                                    ),
-                                  ],
-                                ),
+                              FloatingActionButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return Card(
+                                        child: SingleChildScrollView(
+                                          child: Column(
+                                            children: [
+                                              ListTile(
+                                                title: Text('Cámara'),
+                                              ),
+                                              FutureBuilder<void>(
+                                                future:
+                                                    _initializeControllerFuture,
+                                                builder: (context, snapshot) {
+                                                  if (snapshot
+                                                          .connectionState ==
+                                                      ConnectionState.done) {
+                                                    return CameraPreview(
+                                                        _controller2);
+                                                  } else {
+                                                    return Center(
+                                                        child:
+                                                            CircularProgressIndicator());
+                                                  }
+                                                },
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Align(
+                                                  alignment: Alignment.center,
+                                                  child: Column(
+                                                    children: [
+                                                      IconButton(
+                                                        icon: Icon(
+                                                            Icons.photo_camera),
+                                                        onPressed: () async {
+                                                          if (_photos.length >=
+                                                              5) {
+                                                            _showMaxPhotosAlert();
+                                                          } else {
+                                                            if (_controller2
+                                                                .value
+                                                                .isInitialized) {
+                                                              try {
+                                                                setState(() {
+            _isProcessingImage = true; // Aquí establecemos el valor de _isProcessingImage a true
+          });
+                                                                final XFile
+                                                                    photo =
+                                                                     await _controller2
+                                                                        .takePicture();
+                                                                final File
+                                                                    imageFile =
+                                                                    File(photo
+                                                                        .path);
+                                                                final List<int>
+                                                                    imageBytes =
+                                                                    await imageFile
+                                                                        .readAsBytes();
+                                                                final img.Image?
+                                                                    image =
+                                                                    img.decodeImage(
+                                                                        Uint8List.fromList(
+                                                                            imageBytes));
+                                                                final List<int>
+                                                                    jpegBytes =
+                                                                    img.encodeJpg(
+                                                                        image!);
+                                                                final String
+                                                                    base64Image =
+                                                                    base64Encode(
+                                                                        jpegBytes);
+                                                                imageStorage
+                                                                    .addBase64Image(
+                                                                        base64Image);
+                                                                setState(() {
+                                                                  _photos.add(
+                                                                      photo);
+                
+                                                                });
+                                                                 _isProcessingImage = true; // Aquí establecemos el valor de _isProcessingImage a true
+
+                                                                Navigator.pop(
+                                                                    context);
+                                                              } catch (e) {
+                                                                print(
+                                                                    'Error al tomar la foto: $e');
+                                                              }
+                                                            }
+                                                          }
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+  child: Stack(
+    children: [
+      Icon(Icons.camera_alt),
+      if (_isProcessingImage) // Mostramos el spinner si _isProcessingImage es true
+        Positioned.fill(
+          child: CircularProgressIndicator(),
+        ),
+    ],
+  ),
                               ),
                             ],
                           ),
                         ),
-                        if (_procedures.isNotEmpty &&
-                            _controller.carData != null)
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                      SizedBox(width: 2),
+                      if (_photos.isNotEmpty)
+  Card(
+    child: Column(
+      children: [
+        ListTile(
+          title: Text('Fotos Tomadas', style: TextStyle(fontSize: 16)),
+        ),
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _photos.length,
+            itemBuilder: (context, index) {
+              final photo = _photos[index];
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Stack(
+                  children: [
+                    Image.file(
+                      File(photo.path),
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('Confirmación'),
+                              content: Text('¿Seguro que quieres eliminar la foto?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context); // Cerrar el diálogo
+                                    setState(() {
+                                      _removePhoto(index);
+                                    });
+                                  },
+                                  child: Text('Eliminar'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context); // Cerrar el diálogo
+                                  },
+                                  child: Text('Cancelar'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: Icon(
+                          Icons.delete,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    ),
+  ),
+                      SizedBox(height: 2),
+                      if (_procedures.isNotEmpty && _controller.carData != null)
+                        TypeAheadField(
+                          textFieldConfiguration: TextFieldConfiguration(
+                            decoration: InputDecoration(
+                              hintText: 'Buscar por codigo',
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            keyboardType: TextInputType.number,
+                          ),
+                          suggestionsCallback: (pattern) async {
+                            final suggestions = _procedures
+                                .expand((procedures) => procedures)
+                                .where((procedure) =>
+                                    "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
+                                        .toLowerCase()
+                                        .contains(pattern.toLowerCase()))
+                                .toList();
+                            return suggestions;
+                          },
+                          itemBuilder: (context, suggestion) {
+                            return ListTile(
+                              title: Row(
+                                children: [
+                                  Row(
                                     children: [
-                                      TextFormField(
-                                        controller: _kilometrajeController,
-                                        decoration: InputDecoration(
-                                          labelText: 'Escriba el Kilometraje',
-                                          prefixIcon:
-                                              Icon(Icons.directions_car),
-                                          contentPadding: EdgeInsets.symmetric(
-                                              horizontal:
-                                                  2), // Reduce el padding horizontal
+                                      Text(
+                                        "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
-                                        ],
-                                        keyboardType: TextInputType.number,
-                                        onChanged: (value) {
-                                          _controller.updateKilometraje(value);
-                                        },
-                                      )
+                                      ),
                                     ],
                                   ),
-                                ),
-                                FloatingActionButton(
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return Card(
-                                          child: SingleChildScrollView(
-                                            // Agregamos SingleChildScrollView aquí
-                                            child: Column(
-                                              children: [
-                                                ListTile(
-                                                  title: Text('Cámara'),
-                                                ),
-                                                FutureBuilder<void>(
-                                                  future:
-                                                      _initializeControllerFuture,
-                                                  builder: (context, snapshot) {
-                                                    if (snapshot
-                                                            .connectionState ==
-                                                        ConnectionState.done) {
-                                                      return CameraPreview(
-                                                          _controller2);
-                                                    } else {
-                                                      return Center(
-                                                          child:
-                                                              CircularProgressIndicator());
-                                                    }
-                                                  },
-                                                ),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Align(
-                                                    alignment: Alignment.center,
-                                                    child: Column(
-                                                      children: [
-                                                        IconButton(
-                                                            icon: Icon(Icons
-                                                                .photo_camera),
-                                                            onPressed:
-                                                                () async {
-                                                              if (_photos
-                                                                      .length >=
-                                                                  5) {
-                                                                _showMaxPhotosAlert();
-                                                              } else {
-                                                                if (_controller2
-                                                                    .value
-                                                                    .isInitialized) {
-                                                                  try {
-                                                                    final XFile
-                                                                        photo =
-                                                                        await _controller2
-                                                                            .takePicture();
-
-                                                                    final File
-                                                                        imageFile =
-                                                                        File(photo
-                                                                            .path);
-                                                                    final List<
-                                                                            int>
-                                                                        imageBytes =
-                                                                        await imageFile
-                                                                            .readAsBytes();
-
-                                                                    final img
-                                                                        .Image?
-                                                                        image =
-                                                                        img.decodeImage(
-                                                                            Uint8List.fromList(imageBytes));
-                                                                    final List<
-                                                                            int>
-                                                                        jpegBytes =
-                                                                        img.encodeJpg(
-                                                                            image!);
-
-                                                                    final String
-                                                                        base64Image =
-                                                                        base64Encode(
-                                                                            jpegBytes);
-                                                                    imageStorage
-                                                                        .addBase64Image(
-                                                                            base64Image);
-
-                                                                    setState(
-                                                                        () {
-                                                                      _photos.add(
-                                                                          photo);
-                                                                    });
-                                                                    
-                                                                              Navigator.pop(context);
-
-                                                                  } catch (e) {
-                                                                    print(
-                                                                        'Error al tomar la foto: $e');
-                                                                  }
-                                                                }
-                                                              }
-                                                            }),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                  child: Icon(Icons.camera_alt),
-                                ),
-                              ],
-                            ),
-                          ),
-                        SizedBox(width: 2),
-  if (_photos.isNotEmpty)
-                          Card(
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: Text('Fotos Tomadas',
-                                      style: TextStyle(fontSize: 16)),
-                                ),
-                               SizedBox(
-  height: 100, // Altura de la lista horizontal
-  child: ListView.builder(
-    scrollDirection: Axis.horizontal, // Dirección horizontal
-    itemCount: _photos.length,
-    itemBuilder: (context, index) {
-      final photo = _photos[index];
-      return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Stack(
-          children: [
-            Image.file(
-              File(photo.path),
-              width: 100, // Ancho de cada imagen
-              height: 100, // Altura de cada imagen
-              fit: BoxFit.cover, // Ajuste de la imagen
-            ),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _removePhoto(index);
-                  });
-                },
-                child: Icon(
-                  Icons.delete,
-                  color: Colors.red,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-  ),
-),
-                              ],
-                            ),
-                          ),
-                        SizedBox(height: 2),
-                        if (_procedures.isNotEmpty &&
-                            _controller.carData != null)
-                          TypeAheadField(
-                            textFieldConfiguration: TextFieldConfiguration(
-                              decoration: InputDecoration(
-                                hintText: 'Buscar por codigo',
-                              ),
-                                                                      inputFormatters: [
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
-                                        ],
-                                        keyboardType: TextInputType.number,
-
-                            ),
-                            suggestionsCallback: (pattern) async {
-                              final suggestions = _procedures
-                                  .expand((procedures) => procedures)
-                                  .where((procedure) =>
-                                      "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
-                                          .toLowerCase()
-                                          .contains(pattern.toLowerCase()))
-                                  .toList();
-                              return suggestions;
-                            },
-                            itemBuilder: (context, suggestion) {
-                              return ListTile(
-                                title: Row(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
+                                  Text(
+                                    suggestion.abreviaturaDescripcion,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
                                     ),
-                                    Text(
-                                      suggestion.abreviaturaDescripcion,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                subtitle: Text(
-                                  suggestion.procedimiento,
-                                  style: TextStyle(
-                                    color: Colors.grey,
                                   ),
+                                ],
+                              ),
+                              subtitle: Text(
+                                suggestion.procedimiento,
+                                style: TextStyle(
+                                  color: Colors.grey,
                                 ),
-                              );
-                            },
-                            onSuggestionSelected: (suggestion) {
-                              _showDefectsModal(context, suggestion.defectos,
-                                  suggestion.procedimiento);
-                            },
-                            
-                          ),
-                      ],
-                    ),
-                  )
+                              ),
+                            );
+                          },
+                          onSuggestionSelected: (suggestion) {
+                            _showDefectsModal(context, suggestion.defectos,
+                                suggestion.procedimiento);
+                          },
+                        ),
+                    ],
+                  ),
+                )
               else if (_controller.searchCompleted)
                 Card(
                   elevation: 4,
@@ -625,6 +625,8 @@ class _IdentificationViewState extends State<IdentificationView> {
                               _controller.carData = null;
                               _controller.searchCompleted = false;
                               hasSearched = false;
+                              isTextFieldEnabled = true;
+                              
                             });
                           },
                           child: Text('Realizar una nueva consulta'),
@@ -804,7 +806,7 @@ class _IdentificationViewState extends State<IdentificationView> {
                 size:
                     24, // Puedes ajustar el tamaño del icono según tus preferencias
               ),
-              SizedBox(width:12), // Espacio entre el icono y el texto
+              SizedBox(width: 8), // Espacio entre el icono y el texto
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

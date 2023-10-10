@@ -33,7 +33,7 @@ class HolgurasController {
         Fluttertoast.showToast(
           msg: "El vehículo no se pudo encontrar",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 5,
           backgroundColor: Colors.red,
           textColor: Colors.white,
@@ -48,7 +48,7 @@ class HolgurasController {
         Fluttertoast.showToast(
           msg: "Información encontrada con éxito",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.greenAccent,
           textColor: Colors.white,
@@ -63,7 +63,7 @@ class HolgurasController {
     Fluttertoast.showToast(
       msg: "No se pudo conectar con el servidor",
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
+      gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
       backgroundColor: Colors.red,
       textColor: Colors.white,
@@ -115,7 +115,7 @@ class HolgurasController {
           Fluttertoast.showToast(
             msg: "el vehiculo no tiene RTV",
             toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
+            gravity: ToastGravity.BOTTOM,
             timeInSecForIosWeb: 5,
             backgroundColor: Colors.red,
             textColor: Colors.white,
@@ -129,7 +129,7 @@ class HolgurasController {
        Fluttertoast.showToast(
       msg: "No se pudo conectar con el servidor",
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
+      gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
       backgroundColor: Colors.red,
       textColor: Colors.white,
@@ -183,7 +183,7 @@ class HolgurasController {
     Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
+      gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
       backgroundColor: Colors.redAccent,
       textColor: Colors.white,
@@ -366,7 +366,7 @@ class HolgurasController {
         Fluttertoast.showToast(
           msg: "La identificación no se pudo crear",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 5,
           backgroundColor: Colors.red,
           textColor: Colors.white,
@@ -531,7 +531,7 @@ class HolgurasController {
         Fluttertoast.showToast(
           msg: "La identificación ha sido creada con éxito",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.greenAccent,
           textColor: Colors.white,
@@ -542,7 +542,7 @@ class HolgurasController {
         Fluttertoast.showToast(
           msg: "La identificación no se pudo crear",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 5,
           backgroundColor: Colors.red,
           textColor: Colors.white,

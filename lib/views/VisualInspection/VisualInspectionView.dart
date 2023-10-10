@@ -24,6 +24,10 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
   bool isLoading = false;
   bool hasSearched = false;
     bool _saving = false; // variable para controlar el estado del ProgressBar
+      bool isTextFieldEnabled = true; // Add this variable to track the TextField's enabled state
+    bool isClearIconEnabled = false; // Initialize the variable to false
+
+
 
 
   @override
@@ -206,6 +210,7 @@ return Card(
         _controller.searchCompleted = false;
         hasSearched = false;
       });
+    
       openModal();
       await Future.delayed(Duration(seconds: 3)); // esperamos 3 segundos
       Navigator.of(context).pop(); // cerramos el AlertDialog
@@ -248,86 +253,67 @@ return Card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
-                  controller: _controller.placaController,
-                  decoration: InputDecoration(
-                    hintText: 'Buscar por placa',
-                    prefixIcon: Icon(Icons.search),
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
-                      onPressed: () {
-                        _controller.placaController.clear();
-                        setState(() {
-                          _controller.carData =
-                              null; // Limpiamos la información del vehículo
-                          _controller.searchCompleted = false;
-                          //clear list
-                          _procedureLists.clear();
-                          hasSearched = false;
-                        });
-                      },
-                    ),
-                  ),
-                  textCapitalization: TextCapitalization.characters),
-              SizedBox(height: 2),
-              Stack(
-                children: [
-                  SizedBox(
-                    width: 580.0,
-                    child: ElevatedButton(
-                      onPressed: hasSearched
-                          ? null
-                          : () async {
-                              setState(() {
-                                isLoading = true;
-                              });
+Row(
+  children: [
+    Expanded(
+      child: TextField(
+        controller: _controller.placaController,
+        decoration: InputDecoration(
+          labelText: 'Digite su placa', // Add the label text
+        ),
+        textCapitalization: TextCapitalization.characters,
+        enabled: isTextFieldEnabled, // Use the variable to enable or disable the TextField
+        onChanged: (value) {
+          setState(() {
+            if (value.isEmpty) {
+              isClearIconEnabled = false; // Disable the clear icon if the TextField is empty
+            } else {
+              isClearIconEnabled = true; // Enable the clear icon if the TextField is not empty
+            }
+          });
+        },
+      ),
+    ),
+    SizedBox(width: 16),
+    FloatingActionButton(
+      onPressed: () async {
+        if (hasSearched) { // Check if a search has been performed
+          _controller.placaController.clear();
+          hasSearched = false;
+          setState(() {
+            _controller.carData = null;
+            _procedureLists.clear();
+            isTextFieldEnabled = true; // Enable the TextField after clear
+          });
+        } else {
+          showDialog(
+            context: context,
+            barrierDismissible: false, // Prevent the user from dismissing the dialog
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Cargando RTV, Por favor espere...'),
+              );
+            },
+          );
 
-                              await _controller.searchVehicle(
-                                  context, _controller.placaController.text);
-                              await _loadProcedures();
-                              setState(() {
-                                isLoading = false;
-                                hasSearched = true;
-                              });
-                            },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (isLoading)
-                            SizedBox(
-                              width: 24.0,
-                              height: 24.0,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3.0,
-                              ),
-                            ),
-                          SizedBox(width: isLoading ? 8.0 : 0.0),
-                          Text(
-                            isLoading
-                                ? 'Cargando RTV, por favor espere...'
-                                : 'Buscar',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (isLoading)
-                    Positioned.fill(
-                      child: Container(
-                        color: Colors.white.withOpacity(0.5),
-                        child: Center(
-                          child: SizedBox(
-                            width: 48.0,
-                            height: 48.0,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 4.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+          await _controller.searchVehicle(
+            context,
+            _controller.placaController.text,
+          );
+          await _loadProcedures();
+          Navigator.pop(context); // Close the dialog
+          setState(() {
+            hasSearched = true;
+            isTextFieldEnabled = false; // Disable the TextField after search
+          });
+        }
+      },
+      child: hasSearched // Use the variable to change the icon
+          ? Icon(Icons.clear)
+          : Icon(Icons.search),
+    ),
+  ],
+),
               SizedBox(height: 2),
               if (_controller.carData != null)
               Card(
@@ -469,6 +455,8 @@ return Card(
                                   null; // Limpiamos la información del vehículo
                               _controller.searchCompleted = false;
                               hasSearched = false;
+                              isTextFieldEnabled = true;
+                              
                             });
                           },
                           child: Text('Realizar una nueva consulta'),
@@ -483,60 +471,6 @@ return Card(
     child: SingleChildScrollView(
       child: Column(
         children: [
-Card(
-  child: TypeAheadField(
-    textFieldConfiguration: TextFieldConfiguration(
-      decoration: InputDecoration(
-        hintText: 'Buscar por codigo',
-      ),
-      textCapitalization: TextCapitalization.characters,
-    ),
-    suggestionsCallback: (pattern) async {
-      final suggestions = _procedureLists
-          .expand((procedures) => procedures)
-          .where((procedure) =>
-              "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
-                  .toLowerCase()
-                  .contains(pattern.toLowerCase()))
-          .toList();
-      return suggestions;
-    },
-    itemBuilder: (context, suggestion) {
-      return ListTile(
-        title: Row(
-          children: [
-            Row(
-              children: [
-                Text(
-                  "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              suggestion.abreviaturaDescripcion,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-        subtitle: Text(
-          suggestion.procedimiento,
-          style: TextStyle(
-            color: Colors.grey,
-          ),
-        ),
-      );
-    },
-    onSuggestionSelected: (suggestion) {
-      _showDefectsModal(context, suggestion.defectos, suggestion.procedimiento);
-    },
-  ),
-),
           SizedBox(height: 16),
           Card(
             elevation: 4,

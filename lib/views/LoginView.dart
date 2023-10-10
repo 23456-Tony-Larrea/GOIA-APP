@@ -142,7 +142,7 @@ Center(
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: Text(
-              'RTV-SYSTEM',
+              'RTV-App',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -163,6 +163,7 @@ Center(
               textCapitalization: TextCapitalization.characters
             ),
           ),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: TextField(

@@ -34,7 +34,7 @@ final TextEditingController observationController = TextEditingController();
         Fluttertoast.showToast(
           msg: "El vehículo no se pudo encontrar",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 5,
           backgroundColor: Colors.red,
           textColor: Colors.white,
@@ -49,7 +49,7 @@ final TextEditingController observationController = TextEditingController();
         Fluttertoast.showToast(
           msg: "Información encontrada con éxito",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.greenAccent,
           textColor: Colors.white,
@@ -64,7 +64,7 @@ final TextEditingController observationController = TextEditingController();
     Fluttertoast.showToast(
       msg: "No se pudo conectar con el servidor",
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
+      gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
       backgroundColor: Colors.red,
       textColor: Colors.white,
@@ -130,7 +130,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
        Fluttertoast.showToast(
       msg: "No se pudo conectar con el servidor",
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
+      gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
       backgroundColor: Colors.red,
       textColor: Colors.white,
@@ -182,7 +182,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
     Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
+      gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
       backgroundColor: Colors.redAccent,
       textColor: Colors.white,
@@ -354,7 +354,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
         Fluttertoast.showToast(
           msg: "La identificación ha sido creada con éxito",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.greenAccent,
           textColor: Colors.white,
@@ -365,7 +365,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
         Fluttertoast.showToast(
           msg: "La identificación no se pudo crear",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 5,
           backgroundColor: Colors.red,
           textColor: Colors.white,
@@ -531,7 +531,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
         Fluttertoast.showToast(
           msg: "La identificación ha sido creada con éxito",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
           backgroundColor: Colors.greenAccent,
           textColor: Colors.white,
@@ -542,7 +542,7 @@ Future<Cars> getInformationCar(int vehiCodigo) async {
         Fluttertoast.showToast(
           msg: "La identificación no se pudo crear",
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 5,
           backgroundColor: Colors.red,
           textColor: Colors.white,
