@@ -141,6 +141,7 @@ class _HolgurasViewState extends State<HolgurasView> {
                   ? CircularProgressIndicator()
                   : Icon(Icons.save),
               mini: true,
+               backgroundColor: Colors.greenAccent,
             ),
           ),
           FloatingActionButton(
@@ -150,23 +151,40 @@ class _HolgurasViewState extends State<HolgurasView> {
             child: Icon(Icons.bluetooth),
             mini: true,
           ),
-          IconButton(
-            icon: Icon(
-              Icons.exit_to_app,
-              color: Colors.white,
+         FloatingActionButton(
+              child: Icon(
+                Icons.exit_to_app,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return ExitView();
+                  },
+                );
+              },
+              mini: true,
+               backgroundColor: Colors.redAccent,
             ),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return ExitView();
-                },
-              );
-            },
-          ),
         ],
       ),
-      body:Padding(
+      body:
+        Stack(  // Utilizamos un Stack para colocar la imagen de fondo
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/fondo.png'),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.5),  // Ajusta la opacidad aquí
+                  BlendMode.dstATop,
+                ),
+              ),
+            ),
+          ),
+      Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -200,7 +218,7 @@ Row(
       child: TextField(
         controller: _controller.placaController,
         decoration: InputDecoration(
-          labelText: 'Digite su placa', // Add the label text
+          labelText: 'Digite la placa', // Add the label text
         ),
         textCapitalization: TextCapitalization.characters,
         enabled: isTextFieldEnabled, // Use the variable to enable or disable the TextField
@@ -252,26 +270,43 @@ Row(
       child: hasSearched // Use the variable to change the icon
           ? Icon(Icons.clear)
           : Icon(Icons.search),
+                                backgroundColor: Colors.orangeAccent,
+
     ),
   ],
 ),
               SizedBox(height: 2),
               if (_controller.carData != null)
               Card(
+                                     color: Color(0xFFF0F0F0),
+
                     elevation: 4,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ListTile(
-                          leading: Icon(Icons.info),
-                          title: Text(
-                            'Información del vehículo',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                       Card(
+                          color: Colors.blue,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ListTile(
+                                leading: Icon(
+                                  Icons.info,
+                                  color: Colors.white,
+                                ),
+                                title: Text(
+                                  'Información del vehículo',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.white),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.all(1.0),
+                          padding: const EdgeInsets.all(10.0),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -313,67 +348,7 @@ Row(
                             ],
                           ),
                         ),
-                        if (_holgurasLists.isNotEmpty &&
-                            _controller.carData != null)
-                          TypeAheadField(
-                            textFieldConfiguration: TextFieldConfiguration(
-                              decoration: InputDecoration(
-                                hintText: 'Buscar por codigo',
-                              ),
-                                                                      inputFormatters: [
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
-                                        ],
-                                        keyboardType: TextInputType.number,
-
-                            ),
-                            suggestionsCallback: (pattern) async {
-                              final suggestions = _holgurasLists
-                                  .expand((procedures) => procedures)
-                                  .where((procedure) =>
-                                      "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
-                                          .toLowerCase()
-                                          .contains(pattern.toLowerCase()))
-                                  .toList();
-                              return suggestions;
-                            },
-                            itemBuilder: (context, suggestion) {
-                              return ListTile(
-                                title: Row(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      suggestion.abreviaturaDescripcion,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                subtitle: Text(
-                                  suggestion.procedimiento,
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              );
-                            },
-                            onSuggestionSelected: (suggestion) {
-                              _showDefectsModal(context, suggestion.defectos,
-                                  suggestion.procedimiento);
-                            },
-                            
-                          ),
+                  
                       ],
                     ),
                   )
@@ -405,7 +380,85 @@ Row(
                     ),
                   ),
                 ),
-    if (_holgurasLists.isNotEmpty && _controller.carData != null)
+          if (_holgurasLists.isNotEmpty &&
+                            _controller.carData != null)
+      
+Row(
+  children: [
+
+    Icon(Icons.list), // Reemplaza "Icons.list" con el icono que desees
+    Text(
+      'Lista de Defectos',
+      style: TextStyle(
+        fontSize: 16, // Ajusta el tamaño de fuente según tus preferencias
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+      SizedBox(
+      width: 10, // Ancho del SizedBox
+    ),
+
+            Flexible(
+      child: TypeAheadField(
+        textFieldConfiguration: TextFieldConfiguration(
+          decoration: InputDecoration(
+            hintText: 'Buscar por código',
+          ),
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+          ],
+          keyboardType: TextInputType.number,
+        ),
+        suggestionsCallback: (pattern) async {
+          final suggestions = _holgurasLists
+              .expand((procedures) => procedures)
+              .where((procedure) =>
+                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
+                      .toLowerCase()
+                      .contains(pattern.toLowerCase()))
+              .toList();
+          return suggestions;
+        },
+        itemBuilder: (context, suggestion) {
+          return ListTile(
+            title: Row(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  suggestion.abreviaturaDescripcion,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            subtitle: Text(
+              suggestion.procedimiento,
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          );
+        },
+        onSuggestionSelected: (suggestion) {
+          _showDefectsModal(context, suggestion.defectos, suggestion.procedimiento);
+        },
+      ),
+    ),
+  ],
+),
+
+ if (_holgurasLists.isNotEmpty && _controller.carData != null)
   Expanded(
     child: SingleChildScrollView(
       child: Column(
@@ -489,6 +542,8 @@ child: Card(
           ),
 
       ),
+        ]
+        ),
 bottomNavigationBar: BottomNavigationBar(
   currentIndex: 2,
   onTap: (index) {
@@ -569,47 +624,53 @@ bottomNavigationBar: BottomNavigationBar(
     );
   }
 
-Widget _buildInfoFieldWithIcon(String label, String value, IconData icon) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              icon, // Aquí se muestra el icono
-              color: Colors.black, // Puedes ajustar el color del icono según tus preferencias
-              size: 24, // Puedes ajustar el tamaño del icono según tus preferencias
-            ),
-            SizedBox(width: 12), // Espacio entre el icono y el texto
-            Column(
+  Widget _buildInfoFieldWithIcon(String label, String value, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon, // Aquí se muestra el icono
+            color: Colors
+                .black, // Puedes ajustar el color del icono según tus preferencias
+            size:
+                24, // Puedes ajustar el tamaño del icono según tus preferencias
+          ),
+          SizedBox(width: 8), // Espacio entre el icono y el texto
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   '$label:',
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    color: Colors.grey,
                   ),
                 ),
-                Text(
-                  value,
-                  style: TextStyle(fontSize: 16),
+                SizedBox(height: 4), // Espacio entre el label y el TextField
+                TextField(
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                  ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  enabled: false, // Deshabilitamos el campo de texto
+                  controller: TextEditingController(text: value),
                 ),
               ],
             ),
-          ],
-        ),
-        Divider( // Línea divisoria
-          color: Colors.grey, // Puedes ajustar el color de la línea según tus preferencias
-          thickness: 1.0, // Puedes ajustar el grosor de la línea según tus preferencias
-        ),
-      ],
-    ),
-  );
-}
+          ),
+        ],
+      ),
+    );
+  }
 
 
   void _showDefectsModal(

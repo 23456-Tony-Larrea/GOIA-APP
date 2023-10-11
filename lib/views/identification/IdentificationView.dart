@@ -16,7 +16,6 @@ import '../../controllers/HolgurasBluetoohController.dart';
 import 'dart:convert';
 import 'package:image/image.dart' as img;
 
-
 class IdentificationView extends StatefulWidget {
   @override
   _IdentificationViewState createState() => _IdentificationViewState();
@@ -38,11 +37,9 @@ class _IdentificationViewState extends State<IdentificationView> {
   final ImageStorage imageStorage = ImageStorage(); // Instancia de ImageStorage
   final TextEditingController _kilometrajeController = TextEditingController();
   bool _isProcessingImage = false;
-  bool isTextFieldEnabled = true; // Add this variable to track the TextField's enabled state
-    bool isClearIconEnabled = false; // Initialize the variable to false
-
-
-
+  bool isTextFieldEnabled =
+      true; // Add this variable to track the TextField's enabled state
+  bool isClearIconEnabled = false; // Initialize the variable to false
 
   String searchValue = '';
 
@@ -138,654 +135,750 @@ class _IdentificationViewState extends State<IdentificationView> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Intercepta el evento de retroceso y realiza la acción que desees,
-        // en este caso, puedes no hacer nada para desactivar el botón de retroceso nativo.
-        return false; // Cambia esto a true si deseas permitir la navegación de retroceso nativa.
+        return false;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('Identificación'),
-          actions: [
-            Visibility(
-              visible: _procedures.isNotEmpty && _controller.carData != null,
-              child: FloatingActionButton(
-                onPressed: () async {
-                  setState(() {
-                    _saving =
-                        true; // cambiamos el estado del ProgressBar a true
-                  });
-                  _controller.placaController.clear();
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  prefs.remove('vehi_kilometraje');
+          
+          appBar: AppBar(
+            title: Text('Identificación'),
+            actions: [
+              Visibility(
+                visible: _procedures.isNotEmpty && _controller.carData != null,
+                child: FloatingActionButton(
+                  onPressed: () async {
+                    setState(() {
+                      _saving =
+                          true; // cambiamos el estado del ProgressBar a true
+                    });
+                    _controller.placaController.clear();
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    prefs.remove('vehi_kilometraje');
 
-                  setState(() {
-                    _controller.carData = null;
-                    _controller.searchCompleted = false;
-                    hasSearched = false;
-                    _kilometrajeController.clear();
-                    _photos.clear();
-                  });
-                  openModal();
-                  await Future.delayed(
-                      Duration(seconds: 3)); // esperamos 3 segundos
-                  Navigator.of(context).pop(); // cerramos el AlertDialog
-                  Fluttertoast.showToast(
-                    msg: "Identificación guardada con exito",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.CENTER,
-                    timeInSecForIosWeb: 1,
-                    backgroundColor: Colors.greenAccent,
-                    textColor: Colors.white,
-                    fontSize: 16.0,
-                  );
-                  setState(() {
-                    _saving =
-                        false; // cambiamos el estado del ProgressBar a false
-                  });
-                },
-                child: _saving ? CircularProgressIndicator() : Icon(Icons.save),
-                mini: true,
-              ),
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.exit_to_app,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return ExitView();
+                    setState(() {
+                      _controller.carData = null;
+                      _controller.searchCompleted = false;
+                      hasSearched = false;
+                      _kilometrajeController.clear();
+                      _photos.clear();
+                    });
+                    openModal();
+                    await Future.delayed(
+                        Duration(seconds: 3)); // esperamos 3 segundos
+                    Navigator.of(context).pop(); // cerramos el AlertDialog
+                    Fluttertoast.showToast(
+                      msg: "Identificación guardada con exito",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.CENTER,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Colors.greenAccent,
+                      textColor: Colors.white,
+                      fontSize: 16.0,
+                    );
+                    setState(() {
+                      _saving =
+                          false; // cambiamos el estado del ProgressBar a false
+                    });
                   },
-                );
-              },
+                  child:
+                      _saving ? CircularProgressIndicator() : Icon(Icons.save),
+                  mini: true,
+                  backgroundColor: Colors.greenAccent,
+                ),
+              ),
+              FloatingActionButton(
+                  child: Icon(
+                    Icons.exit_to_app,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return ExitView();
+                      },
+                    );
+                  },
+                  mini: true,
+                  backgroundColor: Colors.redAccent,
+                  ),
+            ],
+            automaticallyImplyLeading: false,
+          ),
+          body:  Stack(  // Utilizamos un Stack para colocar la imagen de fondo
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/fondo.png'),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.5),  // Ajusta la opacidad aquí
+                  BlendMode.dstATop,
+                ),
+              ),
             ),
-          ],
-          automaticallyImplyLeading: false,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-Row(
-  children: [
-    Expanded(
-      child: TextField(
-        controller: _controller.placaController,
-        decoration: InputDecoration(
-          labelText: 'Digite su placa', // Add the label text
-        ),
-        textCapitalization: TextCapitalization.characters,
-        enabled: isTextFieldEnabled, // Use the variable to enable or disable the TextField
-        onChanged: (value) {
-          setState(() {
-            if (value.isEmpty) {
-              isClearIconEnabled = false; // Disable the clear icon if the TextField is empty
-            } else {
-              isClearIconEnabled = true; // Enable the clear icon if the TextField is not empty
-            }
-          });
-        },
-      ),
-    ),
-    SizedBox(width: 16),
-    FloatingActionButton(
-      onPressed: () async {
-        if (hasSearched) { // Check if a search has been performed
-          _controller.placaController.clear();
-          hasSearched = false;
-          _kilometrajeController.clear();
-          setState(() {
-            _controller.carData = null;
-            _procedures.clear();
-            _photos.clear();
-            isTextFieldEnabled = true; // Enable the TextField after clear
-          });
-        } else {
-          showDialog(
-            context: context,
-            barrierDismissible: false, // Prevent the user from dismissing the dialog
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Cargando RTV, Por favor espere...'),
-              );
-            },
-          );
+          ),
+          
+          Padding(
+            
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller.placaController,
+                        decoration: InputDecoration(
+                          labelText: 'Digite la placa', // Add the label text
+                        ),
+                        textCapitalization: TextCapitalization.characters,
+                        enabled:
+                            isTextFieldEnabled, // Use the variable to enable or disable the TextField
+                        onChanged: (value) {
+                          setState(() {
+                            if (value.isEmpty) {
+                              isClearIconEnabled =
+                                  false; // Disable the clear icon if the TextField is empty
+                            } else {
+                              isClearIconEnabled =
+                                  true; // Enable the clear icon if the TextField is not empty
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    FloatingActionButton(
+                      onPressed: () async {
+                        if (hasSearched) {
+                          // Check if a search has been performed
+                          _controller.placaController.clear();
+                          hasSearched = false;
+                          _kilometrajeController.clear();
+                          setState(() {
+                            _controller.carData = null;
+                            _procedures.clear();
+                            _photos.clear();
+                            isTextFieldEnabled =
+                                true; // Enable the TextField after clear
+                          });
+                        } else {
+                          showDialog(
+                            context: context,
+                            barrierDismissible:
+                                false, // Prevent the user from dismissing the dialog
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title:
+                                    Text('Cargando RTV, Por favor espere...'),
+                              );
+                            },
+                          );
 
-          await _controller.searchVehicle(
-            context,
-            _controller.placaController.text,
-          );
-          await _getProcedures();
-          Navigator.pop(context); // Close the dialog
-          setState(() {
-            hasSearched = true;
-            isTextFieldEnabled = false; // Disable the TextField after search
-          });
-        }
-      },
-      child: hasSearched // Use the variable to change the icon
-          ? Icon(Icons.clear)
-          : Icon(Icons.search),
-    ),
-  ],
-),
-              if (_controller.carData != null)
-                Card(
-                  elevation: 4,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListTile(
-                        leading: Icon(Icons.info),
-                        title: Text(
-                          'Información del vehículo',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildInfoFieldWithIcon(
-                                    'Marca',
-                                    _controller.carData!.marca,
-                                    Icons.directions_car, // Icono para la marca
-                                  ),
-                                  _buildInfoFieldWithIcon(
-                                    'Modelo',
-                                    _controller.carData!.modelo,
-                                    Icons.car_rental, // Icono para el modelo
-                                  ),
-                                ],
+                          await _controller.searchVehicle(
+                            context,
+                            _controller.placaController.text,
+                          );
+                          await _getProcedures();
+                          Navigator.pop(context); // Close the dialog
+                          setState(() {
+                            hasSearched = true;
+                            isTextFieldEnabled =
+                                false; // Disable the TextField after search
+                          });
+                        }
+                      },
+                      child: hasSearched // Use the variable to change the icon
+                          ? Icon(Icons.clear)
+                          : Icon(Icons.search),
+                      backgroundColor: Colors.orangeAccent,
+                    ),
+                  ],
+                ),
+                if (_controller.carData != null)
+                Expanded(
+  child: SingleChildScrollView(
+    child:
+                  Card(
+                    elevation: 4,
+                     color: Color(0xFFF0F0F0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Card(
+                          color: Colors.blue,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ListTile(
+                                leading: Icon(
+                                  Icons.info,
+                                  color: Colors.white,
+                                ),
+                                title: Text(
+                                  'Información del vehículo',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.white),
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildInfoFieldWithIcon(
-                                    'Nombre',
-                                    _controller.carData!.cliente,
-                                    Icons.person, // Icono para el cliente
-                                  ),
-                                  _buildInfoFieldWithIcon(
-                                    'Cédula',
-                                    _controller.carData!.cedula,
-                                    Icons.credit_card, // Icono para la cédula
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      if (_procedures.isNotEmpty && _controller.carData != null)
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 0),
+                          padding: const EdgeInsets.all(8.0),
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    TextFormField(
-                                      controller: _kilometrajeController,
-                                      decoration: InputDecoration(
-                                        labelText: 'Escriba el Kilometraje',
-                                        prefixIcon: Icon(Icons.directions_car),
-                                        contentPadding: EdgeInsets.symmetric(
-                                            horizontal:
-                                                2), // Reduce el padding horizontal
-                                      ),
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.digitsOnly,
-                                      ],
-                                      keyboardType: TextInputType.number,
-                                      onChanged: (value) {
-                                        _controller.updateKilometraje(value);
-                                      },
-                                    )
+                                    _buildInfoFieldWithIcon(
+                                      'Marca',
+                                      _controller.carData!.marca,
+                                      Icons
+                                          .directions_car, // Icono para la marca
+                                    ),
+                                    _buildInfoFieldWithIcon(
+                                      'Modelo',
+                                      _controller.carData!.modelo,
+                                      Icons.car_rental, // Icono para el modelo
+                                    ),
                                   ],
                                 ),
                               ),
-                              FloatingActionButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return Card(
-                                        child: SingleChildScrollView(
-                                          child: Column(
-                                            children: [
-                                              ListTile(
-                                                title: Text('Cámara'),
-                                              ),
-                                              FutureBuilder<void>(
-                                                future:
-                                                    _initializeControllerFuture,
-                                                builder: (context, snapshot) {
-                                                  if (snapshot
-                                                          .connectionState ==
-                                                      ConnectionState.done) {
-                                                    return CameraPreview(
-                                                        _controller2);
-                                                  } else {
-                                                    return Center(
-                                                        child:
-                                                            CircularProgressIndicator());
-                                                  }
-                                                },
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Align(
-                                                  alignment: Alignment.center,
-                                                  child: Column(
-                                                    children: [
-                                                      IconButton(
-                                                        icon: Icon(
-                                                            Icons.photo_camera),
-                                                        onPressed: () async {
-                                                          if (_photos.length >=
-                                                              5) {
-                                                            _showMaxPhotosAlert();
-                                                          } else {
-                                                            if (_controller2
-                                                                .value
-                                                                .isInitialized) {
-                                                              try {
-                                                                setState(() {
-            _isProcessingImage = true; // Aquí establecemos el valor de _isProcessingImage a true
-          });
-                                                                final XFile
-                                                                    photo =
-                                                                     await _controller2
-                                                                        .takePicture();
-                                                                final File
-                                                                    imageFile =
-                                                                    File(photo
-                                                                        .path);
-                                                                final List<int>
-                                                                    imageBytes =
-                                                                    await imageFile
-                                                                        .readAsBytes();
-                                                                final img.Image?
-                                                                    image =
-                                                                    img.decodeImage(
-                                                                        Uint8List.fromList(
-                                                                            imageBytes));
-                                                                final List<int>
-                                                                    jpegBytes =
-                                                                    img.encodeJpg(
-                                                                        image!);
-                                                                final String
-                                                                    base64Image =
-                                                                    base64Encode(
-                                                                        jpegBytes);
-                                                                imageStorage
-                                                                    .addBase64Image(
-                                                                        base64Image);
-                                                                setState(() {
-                                                                  _photos.add(
-                                                                      photo);
-                
-                                                                });
-                                                                 _isProcessingImage = true; // Aquí establecemos el valor de _isProcessingImage a true
-
-                                                                Navigator.pop(
-                                                                    context);
-                                                              } catch (e) {
-                                                                print(
-                                                                    'Error al tomar la foto: $e');
-                                                              }
-                                                            }
-                                                          }
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-  child: Stack(
-    children: [
-      Icon(Icons.camera_alt),
-      if (_isProcessingImage) // Mostramos el spinner si _isProcessingImage es true
-        Positioned.fill(
-          child: CircularProgressIndicator(),
-        ),
-    ],
-  ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildInfoFieldWithIcon(
+                                      'Nombre',
+                                      _controller.carData!.cliente,
+                                      Icons.person, // Icono para el cliente
+                                    ),
+                                    _buildInfoFieldWithIcon(
+                                      'Cédula',
+                                      _controller.carData!.cedula,
+                                      Icons.credit_card, // Icono para la cédula
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
-                      SizedBox(width: 2),
-                      if (_photos.isNotEmpty)
-  Card(
-    child: Column(
-      children: [
-        ListTile(
-          title: Text('Fotos Tomadas', style: TextStyle(fontSize: 16)),
-        ),
-        SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _photos.length,
-            itemBuilder: (context, index) {
-              final photo = _photos[index];
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Stack(
-                  children: [
-                    Image.file(
-                      File(photo.path),
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Confirmación'),
-                              content: Text('¿Seguro que quieres eliminar la foto?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context); // Cerrar el diálogo
-                                    setState(() {
-                                      _removePhoto(index);
-                                    });
-                                  },
-                                  child: Text('Eliminar'),
+                        if (_procedures.isNotEmpty &&
+                            _controller.carData != null)
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+TextFormField(
+  controller: _kilometrajeController,
+  decoration: InputDecoration(
+    labelText: 'Escriba el Kilometraje',
+    prefixIcon: Icon(Icons.directions_car),
+    contentPadding: EdgeInsets.symmetric(horizontal: 2),
+    border: InputBorder.none, // Agrega esta línea para quitar el borde
+  ),
+  inputFormatters: [
+    FilteringTextInputFormatter.digitsOnly,
+    LengthLimitingTextInputFormatter(7), // Agrega esta línea para limitar a 7 dígitos
+  ],
+  keyboardType: TextInputType.number,
+  onChanged: (value) {
+    _controller.updateKilometraje(value);
+  },
+)
+                                    ],
+                                  ),
                                 ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context); // Cerrar el diálogo
-                                  },
-                                  child: Text('Cancelar'),
+                                FloatingActionButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return Card(
+                                            child: SingleChildScrollView(
+                                              child: Column(
+                                                children: [
+                                                  ListTile(
+                                                    title: Text('Cámara'),
+                                                  ),
+                                                  FutureBuilder<void>(
+                                                    future:
+                                                        _initializeControllerFuture,
+                                                    builder:
+                                                        (context, snapshot) {
+                                                      if (snapshot
+                                                              .connectionState ==
+                                                          ConnectionState
+                                                              .done) {
+                                                        return CameraPreview(
+                                                            _controller2);
+                                                      } else {
+                                                        return Center(
+                                                            child:
+                                                                CircularProgressIndicator());
+                                                      }
+                                                    },
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Align(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      child: Column(
+                                                        children: [
+                                                          IconButton(
+                                                            icon: Icon(Icons
+                                                                .photo_camera),
+                                                            onPressed:
+                                                                () async {
+                                                              if (_photos
+                                                                      .length >=
+                                                                  5) {
+                                                                _showMaxPhotosAlert();
+                                                              } else {
+                                                                if (_controller2
+                                                                    .value
+                                                                    .isInitialized) {
+                                                                  try {
+                                                                    setState(
+                                                                        () {
+                                                                      _isProcessingImage =
+                                                                          true; // Aquí establecemos el valor de _isProcessingImage a true
+                                                                    });
+                                                                    final XFile
+                                                                        photo =
+                                                                        await _controller2
+                                                                            .takePicture();
+                                                                    final File
+                                                                        imageFile =
+                                                                        File(photo
+                                                                            .path);
+                                                                    final List<
+                                                                            int>
+                                                                        imageBytes =
+                                                                        await imageFile
+                                                                            .readAsBytes();
+                                                                    final img
+                                                                        .Image?
+                                                                        image =
+                                                                        img.decodeImage(
+                                                                            Uint8List.fromList(imageBytes));
+                                                                    final List<
+                                                                            int>
+                                                                        jpegBytes =
+                                                                        img.encodeJpg(
+                                                                            image!);
+                                                                    final String
+                                                                        base64Image =
+                                                                        base64Encode(
+                                                                            jpegBytes);
+                                                                    imageStorage
+                                                                        .addBase64Image(
+                                                                            base64Image);
+                                                                    setState(
+                                                                        () {
+                                                                      _photos.add(
+                                                                          photo);
+                                                                    });
+                                                                    _isProcessingImage =
+                                                                        true; // Aquí establecemos el valor de _isProcessingImage a true
+
+                                                                    Navigator.pop(
+                                                                        context);
+                                                                  } catch (e) {
+                                                                    print(
+                                                                        'Error al tomar la foto: $e');
+                                                                  }
+                                                                }
+                                                              }
+                                                            },
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: Stack(
+                                      children: [
+                                        Icon(Icons.camera_alt),
+                                        if (_isProcessingImage) // Mostramos el spinner si _isProcessingImage es true
+                                          Positioned.fill(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                      ],
+                                    ),
+                                    mini: true),
+                              ],
+                            ),
+                          ),
+                        if (_photos.isNotEmpty)
+                          Card(
+                            elevation:4,
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  title: Text('Fotos Tomadas',
+                                      style: TextStyle(fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                  
+                                      )),
+                                                                         leading: Icon(Icons.camera_alt), // Agrega el icono de cámara
+                                ),
+                                SizedBox(
+                                  height: 100,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: _photos.length,
+                                    itemBuilder: (context, index) {
+                                      final photo = _photos[index];
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Stack(
+                                          children: [
+                                            Image.file(
+                                              File(photo.path),
+                                              width: 100,
+                                              height:100 ,
+                                              fit: BoxFit.cover,
+                                            ),
+                                            Positioned(
+                                              top: 0,
+                                              right: 0,
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      title:
+                                                          Text('Confirmación'),
+                                                      content: Text(
+                                                          '¿Seguro que quieres eliminar la foto?'),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                                context); // Cerrar el diálogo
+                                                            setState(() {
+                                                              _removePhoto(
+                                                                  index);
+                                                            });
+                                                          },
+                                                          child:
+                                                              Text('Eliminar'),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                                context); // Cerrar el diálogo
+                                                          },
+                                                          child:
+                                                              Text('Cancelar'),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                                child: Icon(
+                                                  Icons.delete,
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
-                          );
-                        },
-                        child: Icon(
-                          Icons.delete,
-                          color: Colors.red,
-                        ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  ),
+                  )
+                else if (_controller.searchCompleted)
+                  Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Sin información de este vehículo.',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              _controller.placaController.clear();
+                              setState(() {
+                                _controller.carData = null;
+                                _controller.searchCompleted = false;
+                                hasSearched = false;
+                                isTextFieldEnabled = true;
+                              });
+                            },
+                            child: Text('Realizar una nueva consulta'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (_procedures.isNotEmpty &&
+                            _controller.carData != null)
+      
+Row(
+  children: [
+
+    Icon(Icons.list), // Reemplaza "Icons.list" con el icono que desees
+    Text(
+      'Lista de Defectos',
+      style: TextStyle(
+        fontSize: 16, // Ajusta el tamaño de fuente según tus preferencias
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+      SizedBox(
+      width: 10, // Ancho del SizedBox
+    ),
+
+            Flexible(
+      child: TypeAheadField(
+        textFieldConfiguration: TextFieldConfiguration(
+          decoration: InputDecoration(
+            hintText: 'Buscar por código',
+          ),
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+          ],
+          keyboardType: TextInputType.number,
+        ),
+        suggestionsCallback: (pattern) async {
+          final suggestions = _procedures
+              .expand((procedures) => procedures)
+              .where((procedure) =>
+                  "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
+                      .toLowerCase()
+                      .contains(pattern.toLowerCase()))
+              .toList();
+          return suggestions;
+        },
+        itemBuilder: (context, suggestion) {
+          return ListTile(
+            title: Row(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-              );
-            },
-          ),
-        ),
-      ],
-    ),
-  ),
-                      SizedBox(height: 2),
-                      if (_procedures.isNotEmpty && _controller.carData != null)
-                        TypeAheadField(
-                          textFieldConfiguration: TextFieldConfiguration(
-                            decoration: InputDecoration(
-                              hintText: 'Buscar por codigo',
-                            ),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            keyboardType: TextInputType.number,
-                          ),
-                          suggestionsCallback: (pattern) async {
-                            final suggestions = _procedures
-                                .expand((procedures) => procedures)
-                                .where((procedure) =>
-                                    "${procedure.familia}${procedure.subfamilia}${procedure.categoria}"
-                                        .toLowerCase()
-                                        .contains(pattern.toLowerCase()))
-                                .toList();
-                            return suggestions;
-                          },
-                          itemBuilder: (context, suggestion) {
-                            return ListTile(
-                              title: Row(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "${suggestion.familia}${suggestion.subfamilia}${suggestion.categoria}",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    suggestion.abreviaturaDescripcion,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              subtitle: Text(
-                                suggestion.procedimiento,
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            );
-                          },
-                          onSuggestionSelected: (suggestion) {
-                            _showDefectsModal(context, suggestion.defectos,
-                                suggestion.procedimiento);
-                          },
-                        ),
-                    ],
-                  ),
-                )
-              else if (_controller.searchCompleted)
-                Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Sin información de este vehículo.',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            _controller.placaController.clear();
-                            setState(() {
-                              _controller.carData = null;
-                              _controller.searchCompleted = false;
-                              hasSearched = false;
-                              isTextFieldEnabled = true;
-                              
-                            });
-                          },
-                          child: Text('Realizar una nueva consulta'),
-                        ),
-                      ],
-                    ),
+                Text(
+                  suggestion.abreviaturaDescripcion,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
                 ),
-              SizedBox(height: 2.0),
-              if (_procedures.isNotEmpty && _controller.carData != null)
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        SizedBox(height: 2),
-                        Card(
-                          elevation: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              for (var procedures in _procedures)
-                                for (var procedure in procedures)
-                                  GestureDetector(
-                                    onTap: () {
-                                      _showDefectsModal(
-                                          context,
-                                          procedure.defectos,
-                                          procedure.procedimiento);
-                                    },
-                                    child: Card(
-                                      elevation: 4,
-                                      color: procedure.isRated
-                                          ? Colors.lightBlueAccent
-                                          : null,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Text(
-                                                            "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
-                                                            style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Text(
-                                                        "${procedure.categoriaDescripcion}",
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 18,
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 4,
-                                                      ),
-                                                      Text(
-                                                        "${procedure.procedimiento}",
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        maxLines: 2,
-                                                        style: TextStyle(
-                                                          fontSize: 13.5,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        
-bottomNavigationBar: BottomNavigationBar(
-  currentIndex: 0,
-  onTap: (index) {
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/identification');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/visual_inspection');
-        break;
-      case 2:
-        Navigator.pushReplacementNamed(context, '/holguras');
-        break;
-    }
-  },
-  items: [
-    BottomNavigationBarItem(
-      icon: ClipRRect(
-        borderRadius: BorderRadius.circular(20), // Personaliza el radio de curvatura aquí
-        child: Container(
-          padding: EdgeInsets.all(10),
-          color: Colors.blue, // Color de fondo
-          child: Icon(Icons.car_crash_rounded, color: Colors.white), // Icono
-        ),
+              ],
+            ),
+            subtitle: Text(
+              suggestion.procedimiento,
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          );
+        },
+        onSuggestionSelected: (suggestion) {
+          _showDefectsModal(context, suggestion.defectos, suggestion.procedimiento);
+        },
       ),
-      label: 'Identificación',
-    ),
-    BottomNavigationBarItem(
-      icon: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: EdgeInsets.all(10),
-          color: Colors.blue, 
-          child: Icon(Icons.remove_red_eye, color: Colors.white),
-        ),
-      ),
-      label: 'Inspección Visual',
-    ),
-    BottomNavigationBarItem(
-      icon: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: EdgeInsets.all(10),
-          color: Colors.blue,
-          child: Icon(Icons.settings, color: Colors.white),
-        ),
-      ),
-      label: 'Holguras',
     ),
   ],
-)
-      ),
+),
+
+                SizedBox(height: 2.0),
+                if (_procedures.isNotEmpty && _controller.carData != null)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          SizedBox(height: 2),
+                          Card(
+                            elevation: 4,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (var procedures in _procedures)
+                                  for (var procedure in procedures)
+                                    GestureDetector(
+                                      onTap: () {
+                                        _showDefectsModal(
+                                            context,
+                                            procedure.defectos,
+                                            procedure.procedimiento);
+                                      },
+                                      child: Card(
+                                        elevation: 4,
+                                        color: procedure.isRated
+                                            ? Colors.lightBlueAccent
+                                            : null,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
+                                                              style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Text(
+                                                          "${procedure.categoriaDescripcion}",
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 18,
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 4,
+                                                        ),
+                                                        Text(
+                                                          "${procedure.procedimiento}",
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          maxLines: 2,
+                                                          style: TextStyle(
+                                                            fontSize: 13.5,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ]
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: 0,
+            onTap: (index) {
+              switch (index) {
+                case 0:
+                  Navigator.pushReplacementNamed(context, '/identification');
+                  break;
+                case 1:
+                  Navigator.pushReplacementNamed(context, '/visual_inspection');
+                  break;
+                case 2:
+                  Navigator.pushReplacementNamed(context, '/holguras');
+                  break;
+              }
+            },
+            items: [
+              BottomNavigationBarItem(
+                icon: ClipRRect(
+                  borderRadius: BorderRadius.circular(
+                      20), // Personaliza el radio de curvatura aquí
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    color: Colors.blue, // Color de fondo
+                    child: Icon(Icons.car_crash_rounded,
+                        color: Colors.white), // Icono
+                  ),
+                ),
+                label: 'Identificación',
+              ),
+              BottomNavigationBarItem(
+                icon: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    color: Colors.blue,
+                    child: Icon(Icons.remove_red_eye, color: Colors.white),
+                  ),
+                ),
+                label: 'Inspección Visual',
+              ),
+              BottomNavigationBarItem(
+                icon: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    color: Colors.blue,
+                    child: Icon(Icons.settings, color: Colors.white),
+                  ),
+                ),
+                label: 'Holguras',
+              ),
+            ],
+          )
+          ),
     );
   }
 
@@ -816,45 +909,46 @@ bottomNavigationBar: BottomNavigationBar(
 
   Widget _buildInfoFieldWithIcon(String label, String value, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1.0),
-      child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                icon, // Aquí se muestra el icono
-                color: Colors
-                    .black, // Puedes ajustar el color del icono según tus preferencias
-                size:
-                    24, // Puedes ajustar el tamaño del icono según tus preferencias
-              ),
-              SizedBox(width: 8), // Espacio entre el icono y el texto
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '$label:',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    value,
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Divider(
-            // Línea divisoria
+          Icon(
+            icon, // Aquí se muestra el icono
             color: Colors
-                .grey, // Puedes ajustar el color de la línea según tus preferencias
-            thickness:
-                1.0, // Puedes ajustar el grosor de la línea según tus preferencias
+                .black, // Puedes ajustar el color del icono según tus preferencias
+            size:
+                24, // Puedes ajustar el tamaño del icono según tus preferencias
+          ),
+          SizedBox(width: 8), // Espacio entre el icono y el texto
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$label:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 4), // Espacio entre el label y el TextField
+                TextField(
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                  ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  enabled: false, // Deshabilitamos el campo de texto
+                  controller: TextEditingController(text: value),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -985,35 +1079,3 @@ Widget _buildProcedureField(String label, String value) {
     ),
   );
 }
-/*
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: 0,
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                Navigator.pushReplacementNamed(context, '/identification');
-                break;
-              case 1:
-                Navigator.pushReplacementNamed(context, '/visual_inspection');
-                break;
-              case 2:
-                Navigator.pushReplacementNamed(context, '/holguras');
-                break;
-            }
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.car_crash_rounded),
-              label: 'Identificación',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.remove_red_eye),
-              label: 'Inspección Visual',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Holguras',
-            ),
-          ],
-        ),
-*/
