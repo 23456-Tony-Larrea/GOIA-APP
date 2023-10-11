@@ -304,7 +304,7 @@ class _IdentificationViewState extends State<IdentificationView> {
     child:
                   Card(
                     elevation: 4,
-                     color: Color(0xFFF0F0F0),
+                  color: Color(0xFFF0F0F0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -388,7 +388,7 @@ TextFormField(
   controller: _kilometrajeController,
   decoration: InputDecoration(
     labelText: 'Escriba el Kilometraje',
-    prefixIcon: Icon(Icons.directions_car),
+    prefixIcon: Icon(Icons.speed),
     contentPadding: EdgeInsets.symmetric(horizontal: 2),
     border: InputBorder.none, // Agrega esta línea para quitar el borde
   ),
@@ -664,7 +664,7 @@ Row(
       ),
     ),
       SizedBox(
-      width: 10, // Ancho del SizedBox
+      width: 60, // Ancho del SizedBox
     ),
 
             Flexible(

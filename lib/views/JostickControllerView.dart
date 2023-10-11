@@ -139,8 +139,8 @@ Future<void> _checkConnection() async {
                                           });
                                         },
                                         child: Container(
-                                          width: 24,
-                                          height: 24,
+                                          width: 28,
+                                          height: 28,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: Colors.grey,
@@ -175,8 +175,8 @@ Future<void> _checkConnection() async {
                                           });
                                         },
                                         child: Container(
-                                          width: 24,
-                                          height: 24,
+                                          width: 28,
+                                          height: 28,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: Colors.grey,
@@ -237,8 +237,8 @@ Future<void> _checkConnection() async {
                                           });
                                         },
                                         child: Container(
-                                          width: 24,
-                                          height: 24,
+                                          width: 28,
+                                          height: 28,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: Colors.grey,
@@ -273,8 +273,8 @@ Future<void> _checkConnection() async {
                                           });
                                         },
                                         child: Container(
-                                          width: 24,
-                                          height: 24,
+                                          width: 28,
+                                          height: 28,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: Colors.grey,
@@ -303,7 +303,7 @@ Future<void> _checkConnection() async {
                             ),
                           const SizedBox(height: 4),
                           if (_viewLeft)
-                                                       Card(
+                          Card(
                               elevation:
                                   4, // Ajusta la elevación según tus preferencias
                               margin: EdgeInsets.all(

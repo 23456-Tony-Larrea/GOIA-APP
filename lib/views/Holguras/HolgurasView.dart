@@ -395,7 +395,7 @@ Row(
       ),
     ),
       SizedBox(
-      width: 10, // Ancho del SizedBox
+      width: 50, // Ancho del SizedBox
     ),
 
             Flexible(
