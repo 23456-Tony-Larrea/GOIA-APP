@@ -30,6 +30,7 @@ class _VisualInspectionViewState extends State<VisualInspectionView> {
 
 
 
+
   @override
   void initState() {
     super.initState();
@@ -330,7 +331,7 @@ Row(
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.all(1.0),
+                          padding: const EdgeInsets.all(10.0),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -456,7 +457,7 @@ Row(
                               _controller.searchCompleted = false;
                               hasSearched = false;
                               isTextFieldEnabled = true;
-                              
+
                             });
                           },
                           child: Text('Realizar una nueva consulta'),
@@ -549,36 +550,57 @@ child: Card(
             ],
           ),
         ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushReplacementNamed(context, '/identification');
-              break;
-            case 1:
-              Navigator.pushReplacementNamed(context, '/visual_inspection');
-              break;
-            case 2:
-              Navigator.pushReplacementNamed(context, '/holguras');
-              break;
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.car_crash_rounded),
-            label: 'Identificación',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.remove_red_eye),
-            label: 'Inspección Visual',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Holguras',
-          ),
-        ],
+bottomNavigationBar: BottomNavigationBar(
+  currentIndex: 1,
+  onTap: (index) {
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/identification');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/visual_inspection');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/holguras');
+        break;
+    }
+  },
+  items: [
+    BottomNavigationBarItem(
+      icon: ClipRRect(
+        borderRadius: BorderRadius.circular(20), // Personaliza el radio de curvatura aquí
+        child: Container(
+          padding: EdgeInsets.all(10),
+          color: Colors.blue, // Color de fondo
+          child: Icon(Icons.car_crash_rounded, color: Colors.white), // Icono
+        ),
       ),
+      label: 'Identificación',
+    ),
+    BottomNavigationBarItem(
+      icon: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: EdgeInsets.all(10),
+          color: Colors.blue, 
+          child: Icon(Icons.remove_red_eye, color: Colors.white),
+        ),
+      ),
+      label: 'Inspección Visual',
+    ),
+    BottomNavigationBarItem(
+      icon: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: EdgeInsets.all(10),
+          color: Colors.blue,
+          child: Icon(Icons.settings, color: Colors.white),
+        ),
+      ),
+      label: 'Holguras',
+    ),
+  ],
+)
     ),
     );
   }

@@ -9,7 +9,6 @@ import 'package:rtv/controllers/HolgurasBluetoohController.dart';
 import 'package:rtv/controllers/HolgurasController.dart';
 import 'package:rtv/views/ExitView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:rtv/views/Holguras/CalificationHolgurasView.dart';
 import 'package:rtv/views/Holguras/CalificationOtrosHolgurasView.dart';
 
@@ -31,6 +30,7 @@ class _HolgurasViewState extends State<HolgurasView> {
   bool _saving = false; // variable para controlar el estado del ProgressBar
         bool isTextFieldEnabled = true; // Add this variable to track the TextField's enabled state
     bool isClearIconEnabled = false; // Initialize the variable to false
+
 
 
 
@@ -489,65 +489,57 @@ child: Card(
           ),
 
       ),
-      floatingActionButton: BluetoothManager().isConnected
-          ? SpeedDial(
-              icon: Icons.menu_outlined,
-              backgroundColor: Colors.blueAccent,
-              children: [
-                SpeedDialChild(
-                  child: Icon(Icons.stop),
-                  backgroundColor: Colors.blueAccent,
-                  onTap: () {
-                    _sendBluetooh.sendTrama(TramaType.STOP);
-                  },
-                ),
-                SpeedDialChild(
-                  child: Icon(Icons.swap_horiz),
-                  backgroundColor: Colors.blueAccent,
-                  onTap: () {
-                    _sendBluetooh.sendTrama(TramaType.HORIZONTAL);
-                  },
-                ),
-                SpeedDialChild(
-                  child: Icon(Icons.swap_vertical_circle),
-                  backgroundColor: Colors.blueAccent,
-                  onTap: () {
-                    _sendBluetooh.sendTrama(TramaType.VERTICAL);
-                  },
-                ),
-              ],
-            )
-          : null,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushReplacementNamed(context, '/identification');
-              break;
-            case 1:
-              Navigator.pushReplacementNamed(context, '/visual_inspection');
-              break;
-            case 2:
-              Navigator.pushReplacementNamed(context, '/holguras');
-              break;
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.car_crash_rounded),
-            label: 'Identificación',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.remove_red_eye),
-            label: 'Inspección Visual',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Holguras',
-          ),
-        ],
+bottomNavigationBar: BottomNavigationBar(
+  currentIndex: 2,
+  onTap: (index) {
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/identification');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/visual_inspection');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/holguras');
+        break;
+    }
+  },
+  items: [
+    BottomNavigationBarItem(
+      icon: ClipRRect(
+        borderRadius: BorderRadius.circular(20), // Personaliza el radio de curvatura aquí
+        child: Container(
+          padding: EdgeInsets.all(10),
+          color: Colors.blue, // Color de fondo
+          child: Icon(Icons.car_crash_rounded, color: Colors.white), // Icono
+        ),
       ),
+      label: 'Identificación',
+    ),
+    BottomNavigationBarItem(
+      icon: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: EdgeInsets.all(10),
+          color: Colors.blue, 
+          child: Icon(Icons.remove_red_eye, color: Colors.white),
+        ),
+      ),
+      label: 'Inspección Visual',
+    ),
+    BottomNavigationBarItem(
+      icon: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: EdgeInsets.all(10),
+          color: Colors.blue,
+          child: Icon(Icons.settings, color: Colors.white),
+        ),
+      ),
+      label: 'Holguras',
+    ),
+  ],
+    ),
     ),
     );
   }
