@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rtv/class/BluetoohConnection.dart';
@@ -278,13 +279,12 @@ Row(
               SizedBox(height: 2),
               if (_controller.carData != null)
               Card(
-                                     color: Color(0xFFF0F0F0),
-
+                  color: Color(0xFFF0F0F0),
                     elevation: 4,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                       Card(
+                      Card(
                           color: Colors.blue,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -491,7 +491,7 @@ child: Card(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                     Row(
+                Row(
               children: [   
                 Text(
                   "${procedure.familia}${procedure.subfamilia}${procedure.categoria}",
@@ -538,10 +538,48 @@ child: Card(
       ),
     ),
   ),
+Align(
+  alignment: Alignment.bottomRight,
+  child: Visibility(
+    visible: BluetoothManager().isConnected,
+    child: SpeedDial(
+      icon: Icons.menu_outlined,
+      backgroundColor: Colors.blueAccent,
+      children: [
+        SpeedDialChild(
+          child: Icon(Icons.swap_horiz),
+          backgroundColor: Colors.blueAccent,
+          onTap: () {
+            // Acción para la opción 2
+            _sendBluetooh.sendTrama(TramaType.HORIZONTAL);
+          },
+        ),
+        SpeedDialChild(
+          child: Icon(Icons.swap_vertical_circle_outlined),
+          backgroundColor: Colors.blueAccent,
+          onTap: () {
+            // Acción para la opción 3
+            _sendBluetooh.sendTrama(TramaType.VERTICAL);
+          },
+        ),
+        SpeedDialChild(
+          child: Icon(Icons.stop),
+          backgroundColor: Colors.blueAccent,
+          onTap: () async {
+            _sendBluetooh.sendTrama(TramaType.HORIZONTAL);
+          },
+        ),
+      ],
+    ),
+  ),
+),
+  
             ],
           ),
 
       ),
+
+      
         ]
         ),
 bottomNavigationBar: BottomNavigationBar(
